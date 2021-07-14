@@ -2,6 +2,7 @@ package backendAdministradorCompetenciasFutbolisticas.Security.Service;
 
 
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Rol;
+import backendAdministradorCompetenciasFutbolisticas.Security.Enums.RolNombre;
 import backendAdministradorCompetenciasFutbolisticas.Security.Repository.RolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,8 @@ public class RolService {
 
     @Autowired
     RolRepository rolRepository;
-    Optional<Rol> getRolByNombre(String nombreRol){
+
+    public Optional<Rol> getRolByNombre(RolNombre nombreRol){
         return rolRepository.findByRolNombre(nombreRol);
     }
 
