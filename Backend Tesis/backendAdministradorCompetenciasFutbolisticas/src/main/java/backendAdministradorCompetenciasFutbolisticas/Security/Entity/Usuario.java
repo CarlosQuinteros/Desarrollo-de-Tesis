@@ -26,13 +26,10 @@ public class Usuario {
     @NotNull
     private String password;
     @NotNull
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "usuario_rol", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "rol_id"))
     private Set<Rol> roles = new HashSet<>();
-    @CreationTimestamp
-    private Date fechaCreacion;
-    @UpdateTimestamp
-    private Date fechaActualizacion;
+    private boolean activo;
 
     public Usuario() {
     }
@@ -43,6 +40,7 @@ public class Usuario {
         this.email = email;
         this.nombreUsuario = nombreUsuario;
         this.password = password;
+        this.activo = true;
     }
 
     public Long getId() {
@@ -101,19 +99,11 @@ public class Usuario {
         this.roles = roles;
     }
 
-    public Date getFechaCreacion() {
-        return fechaCreacion;
+    public boolean isActivo() {
+        return activo;
     }
 
-    public void setFechaCreacion(Date fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public Date getFechaActualizacion() {
-        return fechaActualizacion;
-    }
-
-    public void setFechaActualizacion(Date fechaActualizacion) {
-        this.fechaActualizacion = fechaActualizacion;
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

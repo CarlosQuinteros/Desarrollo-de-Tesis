@@ -16,9 +16,10 @@ public class UsuarioPrincipal implements UserDetails {
     private String email;
     private String nombreUsuario;
     private String password;
+    private boolean activo;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UsuarioPrincipal(String nombre, String apellido, String email, String nombreUsuario, String password, Collection<? extends GrantedAuthority> authorities) {
+    public UsuarioPrincipal(String nombre, String apellido, String email, String nombreUsuario, String password, boolean activo, Collection<? extends GrantedAuthority> authorities) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
@@ -32,7 +33,7 @@ public class UsuarioPrincipal implements UserDetails {
         List<GrantedAuthority>  authorities =
                 usuario.getRoles().stream().map(rol -> new SimpleGrantedAuthority(rol
                         .getRolNombre().name())).collect(Collectors.toList());
-        return  new UsuarioPrincipal(usuario.getNombre(),usuario.getApellido(), usuario.getEmail(), usuario.getNombreUsuario(), usuario.getPassword(), authorities);
+        return  new UsuarioPrincipal(usuario.getNombre(),usuario.getApellido(), usuario.getEmail(), usuario.getNombreUsuario(), usuario.getPassword(), usuario.isActivo() ,authorities);
     }
 
     @Override

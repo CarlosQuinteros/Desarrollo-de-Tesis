@@ -9,12 +9,14 @@ public class NuevoUsuario {
     private String nombre;
     @NotBlank
     private String apellido;
+    @NotBlank
     private String email;
     @NotBlank
     private String nombreUsuario;
     @NotBlank
     private String password;
     private Set<String> roles =  new HashSet<>();
+    private String activo;
 
     public String getNombre() {
         return nombre;
@@ -62,5 +64,13 @@ public class NuevoUsuario {
 
     public void setRoles(Set<String> roles) {
         this.roles = roles;
+    }
+
+    public String getActivo() {
+        return activo;
+    }
+
+    public void setActivo(String activo) {
+        this.activo = activo;
     }
 }
