@@ -26,6 +26,7 @@ public class UsuarioPrincipal implements UserDetails {
         this.nombreUsuario = nombreUsuario;
         this.password = password;
         this.authorities = authorities;
+        this.activo = activo;
     }
 
     //asigna los privilegios a cada usuario
@@ -68,7 +69,7 @@ public class UsuarioPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.isActivo();
     }
 
     public String getNombre() {
@@ -93,5 +94,13 @@ public class UsuarioPrincipal implements UserDetails {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }
