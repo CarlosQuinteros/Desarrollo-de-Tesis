@@ -4,7 +4,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NuevoUsuario {
+public class UsuarioDto {
     @NotBlank
     private String nombre;
     @NotBlank
