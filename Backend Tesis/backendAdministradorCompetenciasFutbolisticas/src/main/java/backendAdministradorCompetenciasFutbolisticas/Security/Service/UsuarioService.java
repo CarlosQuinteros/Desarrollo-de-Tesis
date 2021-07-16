@@ -39,4 +39,8 @@ public class UsuarioService {
     public Optional<Usuario> getById(Long id){
         return  usuarioRepository.findById(id);
     }
+
+    public boolean existById(Long id){
+        return usuarioRepository.existsById(id);
+    }
 }

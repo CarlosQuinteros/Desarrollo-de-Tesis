@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.naming.Binding;
 import javax.validation.Valid;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -47,7 +48,7 @@ public class UsuarioController {
     @Autowired
     JwtProvider jwtProvider;
 
-    //@PreAuthorize("hasRole('ADMIN)")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/nuevo")
     public ResponseEntity<?> nuevoUsuario(@Valid @RequestBody NuevoUsuario nuevoUsuario, BindingResult bindingResult){
         if(bindingResult.hasErrors())
@@ -87,5 +88,20 @@ public class UsuarioController {
         JwtDto jwtDto = new JwtDto(jwt, userDetails.getUsername(), userDetails.getAuthorities());
         return new ResponseEntity(jwtDto, HttpStatus.OK);
 
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/listaUsuarios")
+    public ResponseEntity<List<Usuario>> listarUsuarios(){
+        List<Usuario> listaDeUsuarios = usuarioService.list();
+        return new ResponseEntity(listaDeUsuarios, HttpStatus.OK);
+    }
+
+    @GetMapping("/detalle/{id}")
+    public  ResponseEntity<Usuario> getDetalleUsuario(@PathVariable("id") Long id){
+        if(!usuarioService.existById(id)){
+            return new ResponseEntity("No existe el usuario", HttpStatus.NOT_FOUND);
+        }
+        Usuario usuario = usuarioService.getById(id).get();
+        return new ResponseEntity(usuario, HttpStatus.OK);
     }
 }
