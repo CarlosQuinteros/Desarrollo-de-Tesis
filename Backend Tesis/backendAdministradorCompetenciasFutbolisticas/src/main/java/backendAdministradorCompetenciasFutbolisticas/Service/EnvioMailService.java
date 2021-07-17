@@ -15,12 +15,13 @@ public class EnvioMailService {
 
         String asunto = "Nuevo Usuario Creado";
         String destinatario = usuarioNuevo.getEmail();
-        String contenido = "Hola " + usuarioNuevo.getNombre() + " " + usuarioNuevo.getApellido() + "!\n"
-                + "Sus credenciales de acceso al sistema son:\n\n" +
+        String contenido = "Hola " + usuarioNuevo.getNombre() + " " + usuarioNuevo.getApellido() + "!\n" +
+                "Sus credenciales de acceso al sistema son:\n\n" +
                 "Usuario: "+ usuarioNuevo.getNombreUsuario() +"\n" +
-                "Contraseña: "+ usuarioNuevo.getPassword() +
-                "\n\nSe recomienda cambiar la contraseña luego de acceder al sistema.\n"+
-                "\nSaliudos!\nate Administrador de Competencias Futbolisticas de Chilecito";
+                "Contraseña: "+ usuarioNuevo.getPassword() + "\n\n" +
+                "Se recomienda cambiar la contraseña luego de acceder al sistema.\n\n"+
+                "Saludos!\n" +
+                "atte Administrador de Competencias Futbolisticas de Chilecito";
         SimpleMailMessage email = new SimpleMailMessage();
 
         email.setTo(destinatario);
