@@ -75,7 +75,10 @@ public class UsuarioController {
             roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_TORNEOS).get());
         usuario.setRoles(roles);
         usuarioService.save(usuario);
-        envioMailService.sendEmail(usuario.getEmail(),"Usuario Creado","Usuario de acceso: "+usuario.getNombreUsuario()+"\nContraseña: "+usuarioDto.getPassword());
+        try {
+            envioMailService.sendEmailUsuarioCreado(usuarioDto);
+        }catch (Exception e){}
+
         return new ResponseEntity("Usuario Guardado", HttpStatus.CREATED);
 
     }
