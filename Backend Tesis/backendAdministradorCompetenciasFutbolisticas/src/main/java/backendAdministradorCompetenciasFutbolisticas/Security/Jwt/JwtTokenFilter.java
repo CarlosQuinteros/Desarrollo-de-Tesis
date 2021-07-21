@@ -1,5 +1,6 @@
 package backendAdministradorCompetenciasFutbolisticas.Security.Jwt;
 
+import backendAdministradorCompetenciasFutbolisticas.Security.Service.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,11 @@ import java.io.IOException;
 //esta se ejecuta por cada peticion, comprueba que el token sea valido (usa el provider), si es valido permite el acceso al recurso
 public class JwtTokenFilter extends OncePerRequestFilter {
     private final static Logger logger  = LoggerFactory.getLogger(JwtTokenFilter.class);
+
     @Autowired
     JwtProvider jwtProvider;
     @Autowired
-    UserDetailsService userDetailsService;
+    UserDetailsServiceImpl  userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
@@ -43,7 +45,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private String getToken(HttpServletRequest request)
     {
-        String header =  request.getHeader("Autorization");
+        String header =  request.getHeader("Authorization");
         if(header!= null && header.startsWith("Bearer"))
             return header.replace("Bearer ", "");
         return null;
