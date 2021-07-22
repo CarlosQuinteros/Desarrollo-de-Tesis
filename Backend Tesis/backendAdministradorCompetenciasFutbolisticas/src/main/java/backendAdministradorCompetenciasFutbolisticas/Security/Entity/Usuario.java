@@ -106,4 +106,8 @@ public class Usuario {
     public void setActivo(boolean activo) {
         this.activo = activo;
     }
+
+    public void cambiarEstado(){
+        this.activo = !isActivo();
+    }
 }

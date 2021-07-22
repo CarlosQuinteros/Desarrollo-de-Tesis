@@ -51,7 +51,7 @@ public class UsuarioController {
     @Autowired
     EnvioMailService envioMailService;
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/nuevo")
     public ResponseEntity<?> nuevoUsuario(@Valid @RequestBody UsuarioDto usuarioDto, BindingResult bindingResult){
         if(bindingResult.hasErrors())
@@ -103,6 +103,7 @@ public class UsuarioController {
         return new ResponseEntity(listaDeUsuarios, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/detalle/{id}")
     public  ResponseEntity<Usuario> getDetalleUsuario(@PathVariable("id") Long id){
         if(!usuarioService.existById(id)){
@@ -111,6 +112,27 @@ public class UsuarioController {
         Usuario usuario = usuarioService.getById(id).get();
         return new ResponseEntity(usuario, HttpStatus.OK);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/deleteUser/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable ("id") long id){
+        if (!usuarioService.existById(id)){
+            return new ResponseEntity("No existe el usuario", HttpStatus.NOT_FOUND);
+        }
+        usuarioService.delete(id);
+        return new ResponseEntity("Usuario borrado correctamente", HttpStatus.OK);
+    }
+
+    @PreAuthorize(("hasRole('ADMIN')"))
+    @PutMapping("/cambiarEstado/{id}")
+    public ResponseEntity<?> cambiarEstado(@PathVariable ("id") Long id){
+        if (!usuarioService.existById(id)){
+            return new ResponseEntity("No existe el usuario", HttpStatus.NOT_FOUND);
+        }
+        usuarioService.cambiarEstado(id);
+        return  new ResponseEntity("Usuario actualizado correctamente",HttpStatus.OK);
+    }
+
 /*
     @PutMapping("/actualizar/{id}")
     public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, UsuarioDto usuarioDto ){

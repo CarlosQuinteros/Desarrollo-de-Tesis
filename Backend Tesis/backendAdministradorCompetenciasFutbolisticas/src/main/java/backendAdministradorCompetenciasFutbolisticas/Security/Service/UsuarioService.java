@@ -43,4 +43,14 @@ public class UsuarioService {
     public boolean existById(Long id){
         return usuarioRepository.existsById(id);
     }
+
+    public void delete(Long id){
+        usuarioRepository.deleteById(id);
+    }
+    public void cambiarEstado(Long id){
+        Usuario usuario = usuarioRepository.getById(id);
+        usuario.cambiarEstado();
+        usuarioRepository.save(usuario);
+    }
+
 }
