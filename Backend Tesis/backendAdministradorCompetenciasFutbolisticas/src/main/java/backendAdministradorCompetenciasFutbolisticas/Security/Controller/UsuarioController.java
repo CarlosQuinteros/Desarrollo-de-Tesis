@@ -1,5 +1,6 @@
 package backendAdministradorCompetenciasFutbolisticas.Security.Controller;
 
+import backendAdministradorCompetenciasFutbolisticas.Security.Dto.CambiarPasswordDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.JwtDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.LoginUsuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.UsuarioDto;
@@ -18,6 +19,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
@@ -133,6 +135,32 @@ public class UsuarioController {
         return  new ResponseEntity("Usuario actualizado correctamente",HttpStatus.OK);
     }
 
+    @PutMapping("/cambiarContraseña")
+    public ResponseEntity<?> cambiarContraseña(Authentication authentication, @RequestBody CambiarPasswordDto cambiarPasswordDto){
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        if(!passwordEncoder.matches(cambiarPasswordDto.getPasswordActual(),userDetails.getPassword())) {
+            return  new ResponseEntity("La contraseña actual e ingresada son incorrectas", HttpStatus.NOT_FOUND);
+        }
+        if(!cambiarPasswordDto.getPasswordNuevo().equals(cambiarPasswordDto.getRepetirPassword())){
+            return new ResponseEntity("La contraseña nueva debe concidir", HttpStatus.NOT_FOUND);
+        }
+        Usuario usuario = usuarioService.getByNombreUsuario(userDetails.getUsername()).get();
+        usuario.setPassword(passwordEncoder.encode(cambiarPasswordDto.getPasswordNuevo()));
+        usuarioService.save(usuario);
+        return  new ResponseEntity("Contraseña cambiada correctamente", HttpStatus.OK);
+    }
+    /*@PreAuthorize(("hasRole('ADMIN')"))
+    @PutMapping("/cambiarContraseña")
+    public ResponseEntity<?> cambiarContraseña(@PathVariable ("id") Long id){
+        if (!usuarioService.existById(id)) {
+            return new ResponseEntity("No existe el usuario", HttpStatus.NOT_FOUND);
+        }
+
+
+        return  new ResponseEntity("Usuario actualizado correctamente",HttpStatus.OK);
+    }
+    @ResponseBody public String currentUserName(Authentication authentication)
+    { return authentication.getName(); } }  */
 /*
     @PutMapping("/actualizar/{id}")
     public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, UsuarioDto usuarioDto ){
