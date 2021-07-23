@@ -1,6 +1,6 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
-import backendAdministradorCompetenciasFutbolisticas.Security.Dto.UsuarioDto;
+import backendAdministradorCompetenciasFutbolisticas.Security.Dto.NuevoUsuarioDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -11,7 +11,7 @@ public class EnvioMailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendEmailUsuarioCreado(UsuarioDto usuarioNuevo) {
+    public void sendEmailUsuarioCreado(NuevoUsuarioDto usuarioNuevo) {
 
         String asunto = "Nuevo Usuario Creado";
         String destinatario = usuarioNuevo.getEmail();

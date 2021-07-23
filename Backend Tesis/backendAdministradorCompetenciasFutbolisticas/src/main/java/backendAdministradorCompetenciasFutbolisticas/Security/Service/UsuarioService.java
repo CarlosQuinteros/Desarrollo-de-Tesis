@@ -53,4 +53,8 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
+    public boolean existByNombreUsuarioAndActivoIsTrue(String nombreUsuario){
+        return  usuarioRepository.existsByNombreUsuarioAndActivoIsTrue(nombreUsuario);
+    }
+
 }

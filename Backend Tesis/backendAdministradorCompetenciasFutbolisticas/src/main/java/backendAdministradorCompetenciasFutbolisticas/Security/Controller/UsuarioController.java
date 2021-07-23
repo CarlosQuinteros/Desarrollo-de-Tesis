@@ -3,7 +3,7 @@ package backendAdministradorCompetenciasFutbolisticas.Security.Controller;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.CambiarPasswordDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.JwtDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.LoginUsuario;
-import backendAdministradorCompetenciasFutbolisticas.Security.Dto.UsuarioDto;
+import backendAdministradorCompetenciasFutbolisticas.Security.Dto.NuevoUsuarioDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Rol;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Enums.RolNombre;
@@ -19,7 +19,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
@@ -55,7 +54,7 @@ public class UsuarioController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/nuevo")
-    public ResponseEntity<?> nuevoUsuario(@Valid @RequestBody UsuarioDto usuarioDto, BindingResult bindingResult){
+    public ResponseEntity<?> nuevoUsuario(@Valid @RequestBody NuevoUsuarioDto usuarioDto, BindingResult bindingResult){
         if(bindingResult.hasErrors())
             return new ResponseEntity( "Campos al ingresados o email invalido", HttpStatus.BAD_REQUEST);
         if (usuarioService.existByNombreUsuario(usuarioDto.getNombreUsuario()))
@@ -76,8 +75,8 @@ public class UsuarioController {
         if (usuarioDto.getRoles().contains("Encargado de torneos"))
             roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_TORNEOS).get());
         usuario.setRoles(roles);
-        usuarioService.save(usuario);
         try {
+            usuarioService.save(usuario);
             envioMailService.sendEmailUsuarioCreado(usuarioDto);
         }catch (Exception e){}
 
@@ -135,35 +134,30 @@ public class UsuarioController {
         return  new ResponseEntity("Usuario actualizado correctamente",HttpStatus.OK);
     }
 
+    @PreAuthorize("authenticated")
     @PutMapping("/cambiarContraseña")
-    public ResponseEntity<?> cambiarContraseña(Authentication authentication, @RequestBody CambiarPasswordDto cambiarPasswordDto){
+    public ResponseEntity<?> cambiarContraseña(Authentication authentication, @Valid @RequestBody CambiarPasswordDto cambiarPasswordDto, BindingResult bindingResult){
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        if(bindingResult.hasErrors()){
+            return  new ResponseEntity("Campos mal ingresados", HttpStatus.BAD_REQUEST);
+        }
         if(!passwordEncoder.matches(cambiarPasswordDto.getPasswordActual(),userDetails.getPassword())) {
-            return  new ResponseEntity("La contraseña actual e ingresada son incorrectas", HttpStatus.NOT_FOUND);
+            return  new ResponseEntity("La contraseña actual y la ingresada son incorrectas", HttpStatus.NOT_FOUND);
         }
         if(!cambiarPasswordDto.getPasswordNuevo().equals(cambiarPasswordDto.getRepetirPassword())){
             return new ResponseEntity("La contraseña nueva debe concidir", HttpStatus.NOT_FOUND);
+        }
+        if (passwordEncoder.matches(cambiarPasswordDto.getPasswordNuevo(),userDetails.getPassword())){
+            return new ResponseEntity("La contraseña nueva no puede ser igual a la actual",HttpStatus.NOT_FOUND);
         }
         Usuario usuario = usuarioService.getByNombreUsuario(userDetails.getUsername()).get();
         usuario.setPassword(passwordEncoder.encode(cambiarPasswordDto.getPasswordNuevo()));
         usuarioService.save(usuario);
         return  new ResponseEntity("Contraseña cambiada correctamente", HttpStatus.OK);
     }
-    /*@PreAuthorize(("hasRole('ADMIN')"))
-    @PutMapping("/cambiarContraseña")
-    public ResponseEntity<?> cambiarContraseña(@PathVariable ("id") Long id){
-        if (!usuarioService.existById(id)) {
-            return new ResponseEntity("No existe el usuario", HttpStatus.NOT_FOUND);
-        }
 
-
-        return  new ResponseEntity("Usuario actualizado correctamente",HttpStatus.OK);
-    }
-    @ResponseBody public String currentUserName(Authentication authentication)
-    { return authentication.getName(); } }  */
-/*
     @PutMapping("/actualizar/{id}")
-    public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, UsuarioDto usuarioDto ){
+    public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, @RequestBody NuevoUsuarioDto usuarioDto ){
         if(!usuarioService.existById(id)) {
             return new ResponseEntity("No existe el usuario", HttpStatus.NOT_FOUND);
         }
@@ -173,6 +167,22 @@ public class UsuarioController {
         if(usuarioService.existByEmail(usuarioDto.getEmail())){
             return new ResponseEntity("El correo electrónico ya existe", HttpStatus.BAD_REQUEST);
         }
+        Usuario usuario =
+                new Usuario(usuarioDto.getNombre(), usuarioDto.getApellido(), usuarioDto.getEmail(), usuarioDto.getNombreUsuario(),
+                        passwordEncoder.encode(usuarioDto.getPassword()));
+        Set<Rol> roles = new HashSet<>();
+        roles.add(rolService.getRolByNombre(RolNombre.ROLE_USER).get());
+        if(usuarioDto.getRoles().contains("admin"))
+            roles.add(rolService.getRolByNombre(RolNombre.ROLE_ADMIN).get());
+        if(usuarioDto.getRoles().contains("Encargado de jugadores"))
+            roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_JUGADORES).get());
+        if (usuarioDto.getRoles().contains("Encargado de sanciones"))
+            roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_SANCIONES).get());
+        if (usuarioDto.getRoles().contains("Encargado de torneos"))
+            roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_TORNEOS).get());
+        usuario.setRoles(roles);
+        usuarioService.save(usuario);
+        return null;
 
-    }*/
+    }
 }

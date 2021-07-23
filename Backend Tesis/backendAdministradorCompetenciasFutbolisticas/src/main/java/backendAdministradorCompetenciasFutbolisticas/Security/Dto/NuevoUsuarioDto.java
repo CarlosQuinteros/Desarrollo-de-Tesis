@@ -1,15 +1,16 @@
 package backendAdministradorCompetenciasFutbolisticas.Security.Dto;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.util.HashSet;
 import java.util.Set;
 
-public class UsuarioDto {
+public class NuevoUsuarioDto {
     @NotBlank
     private String nombre;
     @NotBlank
     private String apellido;
-    @NotBlank
+    @Email
     private String email;
     @NotBlank
     private String nombreUsuario;
