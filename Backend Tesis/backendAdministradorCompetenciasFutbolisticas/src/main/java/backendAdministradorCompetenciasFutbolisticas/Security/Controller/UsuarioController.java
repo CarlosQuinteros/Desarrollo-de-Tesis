@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -61,6 +63,7 @@ public class UsuarioController {
             return new ResponseEntity("El nombre de usuario ya existe", HttpStatus.BAD_REQUEST);
         if (usuarioService.existByEmail(usuarioDto.getEmail()))
             return  new ResponseEntity("El correo electronico ya existe", HttpStatus.BAD_REQUEST);
+
         Usuario usuario =
                 new Usuario(usuarioDto.getNombre(), usuarioDto.getApellido(), usuarioDto.getEmail(), usuarioDto.getNombreUsuario(),
                         passwordEncoder.encode(usuarioDto.getPassword()));
@@ -78,9 +81,11 @@ public class UsuarioController {
         try {
             usuarioService.save(usuario);
             envioMailService.sendEmailUsuarioCreado(usuarioDto);
-        }catch (Exception e){}
+            return new ResponseEntity("Usuario Guardado", HttpStatus.CREATED);
+        }catch (Exception e){
+            return new ResponseEntity<>("Fallo la operacion, usuario no guardado", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
-        return new ResponseEntity("Usuario Guardado", HttpStatus.CREATED);
 
     }
 
@@ -88,13 +93,21 @@ public class UsuarioController {
     public ResponseEntity<JwtDto> login(@Valid @RequestBody LoginUsuario loginUsuario, BindingResult bindingResult){
         if (bindingResult.hasErrors())
             return new ResponseEntity("Campos mal ingresados", HttpStatus.BAD_REQUEST);
-        Authentication authentication =
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginUsuario.getNombreUsuario(), loginUsuario.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtProvider.generateToken(authentication);
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        JwtDto jwtDto = new JwtDto(jwt, userDetails.getUsername(), userDetails.getAuthorities());
-        return new ResponseEntity(jwtDto, HttpStatus.OK);
+        try {
+            Authentication authentication =
+                    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginUsuario.getNombreUsuario(), loginUsuario.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtProvider.generateToken(authentication);
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            JwtDto jwtDto = new JwtDto(jwt, userDetails.getUsername(), userDetails.getAuthorities());
+            return new ResponseEntity(jwtDto, HttpStatus.OK);
+        }catch (InternalAuthenticationServiceException e){
+
+            return  new ResponseEntity("Nombre de usuario o contraseña incorrectos", HttpStatus.UNAUTHORIZED);
+        }catch (LockedException e){
+            return new ResponseEntity("El usuario se encuentra bloqueado", HttpStatus.UNAUTHORIZED);
+        }
+
 
     }
     @PreAuthorize("hasRole('ADMIN')")
@@ -120,8 +133,13 @@ public class UsuarioController {
         if (!usuarioService.existById(id)){
             return new ResponseEntity("No existe el usuario", HttpStatus.NOT_FOUND);
         }
-        usuarioService.delete(id);
-        return new ResponseEntity("Usuario borrado correctamente", HttpStatus.OK);
+        try {
+            usuarioService.delete(id);
+            return new ResponseEntity("Usuario borrado correctamente", HttpStatus.OK);
+        }
+        catch (Exception e) {
+            return new ResponseEntity("Fallo la operacion, usuario no borrado", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PreAuthorize(("hasRole('ADMIN')"))
