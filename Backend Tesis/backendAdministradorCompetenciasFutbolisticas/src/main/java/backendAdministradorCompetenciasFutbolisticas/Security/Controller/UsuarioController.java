@@ -54,7 +54,7 @@ public class UsuarioController {
     @Autowired
     EnvioMailService envioMailService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/nuevo")
     public ResponseEntity<?> nuevoUsuario(@Valid @RequestBody NuevoUsuarioDto usuarioDto, BindingResult bindingResult){
         if(bindingResult.hasErrors())

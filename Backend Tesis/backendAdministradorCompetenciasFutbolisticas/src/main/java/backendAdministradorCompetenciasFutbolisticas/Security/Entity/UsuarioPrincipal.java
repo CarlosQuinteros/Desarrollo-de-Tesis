@@ -5,6 +5,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,8 @@ public class UsuarioPrincipal implements UserDetails {
     private String nombreUsuario;
     private String password;
     private boolean activo;
+    private Date fechaCreacion;
+    private Date fechaActualizacion;
     private Collection<? extends GrantedAuthority> authorities;
 
     public UsuarioPrincipal(String nombre, String apellido, String email, String nombreUsuario, String password, boolean activo, Collection<? extends GrantedAuthority> authorities) {

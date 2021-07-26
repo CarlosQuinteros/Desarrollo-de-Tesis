@@ -30,8 +30,29 @@ public class Usuario {
     @JoinTable(name = "usuario_rol", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "rol_id"))
     private Set<Rol> roles = new HashSet<>();
     private boolean activo;
+    @CreationTimestamp
+    private Date fechaCreacion;
+    @UpdateTimestamp
+    private Date fechaActualizacion;
+
 
     public Usuario() {
+    }
+
+    public Date getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(Date fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public Date getFechaActualizacion() {
+        return fechaActualizacion;
+    }
+
+    public void setFechaActualizacion(Date fechaActualizacion) {
+        this.fechaActualizacion = fechaActualizacion;
     }
 
     public Usuario(@NotNull String nombre, @NotNull String apellido, @NotNull String email, @NotNull String nombreUsuario, @NotNull String password) {
@@ -41,6 +62,8 @@ public class Usuario {
         this.nombreUsuario = nombreUsuario;
         this.password = password;
         this.activo = true;
+        this.fechaCreacion = null;
+        this.fechaActualizacion = null;
     }
 
     public Long getId() {

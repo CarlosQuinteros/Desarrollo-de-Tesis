@@ -2,6 +2,7 @@ package backendAdministradorCompetenciasFutbolisticas.Security.Dto;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ public class NuevoUsuarioDto {
     private String password;
     private Set<String> roles =  new HashSet<>();
     private String activo;
+
 
     public String getNombre() {
         return nombre;
@@ -74,4 +76,5 @@ public class NuevoUsuarioDto {
     public void setActivo(String activo) {
         this.activo = activo;
     }
+
 }
