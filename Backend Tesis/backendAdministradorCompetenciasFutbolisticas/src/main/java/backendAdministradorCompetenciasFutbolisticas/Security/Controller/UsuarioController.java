@@ -1,5 +1,6 @@
 package backendAdministradorCompetenciasFutbolisticas.Security.Controller;
 
+import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.CambiarPasswordDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.JwtDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.LoginUsuario;
@@ -15,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
-import org.springframework.security.authentication.LockedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -54,7 +52,7 @@ public class UsuarioController {
     @Autowired
     EnvioMailService envioMailService;
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/nuevo")
     public ResponseEntity<?> nuevoUsuario(@Valid @RequestBody NuevoUsuarioDto usuarioDto, BindingResult bindingResult){
         if(bindingResult.hasErrors())
@@ -69,7 +67,7 @@ public class UsuarioController {
                         passwordEncoder.encode(usuarioDto.getPassword()));
         Set<Rol> roles = new HashSet<>();
         roles.add(rolService.getRolByNombre(RolNombre.ROLE_USER).get());
-        if(usuarioDto.getRoles().contains("admin"))
+        if(usuarioDto.getRoles().contains("Admin"))
             roles.add(rolService.getRolByNombre(RolNombre.ROLE_ADMIN).get());
         if(usuarioDto.getRoles().contains("Encargado de jugadores"))
             roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_JUGADORES).get());
@@ -92,7 +90,7 @@ public class UsuarioController {
     @PostMapping("/login")
     public ResponseEntity<JwtDto> login(@Valid @RequestBody LoginUsuario loginUsuario, BindingResult bindingResult){
         if (bindingResult.hasErrors())
-            return new ResponseEntity("Campos mal ingresados", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new Mensaje("Campos mal ingresados"), HttpStatus.BAD_REQUEST);
         try {
             Authentication authentication =
                     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginUsuario.getNombreUsuario(), loginUsuario.getPassword()));
@@ -101,11 +99,12 @@ public class UsuarioController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             JwtDto jwtDto = new JwtDto(jwt, userDetails.getUsername(), userDetails.getAuthorities());
             return new ResponseEntity(jwtDto, HttpStatus.OK);
-        }catch (InternalAuthenticationServiceException e){
-
-            return  new ResponseEntity("Nombre de usuario o contraseña incorrectos", HttpStatus.UNAUTHORIZED);
+        }catch (InternalAuthenticationServiceException e) {
+            return new ResponseEntity(new Mensaje("Nombre de usuario o contraseña incorrectos"), HttpStatus.UNAUTHORIZED);
+        }catch (BadCredentialsException e){
+            return new ResponseEntity(new Mensaje("Contraseña incorrecta"),HttpStatus.UNAUTHORIZED);
         }catch (LockedException e){
-            return new ResponseEntity("El usuario se encuentra bloqueado", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity(new Mensaje("El usuario se encuentra bloqueado"), HttpStatus.UNAUTHORIZED);
         }
 
 
@@ -174,6 +173,7 @@ public class UsuarioController {
         return  new ResponseEntity("Contraseña cambiada correctamente", HttpStatus.OK);
     }
 
+    //TODO: Terminar esto
     @PutMapping("/actualizar/{id}")
     public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, @RequestBody NuevoUsuarioDto usuarioDto ){
         if(!usuarioService.existById(id)) {
