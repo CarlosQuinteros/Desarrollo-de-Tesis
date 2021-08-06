@@ -53,6 +53,16 @@ public class UsuarioController {
         return new ResponseEntity(usuario, HttpStatus.OK);
     }
 
+    @GetMapping("/detalle/nombreUsuario/{nombreUsuario}")
+    public ResponseEntity<Usuario> getDetalleUsuarioPorNombreUsuario(@PathVariable("nombreUsuario") String nombreUsuario){
+        Usuario usuario = usuarioService.getByNombreUsuario(nombreUsuario).get();
+        if (usuario == null){
+            return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity(usuario, HttpStatus.OK);
+
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable ("id") long id){
@@ -71,10 +81,10 @@ public class UsuarioController {
     //@PreAuthorize(("hasRole('ADMIN')"))
     @PutMapping("/alta/{id}")
     public ResponseEntity<?> activarUsuario(@PathVariable ("id") Long id){
-        Usuario usuario = usuarioService.getById(id).get();
-        if (usuario == null){
+        if (!usuarioService.existById(id)){
             return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
         }
+        Usuario usuario = usuarioService.getById(id).get();
         if (usuario.isActivo()) {
             return new ResponseEntity(new Mensaje("El usuario ya se encuentra Activo"), HttpStatus.BAD_REQUEST);
         }
@@ -84,10 +94,11 @@ public class UsuarioController {
 
     @PutMapping("/baja/{id}")
         public ResponseEntity<?> bajaUsuario(@PathVariable ("id") Long id){
-        Usuario usuario = usuarioService.getById(id).get();
-        if (usuario == null){
+
+        if (!usuarioService.existById(id)){
             return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
         }
+        Usuario usuario = usuarioService.getById(id).get();
         if (!usuario.isActivo()){
 
             return new ResponseEntity(new Mensaje("El usuario ya se encuentra Inactivo"), HttpStatus.BAD_REQUEST);
@@ -98,27 +109,30 @@ public class UsuarioController {
     }
 
     //@PreAuthorize("authenticated")
-    @PutMapping("/cambiarContraseña/{id}")
-    public ResponseEntity<?> cambiarContraseña(@PathVariable ("id") Long id, @Valid @RequestBody CambiarPasswordDto cambiarPasswordDto, BindingResult bindingResult){
+    @PutMapping("/cambiarContrasenia/{id}")
+    public ResponseEntity<?> cambiarContrasenia(@PathVariable ("id") Long id, @Valid @RequestBody CambiarPasswordDto cambiarPasswordDto, BindingResult bindingResult){
         //UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        if (!usuarioService.existById(id)){
+            return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
+        }
         Usuario usuario = usuarioService.getById(id).get();
         if(bindingResult.hasErrors()){
-            return  new ResponseEntity("Campos mal ingresados", HttpStatus.BAD_REQUEST);
+            return  new ResponseEntity(new Mensaje("Campos mal ingresados"), HttpStatus.BAD_REQUEST);
         }
         if(!passwordEncoder.matches(cambiarPasswordDto.getPasswordActual(),usuario.getPassword())) {
-            return  new ResponseEntity("La contraseña actual y la ingresada son incorrectas", HttpStatus.NOT_FOUND);
+            return  new ResponseEntity(new Mensaje("La contraseña actual y la ingresada son incorrectas"), HttpStatus.NOT_FOUND);
         }
         if(!cambiarPasswordDto.getPasswordNuevo().equals(cambiarPasswordDto.getRepetirPassword())){
-            return new ResponseEntity("La contraseña nueva debe concidir", HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("La contraseña nueva debe concidir"), HttpStatus.NOT_FOUND);
         }
         if (passwordEncoder.matches(cambiarPasswordDto.getPasswordNuevo(),usuario.getPassword())){
-            return new ResponseEntity("La contraseña nueva no puede ser igual a la actual",HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("La contraseña nueva no puede ser igual a la actual"),HttpStatus.NOT_FOUND);
         }
-       // Usuario usuario = usuarioService.getByNombreUsuario(userDetails.getUsername()).get();
         try{
             usuario.setPassword(passwordEncoder.encode(cambiarPasswordDto.getPasswordNuevo()));
             usuarioService.save(usuario);
-            return  new ResponseEntity("Contraseña cambiada correctamente", HttpStatus.OK);
+            return  new ResponseEntity(new Mensaje("Contraseña cambiada correctamente"), HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity(new Mensaje("Fallo la operacion. La contraseña no fue cambiada"), HttpStatus.BAD_REQUEST);
         }
