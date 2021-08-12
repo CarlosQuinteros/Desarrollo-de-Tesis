@@ -29,17 +29,8 @@ public class EmailService {
     @Autowired
     TemplateEngine templateEngine;
 
-    public void sendEmail(){
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom(this.mailFrom);
-        mailMessage.setTo("admcompetenciasfutbolisticas@gmail.com");
-        mailMessage.setSubject("Prueba de envio email simple");
-        mailMessage.setText("Este es el contenido del mail");
 
-        javaMailSender.send(mailMessage);
-    }
-
-    public void sendEmailConPlantilla(EmailValuesDto emailValuesDto){
+    public void sendEmailRecuperarContraseña(EmailValuesDto emailValuesDto){
         MimeMessage message = javaMailSender.createMimeMessage();
         try{
             MimeMessageHelper helper = new MimeMessageHelper(message,true);
@@ -52,7 +43,7 @@ public class EmailService {
             String htmlText = templateEngine.process("email-template", context);
             helper.setFrom(this.mailFrom);
             helper.setTo(emailValuesDto.getMailTo());
-            helper.setSubject("Prueba de envio email con plantilla");
+            helper.setSubject("Recuperar contraseña");
             helper.setText(htmlText,true);
             javaMailSender.send(message);
 

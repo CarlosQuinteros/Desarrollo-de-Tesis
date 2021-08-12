@@ -58,7 +58,10 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/auth/**").permitAll()
+                .antMatchers(
+                        "/auth/**",
+                        "/email-password/**"
+                ).permitAll()
                 //.anyRequest().authenticated() //esto indica que toda ruta diferente de /auth/ tiene que estar logueado, ahora lo comento para realizar pruebas
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtEntryPoint)
