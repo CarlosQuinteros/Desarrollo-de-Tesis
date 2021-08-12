@@ -30,4 +30,13 @@ public class EnvioMailService {
 
         mailSender.send(email);
     }
+
+    public void sendEmailSimple(String  emailTo, String emailSubject, String texto){
+        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setTo(emailTo);
+        simpleMailMessage.setSubject(emailSubject);
+        simpleMailMessage.setText(texto);
+
+        mailSender.send(simpleMailMessage);
+    }
 }
