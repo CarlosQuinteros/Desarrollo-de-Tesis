@@ -79,12 +79,10 @@ public class AuthController {
         try {
             usuarioService.save(usuario);
             envioMailService.sendEmailUsuarioCreado(usuarioDto);
-            return new ResponseEntity("Usuario Guardado", HttpStatus.CREATED);
+            return new ResponseEntity(new Mensaje("Nuevo usuario guardado"), HttpStatus.CREATED);
         }catch (Exception e){
-            return new ResponseEntity<>("Fallo la operacion, usuario no guardado", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new Mensaje("Fallo la operacion, usuario no guardado"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-
     }
 
     @PostMapping("/login")

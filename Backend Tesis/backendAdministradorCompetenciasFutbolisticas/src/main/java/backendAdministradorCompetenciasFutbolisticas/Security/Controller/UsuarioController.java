@@ -8,6 +8,7 @@ import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Enums.RolNombre;
 import backendAdministradorCompetenciasFutbolisticas.Security.Service.RolService;
 import backendAdministradorCompetenciasFutbolisticas.Security.Service.UsuarioService;
+import backendAdministradorCompetenciasFutbolisticas.Service.EnvioMailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,42 @@ public class UsuarioController {
     @Autowired
     RolService rolService;
 
+    @Autowired
+    EnvioMailService envioMailService;
+
+
+    //@PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/nuevo")
+    public ResponseEntity<?> nuevoUsuario(@Valid @RequestBody NuevoUsuarioDto usuarioDto, BindingResult bindingResult){
+        if(bindingResult.hasErrors())
+            return new ResponseEntity( new Mensaje("Campos al ingresados o email invalido"), HttpStatus.BAD_REQUEST);
+        if (usuarioService.existByNombreUsuario(usuarioDto.getNombreUsuario()))
+            return new ResponseEntity(new Mensaje("El nombre de usuario ya existe"), HttpStatus.BAD_REQUEST);
+        if (usuarioService.existByEmail(usuarioDto.getEmail()))
+            return  new ResponseEntity(new Mensaje("El correo electronico ya existe"), HttpStatus.BAD_REQUEST);
+
+        Usuario usuario =
+                new Usuario(usuarioDto.getNombre(), usuarioDto.getApellido(), usuarioDto.getEmail(), usuarioDto.getNombreUsuario(),
+                        passwordEncoder.encode(usuarioDto.getPassword()));
+        Set<Rol> roles = new HashSet<>();
+        roles.add(rolService.getRolByNombre(RolNombre.ROLE_USER).get());
+        if(usuarioDto.getRoles().contains("Admin"))
+            roles.add(rolService.getRolByNombre(RolNombre.ROLE_ADMIN).get());
+        if(usuarioDto.getRoles().contains("Encargado de jugadores"))
+            roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_JUGADORES).get());
+        if (usuarioDto.getRoles().contains("Encargado de sanciones"))
+            roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_SANCIONES).get());
+        if (usuarioDto.getRoles().contains("Encargado de torneos"))
+            roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_TORNEOS).get());
+        usuario.setRoles(roles);
+        try {
+            usuarioService.save(usuario);
+            //envioMailService.sendEmailUsuarioCreado(usuarioDto); tarda varios segundos
+            return new ResponseEntity(new Mensaje("Nuevo usuario guardado"), HttpStatus.CREATED);
+        }catch (Exception e){
+            return new ResponseEntity<>(new Mensaje("Fallo la operacion, usuario no guardado"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     //@PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/listado")
