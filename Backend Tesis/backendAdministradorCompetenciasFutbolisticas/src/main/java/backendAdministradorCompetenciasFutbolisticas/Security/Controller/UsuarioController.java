@@ -93,15 +93,16 @@ public class UsuarioController {
 
     @GetMapping("/detalle/nombreUsuario/{nombreUsuario}")
     public ResponseEntity<Usuario> getDetalleUsuarioPorNombreUsuario(@PathVariable("nombreUsuario") String nombreUsuario){
-        Usuario usuario = usuarioService.getByNombreUsuario(nombreUsuario).get();
-        if (usuario == null){
+        Optional<Usuario> usuarioOptional = usuarioService.getByNombreUsuario(nombreUsuario);
+        if (!usuarioOptional.isPresent()){
             return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
         }
+        Usuario usuario = usuarioService.getByNombreUsuario(nombreUsuario).get();
         return new ResponseEntity(usuario, HttpStatus.OK);
 
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable ("id") long id){
         if (!usuarioService.existById(id)){
@@ -130,6 +131,7 @@ public class UsuarioController {
         return  new ResponseEntity("Usuario dado de alta correctamente",HttpStatus.OK);
     }
 
+    //@PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/baja/{id}")
         public ResponseEntity<?> bajaUsuario(@PathVariable ("id") Long id){
 
@@ -178,6 +180,7 @@ public class UsuarioController {
     }
 
 
+    //@PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/editar/{id}")
     public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, @RequestBody NuevoUsuarioDto usuarioDto ){
         Optional<Usuario> usuarioOptional = usuarioService.getById(id);
