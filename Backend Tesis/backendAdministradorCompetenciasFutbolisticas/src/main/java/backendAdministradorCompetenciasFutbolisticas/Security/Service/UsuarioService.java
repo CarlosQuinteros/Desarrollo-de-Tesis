@@ -60,4 +60,16 @@ public class UsuarioService {
         return  usuarioRepository.existsByNombreUsuarioAndActivoIsTrue(nombreUsuario);
     }
 
+    public int cantidadUsuarios(){
+        return usuarioRepository.findAll().size();
+    }
+
+    public int cantidadDeActivos(){
+        return usuarioRepository.countUsuarioByActivoTrue();
+    }
+    public int cantidadDeInactivos(){
+
+        return usuarioRepository.countUsuarioByActivoFalse();
+    }
+
 }

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -176,21 +177,25 @@ public class UsuarioController {
 
     }
 
-    //TODO: Terminar esto
-    @PutMapping("/actualizar/{id}")
+
+    @PutMapping("/editar/{id}")
     public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, @RequestBody NuevoUsuarioDto usuarioDto ){
-        if(!usuarioService.existById(id)) {
-            return new ResponseEntity("No existe el usuario", HttpStatus.NOT_FOUND);
+        Optional<Usuario> usuarioOptional = usuarioService.getById(id);
+        if(!usuarioOptional.isPresent()) {
+            return new ResponseEntity(new Mensaje("No existe el usuario"), HttpStatus.NOT_FOUND);
         }
-        if (usuarioService.existByNombreUsuario(usuarioDto.getNombreUsuario())){
-            return new ResponseEntity("El nombre de usuario ya existe",HttpStatus.BAD_REQUEST);
+        Usuario usuarioActualizar = usuarioOptional.get();
+        if (usuarioService.existByNombreUsuario(usuarioDto.getNombreUsuario()) && !usuarioActualizar.getNombreUsuario().equals(usuarioDto.getNombreUsuario())){
+            return new ResponseEntity(new Mensaje("El nombre de usuario ya existe"),HttpStatus.BAD_REQUEST);
         }
-        if(usuarioService.existByEmail(usuarioDto.getEmail())){
-            return new ResponseEntity("El correo electrónico ya existe", HttpStatus.BAD_REQUEST);
+        if(usuarioService.existByEmail(usuarioDto.getEmail()) && !usuarioActualizar.getEmail().equals(usuarioDto.getEmail())){
+            return new ResponseEntity(new Mensaje("El correo electrónico ya existe"), HttpStatus.BAD_REQUEST);
         }
-        Usuario usuario =
-                new Usuario(usuarioDto.getNombre(), usuarioDto.getApellido(), usuarioDto.getEmail(), usuarioDto.getNombreUsuario(),
-                        passwordEncoder.encode(usuarioDto.getPassword()));
+        usuarioActualizar.setNombre(usuarioDto.getNombre());
+        usuarioActualizar.setApellido(usuarioDto.getApellido());
+        usuarioActualizar.setNombreUsuario(usuarioDto.getNombreUsuario());
+        usuarioActualizar.setEmail(usuarioDto.getEmail());
+
         Set<Rol> roles = new HashSet<>();
         roles.add(rolService.getRolByNombre(RolNombre.ROLE_USER).get());
         if(usuarioDto.getRoles().contains("admin"))
@@ -201,9 +206,33 @@ public class UsuarioController {
             roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_SANCIONES).get());
         if (usuarioDto.getRoles().contains("Encargado de torneos"))
             roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_TORNEOS).get());
-        usuario.setRoles(roles);
-        usuarioService.save(usuario);
-        return null;
+        usuarioActualizar.setRoles(roles);
+        try{
+            usuarioService.save(usuarioActualizar);
+            return new ResponseEntity(new Mensaje("Usuario actualizado"), HttpStatus.OK);
+
+        } catch (Exception e){
+            return new ResponseEntity(new Mensaje("Fallo la operacion, usuario no actualizado"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/total")
+    public ResponseEntity<?> cantidadTotalDeUsuarios(){
+        int cantidad = usuarioService.cantidadUsuarios();
+        return new ResponseEntity(cantidad, HttpStatus.OK);
+    }
+
+    @GetMapping("/total-activos")
+    public ResponseEntity<?> cantidadTotalDeActivos(){
+        int cantidad = usuarioService.cantidadDeActivos();
+        return new ResponseEntity(cantidad, HttpStatus.OK);
+
+    }
+
+    @GetMapping("/total-inactivos")
+    public ResponseEntity<?> cantidadTotalDeInactivos(){
+        int cantidad = usuarioService.cantidadDeInactivos();
+        return new ResponseEntity(cantidad, HttpStatus.OK);
 
     }
 }
