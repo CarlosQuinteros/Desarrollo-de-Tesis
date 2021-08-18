@@ -128,7 +128,7 @@ public class UsuarioController {
             return new ResponseEntity(new Mensaje("El usuario ya se encuentra Activo"), HttpStatus.BAD_REQUEST);
         }
         usuarioService.cambiarEstado(id);
-        return  new ResponseEntity("Usuario dado de alta correctamente",HttpStatus.OK);
+        return  new ResponseEntity(new Mensaje("Usuario dado de alta correctamente"),HttpStatus.OK);
     }
 
     //@PreAuthorize("hasRole('ADMIN')")
