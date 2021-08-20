@@ -72,4 +72,12 @@ public class UsuarioService {
         return usuarioRepository.countUsuarioByActivoFalse();
     }
 
+    public Optional<Usuario> getByTokenPassword(String tokenPassword){
+        return usuarioRepository.findByTokenPassword(tokenPassword);
+    }
+
+    public boolean existByTokenPassword(String tokenPassword){
+        return usuarioRepository.existsByTokenPassword(tokenPassword);
+    }
+
 }
