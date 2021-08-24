@@ -1,8 +1,10 @@
 package backendAdministradorCompetenciasFutbolisticas.Security.Controller;
 
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
+import backendAdministradorCompetenciasFutbolisticas.Security.Dto.ActualizarUsuarioDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.CambiarPasswordDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.NuevoUsuarioDto;
+import backendAdministradorCompetenciasFutbolisticas.Security.Dto.PerfilUsuarioDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Rol;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Enums.RolNombre;
@@ -182,7 +184,10 @@ public class UsuarioController {
 
     //@PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/editar/{id}")
-    public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, @RequestBody NuevoUsuarioDto usuarioDto ){
+    public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, @Valid @RequestBody ActualizarUsuarioDto usuarioDto, BindingResult bindingResult ){
+        if(bindingResult.hasErrors()){
+            return new ResponseEntity(new Mensaje("Campos mal ingresado"), HttpStatus.BAD_REQUEST);
+        }
         Optional<Usuario> usuarioOptional = usuarioService.getById(id);
         if(!usuarioOptional.isPresent()) {
             return new ResponseEntity(new Mensaje("No existe el usuario"), HttpStatus.NOT_FOUND);
@@ -201,7 +206,7 @@ public class UsuarioController {
 
         Set<Rol> roles = new HashSet<>();
         roles.add(rolService.getRolByNombre(RolNombre.ROLE_USER).get());
-        if(usuarioDto.getRoles().contains("admin"))
+        if(usuarioDto.getRoles().contains("Admin"))
             roles.add(rolService.getRolByNombre(RolNombre.ROLE_ADMIN).get());
         if(usuarioDto.getRoles().contains("Encargado de jugadores"))
             roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_JUGADORES).get());
@@ -212,11 +217,41 @@ public class UsuarioController {
         usuarioActualizar.setRoles(roles);
         try{
             usuarioService.save(usuarioActualizar);
-            return new ResponseEntity(new Mensaje("Usuario actualizado"), HttpStatus.OK);
+            return new ResponseEntity(usuarioActualizar, HttpStatus.OK);
 
         } catch (Exception e){
             return new ResponseEntity(new Mensaje("Fallo la operacion, usuario no actualizado"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PutMapping("/perfil/actualizarDatos/{id}")
+    public ResponseEntity<Usuario> actualizarDatosPerfil(@PathVariable ("id") Long id, @Valid @RequestBody  PerfilUsuarioDto usuarioDto, BindingResult bindingResult ){
+        if(bindingResult.hasErrors()){
+            return new ResponseEntity(new Mensaje("Camnpos mal ingresados"), HttpStatus.BAD_REQUEST);
+        }
+        Optional<Usuario> usuarioOptional = usuarioService.getById(id);
+        if (!usuarioOptional.isPresent()){
+            return new ResponseEntity(new Mensaje("No existe el usuario"), HttpStatus.BAD_REQUEST);
+        }
+        Usuario usuarioActualizar = usuarioOptional.get();
+        if (usuarioService.existByNombreUsuario(usuarioDto.getNombreUsuario()) && !usuarioActualizar.getNombreUsuario().equals(usuarioDto.getNombreUsuario())){
+            return new ResponseEntity(new Mensaje("El nombre de usuario ya existe"),HttpStatus.BAD_REQUEST);
+        }
+        if(usuarioService.existByEmail(usuarioDto.getEmail()) && !usuarioActualizar.getEmail().equals(usuarioDto.getEmail())){
+            return new ResponseEntity(new Mensaje("El correo electrónico ya existe"), HttpStatus.BAD_REQUEST);
+        }
+        usuarioActualizar.setNombre(usuarioDto.getNombre());
+        usuarioActualizar.setApellido(usuarioDto.getApellido());
+        usuarioActualizar.setNombreUsuario(usuarioDto.getNombreUsuario());
+        usuarioActualizar.setEmail(usuarioDto.getEmail());
+        try{
+            usuarioService.save(usuarioActualizar);
+            return new ResponseEntity(usuarioActualizar, HttpStatus.OK);
+
+        } catch (Exception e){
+            return new ResponseEntity(new Mensaje("Fallo la operación. Usuario no actualizado"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     @GetMapping("/total")

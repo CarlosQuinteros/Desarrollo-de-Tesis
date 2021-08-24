@@ -63,7 +63,7 @@ public class EmailController {
         emailService.sendEmailRecuperarContraseña(dto);
         usuario.setTokenPassword(dto.getToken());
         usuarioService.save(usuario);
-        return new ResponseEntity(new Mensaje("te enviamos un correo."), HttpStatus.OK);
+        return new ResponseEntity(new Mensaje("Te enviamos un correo"), HttpStatus.OK);
     }
 
     @PostMapping("/recuperar-password")
