@@ -1,7 +1,6 @@
 package backendAdministradorCompetenciasFutbolisticas.Security.Controller;
 
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
-import backendAdministradorCompetenciasFutbolisticas.Security.Dto.CambiarPasswordDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.JwtDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.LoginUsuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.NuevoUsuarioDto;
@@ -15,7 +14,6 @@ import backendAdministradorCompetenciasFutbolisticas.Service.EnvioMailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -72,9 +69,9 @@ public class AuthController {
         if(usuarioDto.getRoles().contains("Encargado de jugadores"))
             roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_JUGADORES).get());
         if (usuarioDto.getRoles().contains("Encargado de sanciones"))
-            roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_SANCIONES).get());
+            roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_SANCIONES).get());
         if (usuarioDto.getRoles().contains("Encargado de torneos"))
-            roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_TORNEOS).get());
+            roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_TORNEOS).get());
         usuario.setRoles(roles);
         try {
             usuarioService.save(usuario);

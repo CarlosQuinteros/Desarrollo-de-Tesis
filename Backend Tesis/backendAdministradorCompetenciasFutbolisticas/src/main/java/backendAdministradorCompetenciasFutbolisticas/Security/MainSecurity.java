@@ -62,7 +62,7 @@ public class MainSecurity extends WebSecurityConfigurerAdapter {
                         "/auth/**",
                         "/email-password/**"
                 ).permitAll()
-                //.anyRequest().authenticated() //esto indica que toda ruta diferente de /auth/ tiene que estar logueado, ahora lo comento para realizar pruebas
+                .anyRequest().authenticated() //esto indica que toda ruta diferente de /auth/ tiene que estar logueado, ahora lo comento para realizar pruebas
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtEntryPoint)
                 .and()

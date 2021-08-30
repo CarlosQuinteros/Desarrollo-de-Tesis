@@ -43,7 +43,7 @@ public class UsuarioController {
     EnvioMailService envioMailService;
 
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/nuevo")
     public ResponseEntity<?> nuevoUsuario(@Valid @RequestBody NuevoUsuarioDto usuarioDto, BindingResult bindingResult){
         if(bindingResult.hasErrors())
@@ -63,9 +63,9 @@ public class UsuarioController {
         if(usuarioDto.getRoles().contains("Encargado de jugadores"))
             roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_JUGADORES).get());
         if (usuarioDto.getRoles().contains("Encargado de sanciones"))
-            roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_SANCIONES).get());
+            roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_SANCIONES).get());
         if (usuarioDto.getRoles().contains("Encargado de torneos"))
-            roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_TORNEOS).get());
+            roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_TORNEOS).get());
         usuario.setRoles(roles);
         try {
             usuarioService.save(usuario);
@@ -76,14 +76,14 @@ public class UsuarioController {
         }
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/listado")
     public ResponseEntity<List<Usuario>> listarUsuarios(){
         List<Usuario> listaDeUsuarios = usuarioService.list();
         return new ResponseEntity(listaDeUsuarios, HttpStatus.OK);
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/detalle/{id}")
     public  ResponseEntity<Usuario> getDetalleUsuario(@PathVariable("id") Long id){
         if(!usuarioService.existById(id)){
@@ -119,7 +119,7 @@ public class UsuarioController {
         }
     }
 
-    //@PreAuthorize(("hasRole('ADMIN')"))
+    @PreAuthorize(("hasRole('ADMIN')"))
     @PutMapping("/alta/{id}")
     public ResponseEntity<?> activarUsuario(@PathVariable ("id") Long id){
         if (!usuarioService.existById(id)){
@@ -211,9 +211,9 @@ public class UsuarioController {
         if(usuarioDto.getRoles().contains("Encargado de jugadores"))
             roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_JUGADORES).get());
         if (usuarioDto.getRoles().contains("Encargado de sanciones"))
-            roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_SANCIONES).get());
+            roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_SANCIONES).get());
         if (usuarioDto.getRoles().contains("Encargado de torneos"))
-            roles.add(rolService.getRolByNombre(RolNombre.ROL_ENCARGADO_DE_TORNEOS).get());
+            roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_TORNEOS).get());
         usuarioActualizar.setRoles(roles);
         try{
             usuarioService.save(usuarioActualizar);
