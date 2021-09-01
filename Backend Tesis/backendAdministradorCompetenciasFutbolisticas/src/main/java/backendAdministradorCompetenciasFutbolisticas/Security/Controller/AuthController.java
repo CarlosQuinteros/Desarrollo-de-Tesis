@@ -102,7 +102,5 @@ public class AuthController {
         }catch (LockedException e){
             return new ResponseEntity(new Mensaje("El usuario se encuentra bloqueado"), HttpStatus.UNAUTHORIZED);
         }
-
-
     }
 }
