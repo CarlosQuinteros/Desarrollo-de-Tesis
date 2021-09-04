@@ -104,7 +104,7 @@ public class UsuarioController {
 
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable ("id") long id){
         if (!usuarioService.existById(id)){
@@ -133,7 +133,7 @@ public class UsuarioController {
         return  new ResponseEntity(new Mensaje("Usuario dado de alta correctamente"),HttpStatus.OK);
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/baja/{id}")
         public ResponseEntity<?> bajaUsuario(@PathVariable ("id") Long id){
 
@@ -144,6 +144,9 @@ public class UsuarioController {
         if (!usuario.isActivo()){
 
             return new ResponseEntity(new Mensaje("El usuario ya se encuentra Inactivo"), HttpStatus.BAD_REQUEST);
+        }
+        if(usuario.getNombreUsuario().contains("admin")){
+            return new ResponseEntity(new Mensaje("El usuario administrador no puede darse de baja."), HttpStatus.NOT_FOUND);
         }
         usuarioService.cambiarEstado(id);
         return new ResponseEntity(new Mensaje("Usuario dado de baja correctamente"), HttpStatus.OK);
@@ -182,7 +185,7 @@ public class UsuarioController {
     }
 
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/editar/{id}")
     public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, @Valid @RequestBody ActualizarUsuarioDto usuarioDto, BindingResult bindingResult ){
         if(bindingResult.hasErrors()){
@@ -254,12 +257,14 @@ public class UsuarioController {
 
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/total")
     public ResponseEntity<?> cantidadTotalDeUsuarios(){
         int cantidad = usuarioService.cantidadUsuarios();
         return new ResponseEntity(cantidad, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/total-activos")
     public ResponseEntity<?> cantidadTotalDeActivos(){
         int cantidad = usuarioService.cantidadDeActivos();
@@ -267,6 +272,7 @@ public class UsuarioController {
 
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/total-inactivos")
     public ResponseEntity<?> cantidadTotalDeInactivos(){
         int cantidad = usuarioService.cantidadDeInactivos();
