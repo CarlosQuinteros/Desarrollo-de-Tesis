@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -22,7 +24,12 @@ public class ProvinciaService {
     }
 
     public List<Provincia> getProvincias(){
-        return provinciaRepository.findByOrderByNombreAsc();
+        List<Provincia> listado =provinciaRepository.findByOrderByNombreAsc();
+        for (Provincia provincia : listado) {
+            provincia.setLocalidades(provincia.getLocalidades().stream().sorted(Comparator.comparing(Localidad::getNombre)).collect(Collectors.toList()));
+        }
+        return listado;
+        //return provinciaRepository.findByOrderByNombreAsc();
     }
 
     public Optional<Provincia> getById(Long id){

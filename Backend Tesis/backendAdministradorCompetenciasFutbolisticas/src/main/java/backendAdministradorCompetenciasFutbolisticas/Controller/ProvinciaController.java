@@ -44,7 +44,7 @@ public class ProvinciaController {
 
     @GetMapping("/listado")
     public ResponseEntity<List<Provincia>> listadoProvincias(){
-        List<Provincia> listado =  provinciaService.getProvincias();
+        List<Provincia> listado = provinciaService.getProvincias();
         return  new ResponseEntity(listado, HttpStatus.OK);
     }
 
@@ -62,4 +62,25 @@ public class ProvinciaController {
         }
         return  new ResponseEntity(provinciaOptional.get(), HttpStatus.OK);
     }
+
+    @PutMapping("/editar/{id}")
+    public ResponseEntity<?> editarProvincia (@PathVariable ("id") Long id, @Valid @RequestBody ProvinciaDto provinciaDto, BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            return  new ResponseEntity(new Mensaje("Campos mal ingresados"), HttpStatus.NOT_FOUND);
+        }
+        Optional<Provincia> provinciaOptional = provinciaService.getById(id);
+        if(!provinciaOptional.isPresent()){
+            return new ResponseEntity(new Mensaje("La provincia no existe"), HttpStatus.NOT_FOUND);
+        }
+        Provincia provincia = provinciaOptional.get();
+        provincia.setNombre(provinciaDto.getNombre());
+        try{
+            provinciaService.save(provincia);
+            return new ResponseEntity(new Mensaje("Provincia actualizada correctamente"), HttpStatus.OK);
+        }catch (Exception e){
+            return  new ResponseEntity(new Mensaje("Fallo la operacion. Provincia no actualizada"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
 }

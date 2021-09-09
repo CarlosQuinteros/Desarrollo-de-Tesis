@@ -1,13 +1,17 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Entity.Localidad;
+import backendAdministradorCompetenciasFutbolisticas.Entity.Provincia;
 import backendAdministradorCompetenciasFutbolisticas.Repository.LocalidadRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -24,6 +28,7 @@ public class LocalidadService {
     public Optional<Localidad> getById(Long id) { return  localidadRepository.findById(id);}
 
     public List<Localidad> getListado(){
+
         return localidadRepository.findByOrderByProvinciaNombreAsc();
     }
 

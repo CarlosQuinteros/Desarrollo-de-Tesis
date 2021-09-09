@@ -6,7 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
-public class Localidad {
+public class Localidad{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,4 +50,5 @@ public class Localidad {
     public void setProvincia(Provincia provincia) {
         this.provincia = provincia;
     }
+
 }
