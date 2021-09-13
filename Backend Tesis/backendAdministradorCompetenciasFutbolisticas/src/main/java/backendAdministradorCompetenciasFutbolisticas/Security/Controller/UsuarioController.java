@@ -110,6 +110,10 @@ public class UsuarioController {
         if (!usuarioService.existById(id)){
             return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
         }
+        Usuario usuario = usuarioService.getById(id).get();
+        if (usuario.getNombreUsuario().contains("admin")){
+            return  new ResponseEntity(new Mensaje("El usuario administrador no se puede eliminar"), HttpStatus.BAD_REQUEST);
+        }
         try {
             usuarioService.delete(id);
             return new ResponseEntity(new Mensaje("Usuario borrado correctamente"), HttpStatus.OK);
@@ -146,14 +150,14 @@ public class UsuarioController {
             return new ResponseEntity(new Mensaje("El usuario ya se encuentra Inactivo"), HttpStatus.BAD_REQUEST);
         }
         if(usuario.getNombreUsuario().contains("admin")){
-            return new ResponseEntity(new Mensaje("El usuario administrador no puede darse de baja."), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new Mensaje("El usuario administrador no puede darse de baja"), HttpStatus.NOT_FOUND);
         }
         usuarioService.cambiarEstado(id);
         return new ResponseEntity(new Mensaje("Usuario dado de baja correctamente"), HttpStatus.OK);
 
     }
 
-    //@PreAuthorize("authenticated")
+    @PreAuthorize("authenticated")
     @PutMapping("/cambiarContrasenia/{id}")
     public ResponseEntity<?> cambiarContrasenia(@PathVariable ("id") Long id, @Valid @RequestBody CambiarPasswordDto cambiarPasswordDto, BindingResult bindingResult){
         //UserDetails userDetails = (UserDetails) authentication.getPrincipal();
