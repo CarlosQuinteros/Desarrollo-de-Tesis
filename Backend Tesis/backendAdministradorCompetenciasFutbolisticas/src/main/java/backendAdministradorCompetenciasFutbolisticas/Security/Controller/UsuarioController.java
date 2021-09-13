@@ -200,6 +200,9 @@ public class UsuarioController {
             return new ResponseEntity(new Mensaje("No existe el usuario"), HttpStatus.NOT_FOUND);
         }
         Usuario usuarioActualizar = usuarioOptional.get();
+        if(usuarioActualizar.getNombreUsuario().contains("admin")){
+            return  new ResponseEntity(new Mensaje("El usuario administrador no puede editarse"), HttpStatus.BAD_REQUEST);
+        }
         if (usuarioService.existByNombreUsuario(usuarioDto.getNombreUsuario()) && !usuarioActualizar.getNombreUsuario().equals(usuarioDto.getNombreUsuario())){
             return new ResponseEntity(new Mensaje("El nombre de usuario ya existe"),HttpStatus.BAD_REQUEST);
         }
@@ -241,6 +244,9 @@ public class UsuarioController {
             return new ResponseEntity(new Mensaje("No existe el usuario"), HttpStatus.BAD_REQUEST);
         }
         Usuario usuarioActualizar = usuarioOptional.get();
+        if(usuarioActualizar.getNombreUsuario().contains("admin")){
+            return  new ResponseEntity(new Mensaje("El usuario administrador no puede editarse"), HttpStatus.BAD_REQUEST);
+        }
         if (usuarioService.existByNombreUsuario(usuarioDto.getNombreUsuario()) && !usuarioActualizar.getNombreUsuario().equals(usuarioDto.getNombreUsuario())){
             return new ResponseEntity(new Mensaje("El nombre de usuario ya existe"),HttpStatus.BAD_REQUEST);
         }
