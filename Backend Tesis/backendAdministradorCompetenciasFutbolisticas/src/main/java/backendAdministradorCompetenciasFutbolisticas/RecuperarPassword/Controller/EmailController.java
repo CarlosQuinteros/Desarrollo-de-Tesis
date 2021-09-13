@@ -54,16 +54,23 @@ public class EmailController {
         if (!usuarioOptional.isPresent()){
             return new ResponseEntity(new Mensaje("No existe ningún usuario con las credenciales ingresadas."), HttpStatus.NOT_FOUND);
         }
-        Usuario usuario = usuarioOptional.get();
-        dto.setMailTo(usuario.getEmail());
-        dto.setUserName(usuario.getNombreUsuario());
-        UUID uuid = UUID.randomUUID();
-        String tokenPassword = uuid.toString();
-        dto.setToken(tokenPassword);
-        emailService.sendEmailRecuperarContraseña(dto);
-        usuario.setTokenPassword(dto.getToken());
-        usuarioService.save(usuario);
-        return new ResponseEntity(new Mensaje("Te enviamos un correo"), HttpStatus.OK);
+        try{
+            Usuario usuario = usuarioOptional.get();
+            dto.setMailTo(usuario.getEmail());
+            dto.setUserName(usuario.getNombreUsuario());
+            UUID uuid = UUID.randomUUID();
+            String tokenPassword = uuid.toString();
+            dto.setToken(tokenPassword);
+            emailService.sendEmailRecuperarContraseña(dto);
+            usuario.setTokenPassword(dto.getToken());
+
+            usuarioService.save(usuario);
+            return new ResponseEntity(new Mensaje("Te enviamos un correo"), HttpStatus.OK);
+
+        }catch (Exception e){
+            return  new ResponseEntity(new Mensaje("Error al enviar el correo"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     @PostMapping("/recuperar-password")
@@ -78,12 +85,18 @@ public class EmailController {
         if(!usuarioOptional.isPresent()){
             return new ResponseEntity(new Mensaje("No existe ningún usuario con el token indicado"), HttpStatus.NOT_FOUND);
         }
-        Usuario usuario = usuarioOptional.get();
-        String nuevoPassword = passwordEncoder.encode(recuperarPasswordDto.getPassword());
-        usuario.setPassword(nuevoPassword);
-        usuario.setTokenPassword(null);
+        try {
+            Usuario usuario = usuarioOptional.get();
+            String nuevoPassword = passwordEncoder.encode(recuperarPasswordDto.getPassword());
+            usuario.setPassword(nuevoPassword);
+            usuario.setTokenPassword(null);
 
-        usuarioService.save(usuario);
-        return new ResponseEntity(new Mensaje("Contraseña actualizada correctamente"), HttpStatus.OK);
+            usuarioService.save(usuario);
+            return new ResponseEntity(new Mensaje("Contraseña actualizada correctamente"), HttpStatus.OK);
+
+        }catch (Exception e){
+            return new ResponseEntity(new Mensaje("Fallo la operación. La contraseña no se actualizó"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 }
