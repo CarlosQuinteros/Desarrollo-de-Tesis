@@ -50,22 +50,6 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Date getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(Date fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public Date getFechaActualizacion() {
-        return fechaActualizacion;
-    }
-
-    public void setFechaActualizacion(Date fechaActualizacion) {
-        this.fechaActualizacion = fechaActualizacion;
-    }
-
     public Usuario(@NotNull String nombre, @NotNull String apellido, @NotNull String email, @NotNull String nombreUsuario, @NotNull String password) {
         this.nombre = nombre;
         this.apellido = apellido;
@@ -151,5 +135,21 @@ public class Usuario {
 
     public void setTokenPassword(String tokenPassword) {
         this.tokenPassword = tokenPassword;
+    }
+
+    public Date getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(Date fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public Date getFechaActualizacion() {
+        return fechaActualizacion;
+    }
+
+    public void setFechaActualizacion(Date fechaActualizacion) {
+        this.fechaActualizacion = fechaActualizacion;
     }
 }
