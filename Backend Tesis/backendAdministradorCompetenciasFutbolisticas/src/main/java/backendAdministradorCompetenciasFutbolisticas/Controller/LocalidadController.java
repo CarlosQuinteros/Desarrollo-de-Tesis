@@ -52,18 +52,28 @@ public class LocalidadController {
         Localidad localidad = new Localidad(localidadDto.getNombre(),provincia);
         try{
 
-            localidadService.save(localidad);
-            return new ResponseEntity(new Mensaje("Localidad guardada correctamente"), HttpStatus.OK);
+            if(localidadService.save(localidad)){
+                return new ResponseEntity(new Mensaje("Localidad guardada correctamente"), HttpStatus.OK);
+            }
+            return  new ResponseEntity(new Mensaje("Localidad no guardada correctamente"), HttpStatus.INTERNAL_SERVER_ERROR);
         }catch (Exception e){
             return new ResponseEntity(new Mensaje("Fallo la operacion. Localidad no guardada"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/listado")
-        public ResponseEntity<List<Localidad>> listadoLocalidades(){
+    public ResponseEntity<List<Localidad>> listadoLocalidades(){
         List<Localidad> listaLocalidades = localidadService.getListado();
             return new ResponseEntity(listaLocalidades, HttpStatus.OK);
     }
+
+    @GetMapping("/listado/{idProvincia}")
+    public ResponseEntity<List<Localidad>> listadoLocalidadPorIdProvincia(@PathVariable("idProvincia") Long idProvincia){
+        List<Localidad> listaLocalidades = localidadService.getLocalidadesPorIdProvincia(idProvincia);
+        return  new ResponseEntity(listaLocalidades, HttpStatus.OK);
+    }
+
+
 
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminarLocalidad(@PathVariable ("id") Long id){

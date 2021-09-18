@@ -29,7 +29,6 @@ public class ProvinciaService {
             provincia.setLocalidades(provincia.getLocalidades().stream().sorted(Comparator.comparing(Localidad::getNombre)).collect(Collectors.toList()));
         }
         return listado;
-        //return provinciaRepository.findByOrderByNombreAsc();
     }
 
     public Optional<Provincia> getById(Long id){

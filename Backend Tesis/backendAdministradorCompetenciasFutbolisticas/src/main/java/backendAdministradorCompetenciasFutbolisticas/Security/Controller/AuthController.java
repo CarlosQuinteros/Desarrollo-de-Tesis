@@ -68,7 +68,7 @@ public class AuthController {
         }catch (BadCredentialsException e){
             return new ResponseEntity(new Mensaje("Contraseña incorrecta"),HttpStatus.UNAUTHORIZED);
         }catch (LockedException e){
-            return new ResponseEntity(new Mensaje("El usuario se encuentra bloqueado"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity(new Mensaje("El usuario se encuentra bloqueado. Solicite su alta con el administrador del sistema"), HttpStatus.UNAUTHORIZED);
         }
     }
 }

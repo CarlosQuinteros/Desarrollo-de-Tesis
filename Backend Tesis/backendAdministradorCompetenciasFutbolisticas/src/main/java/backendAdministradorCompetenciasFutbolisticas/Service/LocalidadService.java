@@ -19,8 +19,8 @@ public class LocalidadService {
     @Autowired
     LocalidadRepository localidadRepository;
 
-    public void save(Localidad localidad){
-        localidadRepository.save(localidad);
+    public boolean save(Localidad localidad){
+        return localidadRepository.save(localidad).getId()!=null;
     }
 
     public void eliminarLocalidad(Long id){ localidadRepository.deleteById(id);}
@@ -30,6 +30,14 @@ public class LocalidadService {
     public List<Localidad> getListado(){
 
         return localidadRepository.findByOrderByProvinciaNombreAsc();
+    }
+
+    public List<Localidad> getLocalidadesPorIdProvincia(Long idProvincia){
+        return localidadRepository.findByProvincia_IdOrderByNombreAsc(idProvincia);
+    }
+
+    public List<Localidad> getLocalidadesPorNombreProvincia(String nombreProvincia){
+        return localidadRepository.findByProvincia_NombreOrderByNombre(nombreProvincia);
     }
 
     public boolean existById(Long id){

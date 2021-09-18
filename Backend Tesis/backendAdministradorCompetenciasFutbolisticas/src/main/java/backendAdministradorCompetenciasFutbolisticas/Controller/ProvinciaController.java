@@ -50,8 +50,21 @@ public class ProvinciaController {
 
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminarProvincia(@PathVariable ("id") Long id){
-        provinciaService.eliminarProvincia(id);
-        return new ResponseEntity(new Mensaje("Provincia eliminada correctamente"), HttpStatus.OK);
+        Optional<Provincia> provinciaOptional = provinciaService.getById(id);
+        if(!provinciaOptional.isPresent()){
+            return  new ResponseEntity(new Mensaje("La provincia no existe"), HttpStatus.BAD_REQUEST);
+        }
+        Provincia provincia = provinciaOptional.get();
+        if(!provincia.getLocalidades().isEmpty()){
+            return new ResponseEntity(new Mensaje("La provincia contiene localidades y no puede eliminarse"), HttpStatus.BAD_REQUEST);
+        }
+        try{
+            provinciaService.eliminarProvincia(id);
+            return new ResponseEntity(new Mensaje("Provincia eliminada correctamente"), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity(new Mensaje("Fallo la operacion. La provincia no se eliminó"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     @GetMapping("/detalle/{id}")
