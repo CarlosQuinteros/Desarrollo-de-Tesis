@@ -1,2 +1,2 @@
 # Desarrollo-de-Tesis
-Desarrollo del proyecto de tesis "Administrador de Competencias Futbolisticas"
+Desarrollo backend del proyecto de tesis "Administrador de Competencias Futbolisticas" - UNDEC
