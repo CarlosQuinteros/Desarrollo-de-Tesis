@@ -18,5 +18,7 @@ public interface LocalidadRepository extends JpaRepository<Localidad, Long> {
 
     Optional<Localidad> findByNombre(String nombre);
 
+    Optional<Localidad> findById(Long id);
+
     boolean existsByNombreAndAndProvincia_Nombre(String nombreLocalidad, String nombreProvincia);
 }

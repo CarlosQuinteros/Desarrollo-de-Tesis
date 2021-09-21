@@ -43,6 +43,9 @@ public class UsuarioController {
     EnvioMailService envioMailService;
 
 
+    /*
+        Metodo que permite crear un nuevo usuario
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/nuevo")
     public ResponseEntity<?> nuevoUsuario(@Valid @RequestBody NuevoUsuarioDto usuarioDto, BindingResult bindingResult){
@@ -76,6 +79,10 @@ public class UsuarioController {
         }
     }
 
+
+    /*
+        Metodo que permite listar todos los usuarios
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/listado")
     public ResponseEntity<List<Usuario>> listarUsuarios(){
@@ -83,6 +90,9 @@ public class UsuarioController {
         return new ResponseEntity(listaDeUsuarios, HttpStatus.OK);
     }
 
+    /*
+        Metodo que retorna un usuario por id
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/detalle/{id}")
     public  ResponseEntity<Usuario> getDetalleUsuario(@PathVariable("id") Long id){
@@ -93,6 +103,9 @@ public class UsuarioController {
         return new ResponseEntity(usuario, HttpStatus.OK);
     }
 
+    /*
+        Metodo que retorna un usuario por su nombre de usuario o login
+     */
     @GetMapping("/detalle/nombreUsuario/{nombreUsuario}")
     public ResponseEntity<Usuario> getDetalleUsuarioPorNombreUsuario(@PathVariable("nombreUsuario") String nombreUsuario){
         Optional<Usuario> usuarioOptional = usuarioService.getByNombreUsuario(nombreUsuario);
@@ -104,6 +117,10 @@ public class UsuarioController {
 
     }
 
+
+    /*
+        Metodo que permite eliminar un usuario a un usuario.
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable ("id") long id){
@@ -123,6 +140,10 @@ public class UsuarioController {
         }
     }
 
+
+    /*
+        Metodo que permite dar de alta a un usurio
+     */
     @PreAuthorize(("hasRole('ADMIN')"))
     @PutMapping("/alta/{id}")
     public ResponseEntity<?> activarUsuario(@PathVariable ("id") Long id){
@@ -137,6 +158,10 @@ public class UsuarioController {
         return  new ResponseEntity(new Mensaje("Usuario dado de alta correctamente"),HttpStatus.OK);
     }
 
+
+    /*
+        Metodo que permite  dar de baja a un usuario
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/baja/{id}")
         public ResponseEntity<?> bajaUsuario(@PathVariable ("id") Long id){
@@ -157,6 +182,10 @@ public class UsuarioController {
 
     }
 
+
+    /*
+        Metodo que permite a un usuario cambiar su contraseña
+    */
     @PreAuthorize("authenticated")
     @PutMapping("/cambiarContrasenia/{id}")
     public ResponseEntity<?> cambiarContrasenia(@PathVariable ("id") Long id, @Valid @RequestBody CambiarPasswordDto cambiarPasswordDto, BindingResult bindingResult){
@@ -189,6 +218,9 @@ public class UsuarioController {
     }
 
 
+    /*
+        Metodo que permite editar un usuario, sus datos personales y sus roles
+    */
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/editar/{id}")
     public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, @Valid @RequestBody ActualizarUsuarioDto usuarioDto, BindingResult bindingResult ){
@@ -234,6 +266,9 @@ public class UsuarioController {
         }
     }
 
+    /*
+        Metodo que permite a un usuario actualizar sus datos personales, no sus roles.
+    */
     @PutMapping("/perfil/actualizarDatos/{id}")
     public ResponseEntity<Usuario> actualizarDatosPerfil(@PathVariable ("id") Long id, @Valid @RequestBody  PerfilUsuarioDto usuarioDto, BindingResult bindingResult ){
         if(bindingResult.hasErrors()){
@@ -267,6 +302,9 @@ public class UsuarioController {
 
     }
 
+    /*
+        Metodo que retorna la cantidad de usuarios
+    */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/total")
     public ResponseEntity<?> cantidadTotalDeUsuarios(){
@@ -274,6 +312,10 @@ public class UsuarioController {
         return new ResponseEntity(cantidad, HttpStatus.OK);
     }
 
+
+    /*
+        Metodo que retorna la cantidad de usuarios activos
+    */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/total-activos")
     public ResponseEntity<?> cantidadTotalDeActivos(){
@@ -282,6 +324,10 @@ public class UsuarioController {
 
     }
 
+
+    /*
+        Metodo que retorna la cantidad de usuarios dados de baja
+    */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/total-inactivos")
     public ResponseEntity<?> cantidadTotalDeInactivos(){

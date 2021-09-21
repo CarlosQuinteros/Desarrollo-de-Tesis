@@ -36,7 +36,7 @@ public class UsuarioService {
     }
 
     public List<Usuario> list(){
-        return usuarioRepository.findAll();
+        return usuarioRepository.findAllByOrderByApellidoAsc();
     }
 
     public Optional<Usuario> getById(Long id){

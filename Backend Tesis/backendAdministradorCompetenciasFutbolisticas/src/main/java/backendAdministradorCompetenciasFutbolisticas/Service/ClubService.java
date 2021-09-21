@@ -54,6 +54,14 @@ public class ClubService {
         return  clubRepository.findByLocalidad_IdOrderByNombreClubAsc(idLocalidad);
     }
 
+    public boolean existeClubPorAsociacion(Long idAsociacion){
+        return clubRepository.existsByAsociacionDeportiva_Id(idAsociacion);
+    }
+
+    public boolean existeClubPorLocalidad(Long idLocalidad){
+        return clubRepository.existsByLocalidad_Id(idLocalidad);
+    }
+
 
 
 

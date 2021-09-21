@@ -2,6 +2,7 @@ package backendAdministradorCompetenciasFutbolisticas.Entity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Objects;
 
@@ -15,7 +16,7 @@ public class Club {
     @NotNull
     private String nombreClub;
 
-    private Date fechaFundacion;
+    private LocalDate fechaFundacion;
 
     @Column(unique = true)
     private String email;
@@ -34,7 +35,7 @@ public class Club {
 
     }
 
-    public Club(@NotNull String nombreClub, Date fechaFundacion, String email, @NotNull Localidad localidad, Responsable responsableClub, AsociacionDeportiva asociacionDeportiva) {
+    public Club(@NotNull String nombreClub, LocalDate fechaFundacion, String email, @NotNull Localidad localidad, Responsable responsableClub, AsociacionDeportiva asociacionDeportiva) {
         this.nombreClub = nombreClub;
         this.fechaFundacion = fechaFundacion;
         this.email = email;
@@ -59,11 +60,11 @@ public class Club {
         this.nombreClub = nombreClub;
     }
 
-    public Date getFechaFundacion() {
+    public LocalDate getFechaFundacion() {
         return fechaFundacion;
     }
 
-    public void setFechaFundacion(Date fechaFundacion) {
+    public void setFechaFundacion(LocalDate fechaFundacion) {
         this.fechaFundacion = fechaFundacion;
     }
 

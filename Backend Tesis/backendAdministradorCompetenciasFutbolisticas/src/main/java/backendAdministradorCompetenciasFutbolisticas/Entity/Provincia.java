@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -44,6 +45,7 @@ public class Provincia {
     }
 
     public List<Localidad> getLocalidades() {
+        Collections.sort(this.localidades, (x,y) -> x.getNombre().compareToIgnoreCase(y.getNombre()));
         return localidades;
     }
 

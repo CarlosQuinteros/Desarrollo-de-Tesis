@@ -25,9 +25,6 @@ public class ProvinciaService {
 
     public List<Provincia> getProvincias(){
         List<Provincia> listado =provinciaRepository.findByOrderByNombreAsc();
-        for (Provincia provincia : listado) {
-            provincia.setLocalidades(provincia.getLocalidades().stream().sorted(Comparator.comparing(Localidad::getNombre)).collect(Collectors.toList()));
-        }
         return listado;
     }
 

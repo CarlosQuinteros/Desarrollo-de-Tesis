@@ -29,4 +29,6 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByLocalidad_Id(Long id);
+
+    boolean existsByAsociacionDeportiva_Id(Long id);
 }
