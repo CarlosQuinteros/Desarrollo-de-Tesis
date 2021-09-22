@@ -124,20 +124,15 @@ public class LocalidadController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> editarLocalidad(@PathVariable ("id") Long id, @Valid @RequestBody LocalidadDto localidadDto, BindingResult bindingResult){
-        //Optional<Localidad> localidadOptional = localidadService.getById(id);
         try{
         Localidad localidadActualizar = localidadService.getLocalidadPorID(id);
         Optional<Provincia> provinciaOptional = provinciaService.getByNombre(localidadDto.getProvincia());
-        //if(!localidadOptional.isPresent()){
-       //     return new ResponseEntity(new Mensaje("La localidad no existe"), HttpStatus.NOT_FOUND);
-        //}
         if(!provinciaOptional.isPresent()){
             return new ResponseEntity<>(new Mensaje("La provincia no existe"), HttpStatus.NOT_FOUND);
         }
         if(localidadService.existeLocalidadNombreYProvinciaNombre(localidadDto.getNombre(), localidadDto.getProvincia())){
             return new ResponseEntity<>(new Mensaje("La Provincia de " + localidadDto.getProvincia() + " ya contiene esa localidad"), HttpStatus.NOT_FOUND);
         }
-        //Localidad localidadActualizar = localidadOptional.get();
         Provincia provinciaActualizar = provinciaOptional.get();
             boolean resultado = localidadService.actualizar(localidadActualizar, localidadDto, provinciaActualizar);
             if(resultado){
@@ -145,9 +140,6 @@ public class LocalidadController {
             }else{
                 return new ResponseEntity<>(new Mensaje("Localidad no actualizada correctamente"), HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            //localidadActualizar.setNombre(localidadDto.getNombre());
-            //localidadActualizar.setProvincia(provinciaActualizar);
-            // localidadService.save(localidadActualizar);
         }catch (LocalidadNoExisteException e) {
             return new ResponseEntity<>(new Mensaje(e.getMessage()), HttpStatus.NOT_FOUND);
 

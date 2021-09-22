@@ -20,8 +20,8 @@ public class ClubService {
         return clubRepository.save(club).getId()!=null;
     }
 
-    public void actualizarClub(Club club){
-        clubRepository.save(club);
+    public Club actualizarClub(Club club){
+        return clubRepository.save(club);
     }
 
     public boolean existById(Long id){
@@ -60,6 +60,10 @@ public class ClubService {
 
     public boolean existeClubPorLocalidad(Long idLocalidad){
         return clubRepository.existsByLocalidad_Id(idLocalidad);
+    }
+
+    public boolean existeClubNombreYAsociacionNombre(String nombreClub, String nombreAsociacion){
+        return clubRepository.existsByNombreClubAndAndAsociacionDeportiva_Nombre(nombreClub, nombreAsociacion);
     }
 
 

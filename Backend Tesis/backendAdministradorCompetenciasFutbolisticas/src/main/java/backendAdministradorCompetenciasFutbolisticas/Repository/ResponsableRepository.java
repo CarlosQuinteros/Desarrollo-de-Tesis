@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface ResponsableRepository extends JpaRepository<Responsable, Long> {
 
+
     boolean existsByDocumento(String documento);
 
     boolean existsByEmail(String email);
@@ -15,4 +16,6 @@ public interface ResponsableRepository extends JpaRepository<Responsable, Long> 
     Optional<Responsable> findByDocumento(String documento);
 
     List<Responsable> findByOrderByApellidoAscNombreAsc();
+
+    List<Responsable> findByOrderByApellido();
 }

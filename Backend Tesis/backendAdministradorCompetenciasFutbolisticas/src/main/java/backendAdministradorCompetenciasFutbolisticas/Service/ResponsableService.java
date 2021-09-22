@@ -24,7 +24,15 @@ public class ResponsableService {
         return responsableRepository.findByDocumento(documento);
     }
 
-    public List<Responsable> getListadoOrdenadoPorApellido(){
+    public List<Responsable> getListadoOrdenadoPorApellido() {
         return responsableRepository.findByOrderByApellidoAscNombreAsc();
+    }
+
+    public boolean existeResponsablePorDocumento(String documento){
+        return responsableRepository.existsByDocumento(documento);
+    }
+
+    public  boolean existeResponsablePorEmail(String email){
+        return responsableRepository.existsByEmail(email);
     }
 }
