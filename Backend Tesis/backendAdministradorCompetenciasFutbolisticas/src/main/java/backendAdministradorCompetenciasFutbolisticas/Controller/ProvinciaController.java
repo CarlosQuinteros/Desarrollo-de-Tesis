@@ -105,7 +105,11 @@ public class ProvinciaController {
         if(!provinciaOptional.isPresent()){
             return new ResponseEntity<>(new Mensaje("La provincia no existe"), HttpStatus.NOT_FOUND);
         }
+        if(provinciaService.existByNombre(provinciaDto.getNombre())){
+            return new ResponseEntity<>(new Mensaje("La provincia ya existe"), HttpStatus.NOT_FOUND);
+        }
         Provincia provincia = provinciaOptional.get();
+
         provincia.setNombre(provinciaDto.getNombre());
         try{
             provinciaService.save(provincia);

@@ -1,17 +1,16 @@
 package backendAdministradorCompetenciasFutbolisticas.Dtos;
 
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDate;
-import java.util.Date;
 
 public class ClubDto {
+
+    @NotBlank
+    private  String alias;
     @NotBlank
     private String nombre;
+
+    @NotBlank
     private String email;
-    private LocalDate fechaFundacion;
-    private Long idLocalidad;
-    private ResponsableDto responsable;
-    private Long asociacionDeportiva;
 
     public String getNombre() {
         return nombre;
@@ -29,35 +28,11 @@ public class ClubDto {
         this.email = email;
     }
 
-    public LocalDate getFechaFundacion() {
-        return fechaFundacion;
+    public String getAlias() {
+        return alias;
     }
 
-    public void setFechaFundacion(LocalDate fechaFundacion) {
-        this.fechaFundacion = fechaFundacion;
-    }
-
-    public Long getIdLocalidad() {
-        return idLocalidad;
-    }
-
-    public void setIdLocalidad(Long idLocalidad) {
-        this.idLocalidad = idLocalidad;
-    }
-
-    public ResponsableDto getResponsable() {
-        return responsable;
-    }
-
-    public void setResponsable(ResponsableDto responsable) {
-        this.responsable = responsable;
-    }
-
-    public Long getAsociacionDeportiva() {
-        return asociacionDeportiva;
-    }
-
-    public void setAsociacionDeportiva(Long asociacionDeportiva) {
-        this.asociacionDeportiva = asociacionDeportiva;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 }

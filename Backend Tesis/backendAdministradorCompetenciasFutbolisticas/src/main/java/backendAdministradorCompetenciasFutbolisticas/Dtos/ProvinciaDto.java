@@ -3,6 +3,7 @@ package backendAdministradorCompetenciasFutbolisticas.Dtos;
 import javax.validation.constraints.NotBlank;
 
 public class ProvinciaDto {
+
     @NotBlank
     private String nombre;
 

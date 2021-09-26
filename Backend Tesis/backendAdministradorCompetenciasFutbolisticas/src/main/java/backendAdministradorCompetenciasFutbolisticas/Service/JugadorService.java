@@ -1,0 +1,96 @@
+package backendAdministradorCompetenciasFutbolisticas.Service;
+
+import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
+import backendAdministradorCompetenciasFutbolisticas.Entity.EstadoJugador;
+import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
+import backendAdministradorCompetenciasFutbolisticas.Entity.JugadorClub;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoJugador;
+import backendAdministradorCompetenciasFutbolisticas.Repository.EstadoJugadorRepository;
+import backendAdministradorCompetenciasFutbolisticas.Repository.JugadorRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+public class JugadorService {
+
+    @Autowired
+    JugadorRepository jugadorRepository;
+
+    @Autowired
+    EstadoJugadorRepository estadoJugadorRepository;
+
+    public boolean guardarNuevoJugador(Jugador nuevoJugador){
+        EstadoJugador estadoActivo = estadoJugadorRepository.findByEstadoJugador(NombreEstadoJugador.ACTIVO);
+        nuevoJugador.setEstadoJugador(estadoActivo);
+        return jugadorRepository.save(nuevoJugador).getId() != null;
+    }
+
+    public void save(Jugador jugador){
+        jugadorRepository.save(jugador);
+    }
+
+    public void eliminar(Long id){
+        jugadorRepository.deleteById(id);
+    }
+
+    public List<Jugador> getListadoJugadoresOrdenadoPorApellido(){
+        return jugadorRepository.findByOrderByApellidosAsc();
+    }
+
+    public List<Jugador> getListadoJugadoresDeUnClub(Long idClub){
+        return jugadorRepository.findByClubActual_Id(idClub);
+    }
+
+    public Optional<Jugador> getJugadorPorId(Long id){
+        return jugadorRepository.findById(id);
+    }
+
+    public boolean existePorId(Long id){
+        return jugadorRepository.existsById(id);
+    }
+
+    public  boolean existeJugadorPorDocumento(String documento){
+        return jugadorRepository.existsByDocumento(documento);
+    }
+
+    public boolean cambiarEstadoAInactivo(Jugador jugador){
+        EstadoJugador estadoInactivo = estadoJugadorRepository.findByEstadoJugador(NombreEstadoJugador.INACTIVO);
+        jugador.setEstadoJugador(estadoInactivo);
+        jugadorRepository.save(jugador);
+        return  jugador.getEstadoJugador().getNombreEstado().equals(NombreEstadoJugador.INACTIVO);
+    }
+
+    public boolean cambiarEstadoAActivo(Jugador jugador){
+        EstadoJugador estadoActivo = estadoJugadorRepository.findByEstadoJugador(NombreEstadoJugador.ACTIVO);
+        jugador.setEstadoJugador(estadoActivo);
+        jugadorRepository.save(jugador);
+        return  jugador.getEstadoJugador().getNombreEstado().equals(NombreEstadoJugador.ACTIVO);
+    }
+
+    public boolean cambiarEstadoARetirado(Jugador jugador){
+        EstadoJugador estadoRetirado = estadoJugadorRepository.findByEstadoJugador(NombreEstadoJugador.RETIRADO);
+        jugador.setEstadoJugador(estadoRetirado);
+        jugadorRepository.save(jugador);
+        return  jugador.getEstadoJugador().getNombreEstado().equals(NombreEstadoJugador.RETIRADO);
+    }
+
+    public boolean validarFechaCambioDeClub(LocalDate fechaCambioClub, Jugador jugador){
+        List<JugadorClub> historial = jugador.getHistorialClubes();
+        JugadorClub ultimoPase = historial.get(historial.size() - 1);
+        return fechaCambioClub.isAfter(ultimoPase.getFecha());
+    }
+
+    public boolean validarClubNoIguales(Club clubACambiar, Jugador jugador){
+        List<JugadorClub> historial = jugador.getHistorialClubes();
+        if(clubACambiar.getId().equals(jugador.getClubActual().getId())){
+            return false;
+        }
+        return true;
+    }
+}

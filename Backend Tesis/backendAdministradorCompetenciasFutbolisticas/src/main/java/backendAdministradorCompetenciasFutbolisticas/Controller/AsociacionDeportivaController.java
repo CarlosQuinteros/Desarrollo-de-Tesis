@@ -12,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -78,7 +79,8 @@ public class AsociacionDeportivaController {
 
 
     /*
-        Metodo que permite eliminar una asociacion deportiva que no tenga clubes asociados
+        Metodo que permite eliminar una asociacion deportiva
+        TODO: NO SE PUEDE ELIMINAR SI TIENE REFERENCIAS EN TORNEOS.
      */
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminarAsociacion(@PathVariable ("id") Long id){
@@ -87,14 +89,17 @@ public class AsociacionDeportivaController {
             return new ResponseEntity<>(new Mensaje("La Asociacion Deportiva a eliminar no existe"), HttpStatus.NOT_FOUND);
         }
         AsociacionDeportiva asociacionDeportiva = asociacionDeportivaOptional.get();
-        if(clubService.existeClubPorAsociacion(asociacionDeportiva.getId())){
-            return new ResponseEntity<>(new Mensaje("La Asociacion Deportiva tiene clubes asociados y no puede eliminarse"), HttpStatus.BAD_REQUEST);
-        }
         try{
             asociacionDeportivaService.eliminarAsociacion(asociacionDeportiva);
             return new ResponseEntity<>(new Mensaje("Asociacion Deportiva eliminada correctamente"), HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(new Mensaje("Fallo la operacion. La Asociacion Deportiva no se elimino"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/listado")
+    public ResponseEntity<List<AsociacionDeportiva>> listadoAsociaciones(){
+        List<AsociacionDeportiva> listado = asociacionDeportivaService.getListadoOrdenadoPorNombre();
+        return new ResponseEntity<>(listado, HttpStatus.OK);
     }
 }

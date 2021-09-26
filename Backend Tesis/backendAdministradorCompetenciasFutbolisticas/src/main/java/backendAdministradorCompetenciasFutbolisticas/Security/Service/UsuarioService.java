@@ -50,6 +50,7 @@ public class UsuarioService {
     public void delete(Long id){
         usuarioRepository.deleteById(id);
     }
+
     public void cambiarEstado(Long id){
         Usuario usuario = usuarioRepository.getById(id);
         usuario.cambiarEstado();

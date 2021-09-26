@@ -2,15 +2,11 @@ package backendAdministradorCompetenciasFutbolisticas.Controller;
 
 import backendAdministradorCompetenciasFutbolisticas.Dtos.ClubDto;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
-import backendAdministradorCompetenciasFutbolisticas.Entity.AsociacionDeportiva;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Localidad;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Responsable;
-import backendAdministradorCompetenciasFutbolisticas.Security.Enums.RolNombre;
 import backendAdministradorCompetenciasFutbolisticas.Service.AsociacionDeportivaService;
 import backendAdministradorCompetenciasFutbolisticas.Service.ClubService;
+import backendAdministradorCompetenciasFutbolisticas.Service.JugadorClubService;
 import backendAdministradorCompetenciasFutbolisticas.Service.LocalidadService;
-import backendAdministradorCompetenciasFutbolisticas.Service.ResponsableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -37,7 +34,7 @@ public class ClubController {
     AsociacionDeportivaService asociacionDeportivaService;
 
     @Autowired
-    ResponsableService responsableService;
+    JugadorClubService jugadorClubService;
 
     /*
         Metodo que permite crear un nuevo club
@@ -49,39 +46,71 @@ public class ClubController {
         if(bindingResult.hasErrors()){
             return new ResponseEntity<>(new Mensaje("Campos mal ingresados"), HttpStatus.NOT_FOUND);
         }
-        Optional<AsociacionDeportiva> asociacionDeportivaOptional = asociacionDeportivaService.getById(clubDto.getAsociacionDeportiva());
-        Optional<Localidad> localidadOptional = localidadService.getById(clubDto.getIdLocalidad());
-        if(!localidadOptional.isPresent()){
-            return new ResponseEntity<>(new Mensaje("La Localidad no existe"), HttpStatus.NOT_FOUND);
-        }
-        if(!asociacionDeportivaOptional.isPresent()){
-            return new ResponseEntity<>(new Mensaje("La Asociacion deportiva no existe"), HttpStatus.NOT_FOUND);
-        }
-        if(clubService.existeClubNombreYAsociacionNombre(clubDto.getNombre(),asociacionDeportivaOptional.get().getNombre())){
-            return new ResponseEntity<>(new Mensaje("La Asociacion Deportiva ingresada ya contiene el club " + clubDto.getNombre()), HttpStatus.BAD_REQUEST);
+        if(clubService.existePorNombre(clubDto.getNombre())){
+            return new ResponseEntity<>(new Mensaje("Ya existe un Club con el nombre ingresado"), HttpStatus.NOT_FOUND);
         }
         if(clubService.existByEmail(clubDto.getEmail())){
-            return new ResponseEntity<>(new Mensaje("Ya existe un club con el email ingresado"), HttpStatus.BAD_REQUEST);
-        }
-        if(responsableService.existeResponsablePorDocumento(clubDto.getResponsable().getDocumento())){
-            return new ResponseEntity<>(new Mensaje("Ya existe un responsable con el documento ingresado"), HttpStatus.BAD_REQUEST);
-        }
-        if(responsableService.existeResponsablePorEmail(clubDto.getResponsable().getEmail())){
-            return new ResponseEntity<>(new Mensaje("Ya existe un responsable con el email ingresado"), HttpStatus.BAD_REQUEST);
-
+            return new ResponseEntity<>(new Mensaje("Ya existe un Club con el email ingresado"), HttpStatus.NOT_FOUND);
         }
         try {
-            Responsable nuevoResponsable = new Responsable(clubDto.getResponsable().getNombre(),clubDto.getResponsable().getApellido(), clubDto.getResponsable().getDocumento(), clubDto.getResponsable().getEmail());
-            Club nuevoClub = new Club(clubDto.getNombre(), clubDto.getFechaFundacion(), clubDto.getEmail(), localidadOptional.get(),nuevoResponsable,asociacionDeportivaOptional.get());
-            boolean resultadoCarga = clubService.guardarNuevoClub(nuevoClub);
-            if(resultadoCarga){
-                return new ResponseEntity<>(new Mensaje("Club guardado correctamente"), HttpStatus.CREATED);
-            }else return  new ResponseEntity<>(new Mensaje("Club no guardado correctamente"), HttpStatus.INTERNAL_SERVER_ERROR);
-
+            Club nuevoClub = new Club(clubDto.getAlias(), clubDto.getNombre(), clubDto.getEmail());
+            boolean resultado = clubService.guardarNuevoClub(nuevoClub);
+            if(resultado){
+                return new ResponseEntity<>(new Mensaje("Club guardado correctamente"),HttpStatus.CREATED);
+            }
+            return new ResponseEntity<>(new Mensaje("Club no guardado correctamten"), HttpStatus.INTERNAL_SERVER_ERROR);
         }catch (Exception e){
-            return new ResponseEntity<>(new Mensaje("Fallo la operacion. No se guardo el nuevo club"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new Mensaje("Fallo la operacion. Club no guardado correctamten"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
 
+    @GetMapping("/listado")
+    public ResponseEntity<List<Club>> listadoClubes(){
+        List<Club>  listado = clubService.getListadoOrdenadoPorNombre();
+        return new ResponseEntity<>(listado, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<?> eliminarClub(@PathVariable ("id") Long id){
+        if(!clubService.existById(id)){
+            return new ResponseEntity<>(new Mensaje("El club no existe"), HttpStatus.NOT_FOUND);
+        }
+        if(jugadorClubService.existeHistorialPorClub(id)){
+            return new ResponseEntity<>(new Mensaje("El club tiene transacciones con jugadores y no puede eliminarse"),HttpStatus.BAD_REQUEST);
+        }
+        try {
+            clubService.eliminarClub(id);
+            return new ResponseEntity<>(new Mensaje("Club eliminado correctamente"), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(new Mensaje("Fallo la operacion. El club no se elimino"),HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
+    }
+
+    @PutMapping("/editar/{id}")
+    public ResponseEntity<?> editarClub(@PathVariable ("id") Long id, @Valid @RequestBody ClubDto clubDto , BindingResult bindingResult ){
+        if(bindingResult.hasErrors()){
+            return new ResponseEntity<>(new Mensaje("campos mal ingresados"), HttpStatus.NOT_FOUND);
+        }
+        Optional<Club> clubOptional = clubService.getById(id);
+        if(!clubOptional.isPresent()){
+            return new ResponseEntity<>(new Mensaje("El Club no existe"), HttpStatus.NOT_FOUND);
+        }
+        Club clubActualizar = clubOptional.get();
+        if(!clubActualizar.getNombreClub().equals(clubDto.getNombre()) && clubService.existePorNombre(clubDto.getNombre())){
+            return new ResponseEntity<>(new Mensaje("Ya existe un Club con el nombre ingresado"), HttpStatus.NOT_FOUND);
+        }
+        if(!clubActualizar.getEmail().equals(clubDto.getEmail()) && clubService.existByEmail(clubDto.getEmail())){
+            return new ResponseEntity<>(new Mensaje("Ya existe un Club con el email ingresado"), HttpStatus.NOT_FOUND);
+        }
+        clubActualizar.setAlias(clubDto.getAlias());
+        clubActualizar.setEmail(clubActualizar.getNombreClub());
+        clubActualizar.setEmail(clubDto.getEmail());
+        Club clubActualizado = clubService.actualizarClub(clubActualizar);
+        if(clubActualizado != null){
+            return new ResponseEntity<>(clubActualizado, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new Mensaje("Club no actualizado correctamente"),HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

@@ -95,7 +95,7 @@ public class LocalidadController {
 
 
     /*
-        Metodo que permite eliminar una localidad, solo si no tiene clubes asociados o jugadores (TODO)
+        Metodo que permite eliminar una localidad
     */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/eliminar/{id}")
@@ -105,9 +105,6 @@ public class LocalidadController {
         }
         try{
             Localidad localidad = localidadService.getById(id).get();
-            if(clubService.existeClubPorAsociacion(localidad.getId())){
-                return new ResponseEntity<>(new Mensaje("La localidad tiene clubes asociados y no puede eliminarse"), HttpStatus.BAD_REQUEST);
-            }
             Provincia provincia = provinciaService.getById(localidad.getProvincia().getId()).get();
             provincia.eliminarLocalidad(localidad);
             localidadService.eliminarLocalidad(id);

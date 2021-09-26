@@ -1,5 +1,8 @@
 package backendAdministradorCompetenciasFutbolisticas.CrearRoles;
 
+import backendAdministradorCompetenciasFutbolisticas.Entity.EstadoJugador;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoJugador;
+import backendAdministradorCompetenciasFutbolisticas.Repository.EstadoJugadorRepository;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.NuevoUsuarioDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Rol;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
@@ -13,7 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Set;
 
-//se ejecuta una sola vez para crear los roles
+//se ejecuta una sola vez para crear los roles, usuario administrador y estado de jugadores
 /*
 @Component
 public class CrearRoles implements CommandLineRunner {
@@ -24,8 +27,12 @@ public class CrearRoles implements CommandLineRunner {
     @Autowired
     UsuarioService usuarioService;
 
+    @Autowired
+    EstadoJugadorRepository estadoJugadorRepository;
+
     @Override
     public void run(String... args) throws Exception {
+
         Rol admin = new Rol(RolNombre.ROLE_ADMIN);
         Rol user =  new Rol(RolNombre.ROLE_USER);
         Rol encargadoJugadoresYClubes = new Rol(RolNombre.ROLE_ENCARGADO_DE_JUGADORES);
@@ -51,6 +58,16 @@ public class CrearRoles implements CommandLineRunner {
         usuarioAdmin.setRoles(roles);
 
         usuarioService.save(usuarioAdmin);
+
+        EstadoJugador estadoActivo = new EstadoJugador(NombreEstadoJugador.ACTIVO);
+        EstadoJugador estadoInactivo = new EstadoJugador(NombreEstadoJugador.INACTIVO);
+        EstadoJugador estadoSuspendido = new EstadoJugador(NombreEstadoJugador.SUSPENDIDO);
+        EstadoJugador estadoRetirado = new EstadoJugador(NombreEstadoJugador.RETIRADO);
+
+        estadoJugadorRepository.save(estadoActivo);
+        estadoJugadorRepository.save(estadoInactivo);
+        estadoJugadorRepository.save(estadoSuspendido);
+        estadoJugadorRepository.save(estadoRetirado);
     }
 }
 */

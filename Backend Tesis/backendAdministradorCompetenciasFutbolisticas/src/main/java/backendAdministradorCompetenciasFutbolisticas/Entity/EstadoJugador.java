@@ -2,20 +2,26 @@ package backendAdministradorCompetenciasFutbolisticas.Entity;
 
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoJugador;
 
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+@Entity
 public class EstadoJugador {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private NombreEstadoJugador nombreEstado;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private NombreEstadoJugador estadoJugador;
 
     public EstadoJugador(){
 
     }
 
-    public EstadoJugador(@NotNull NombreEstadoJugador nombreEstadoJugador){
-        this.nombreEstado = nombreEstadoJugador;
+    public EstadoJugador(@NotNull NombreEstadoJugador estadoJugador){
+        this.estadoJugador = estadoJugador;
     }
 
     public Long getId() {
@@ -27,10 +33,10 @@ public class EstadoJugador {
     }
 
     public NombreEstadoJugador getNombreEstado() {
-        return nombreEstado;
+        return estadoJugador;
     }
 
     public void setNombreEstado(NombreEstadoJugador nombreEstado) {
-        this.nombreEstado = nombreEstado;
+        this.estadoJugador = nombreEstado;
     }
 }
