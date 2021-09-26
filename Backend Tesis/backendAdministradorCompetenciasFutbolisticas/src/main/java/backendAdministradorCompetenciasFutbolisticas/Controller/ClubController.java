@@ -36,6 +36,7 @@ public class ClubController {
     @Autowired
     JugadorClubService jugadorClubService;
 
+
     /*
         Metodo que permite crear un nuevo club
      */
@@ -64,12 +65,14 @@ public class ClubController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
     @GetMapping("/listado")
     public ResponseEntity<List<Club>> listadoClubes(){
         List<Club>  listado = clubService.getListadoOrdenadoPorNombre();
         return new ResponseEntity<>(listado, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminarClub(@PathVariable ("id") Long id){
         if(!clubService.existById(id)){
@@ -87,6 +90,7 @@ public class ClubController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> editarClub(@PathVariable ("id") Long id, @Valid @RequestBody ClubDto clubDto , BindingResult bindingResult ){
         if(bindingResult.hasErrors()){
