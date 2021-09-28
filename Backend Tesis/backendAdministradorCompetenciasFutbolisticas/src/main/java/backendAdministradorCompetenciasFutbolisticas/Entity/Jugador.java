@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 public class Jugador {
@@ -138,5 +139,18 @@ public class Jugador {
 
     public boolean agregarHistoriaClub(JugadorClub jugadorClub){
         return this.getHistorialClubes().add(jugadorClub);
+    }
+
+    public Club getClubEnFecha(LocalDate fecha){
+        List<JugadorClub> historial = this.getHistorialClubes();
+        List<JugadorClub> historialHastaFecha =
+                historial.stream()
+                        .filter(pase -> pase.getFecha().isBefore(fecha))
+                        .collect(Collectors.toList());
+        if(historialHastaFecha.isEmpty()){
+            return null;
+        }
+        Club club = historialHastaFecha.get(historialHastaFecha.size() - 1).getClub();
+        return club;
     }
 }

@@ -18,7 +18,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
@@ -212,7 +214,7 @@ public class JugadorController {
         if(!jugadorService.validarFechaCambioDeClub(cambioDeClubDto.getFecha(), jugador)){
             return new ResponseEntity<>(new Mensaje("La fecha ingresada no debe ser menor a la fecha de su ultimo cambio de club"),HttpStatus.BAD_REQUEST);
         }
-        if(!jugadorService.validarClubNoIguales(club, jugador)){
+        if(!jugadorService.validarClubNoIgualesAlCambiarDeClub(club, jugador)){
             return new ResponseEntity<>(new Mensaje("El Club actual es el mismo club ingresado"),HttpStatus.BAD_REQUEST);
         }
         try {
@@ -253,6 +255,32 @@ public class JugadorController {
     public ResponseEntity<List<Jugador>> listaJugadoresDeUnClub(@PathVariable ("idClub") Long idClub){
         List<Jugador> listado = jugadorService.getListadoJugadoresDeUnClub(idClub);
         return new ResponseEntity<>(listado,HttpStatus.OK);
+    }
+
+    @GetMapping("ultimoPaseJugador/{id}")
+    public ResponseEntity<?> ultimaTransferenciaJugador(@PathVariable ("id") Long id){
+        Optional<Jugador> jugadorOptional = jugadorService.getJugadorPorId(id);
+        if(!jugadorOptional.isPresent()){
+            return new ResponseEntity<>(new Mensaje("El jugador no existe"), HttpStatus.NOT_FOUND);
+        }
+        Jugador jugador = jugadorOptional.get();
+        JugadorClub ultimoPase = jugadorService.getUltimaTransferencia(jugador);
+        return new ResponseEntity<>(ultimoPase, HttpStatus.OK);
+    }
+
+    @GetMapping("ClubEnFecha/{id}")
+    public ResponseEntity<?> clubEnCiertaFecha(@PathVariable ("id") Long id){
+        Optional<Jugador> jugadorOptional = jugadorService.getJugadorPorId(id);
+        if(!jugadorOptional.isPresent()){
+            return new ResponseEntity<>(new Mensaje("El jugador no existe"), HttpStatus.NOT_FOUND);
+        }
+        Jugador jugador = jugadorOptional.get();
+        LocalDate fecha = LocalDate.of(2022, Month.SEPTEMBER, 30);
+        Club club = jugadorService.getClubEnFecha(jugador, fecha);
+        if(club == null){
+            return new ResponseEntity<>(new Mensaje("No tiene clubes"),HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(club,HttpStatus.OK);
     }
 
 

@@ -80,17 +80,43 @@ public class JugadorService {
         return  jugador.getEstadoJugador().getNombreEstado().equals(NombreEstadoJugador.RETIRADO);
     }
 
+    /*
+    *   Metodo que valida que la fecha de realizacion de una transferencia (cambio de club de un jugador)
+    *   sea mayor a la fecha de su ultima transferencia
+     */
     public boolean validarFechaCambioDeClub(LocalDate fechaCambioClub, Jugador jugador){
         List<JugadorClub> historial = jugador.getHistorialClubes();
         JugadorClub ultimoPase = historial.get(historial.size() - 1);
         return fechaCambioClub.isAfter(ultimoPase.getFecha());
     }
 
-    public boolean validarClubNoIguales(Club clubACambiar, Jugador jugador){
+    /*
+    *   Metodo que valida que al realizar una transferencia, el club sea diferente del club
+    *   en que se encuentra actualmente el jugador
+     */
+    public boolean validarClubNoIgualesAlCambiarDeClub(Club clubACambiar, Jugador jugador){
         List<JugadorClub> historial = jugador.getHistorialClubes();
         if(clubACambiar.getId().equals(jugador.getClubActual().getId())){
             return false;
         }
         return true;
     }
+
+
+    /*
+    *   Metodo que retorna la ultima transferencia realizada por un jugador
+     */
+    public JugadorClub getUltimaTransferencia(Jugador jugador){
+        List<JugadorClub> historial = jugador.getHistorialClubes();
+        return historial.get(historial.size() - 1 );
+    }
+
+    /*
+    *   Metodo que retorna el club en que el jugador estuvo en una cierta fecha
+     */
+    public Club getClubEnFecha(Jugador jugador, LocalDate fecha){
+        return jugador.getClubEnFecha(fecha);
+    }
+
+
 }

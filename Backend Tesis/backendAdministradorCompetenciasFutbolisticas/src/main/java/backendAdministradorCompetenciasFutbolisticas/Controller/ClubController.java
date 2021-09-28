@@ -112,7 +112,7 @@ public class ClubController {
         clubActualizar.setEmail(clubDto.getEmail());
         Club clubActualizado = clubService.actualizarClub(clubActualizar);
         if(clubActualizado != null){
-            return new ResponseEntity<>(clubActualizado, HttpStatus.OK);
+            return new ResponseEntity<>(new Mensaje("Club actualizado correctamente", clubActualizado), HttpStatus.OK);
         }
         return new ResponseEntity<>(new Mensaje("Club no actualizado correctamente"),HttpStatus.INTERNAL_SERVER_ERROR);
     }
