@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -25,14 +26,21 @@ public class JugadorService {
     @Autowired
     EstadoJugadorRepository estadoJugadorRepository;
 
+    @Autowired
+    JugadorClubService jugadorClubService;
+
     public boolean guardarNuevoJugador(Jugador nuevoJugador){
         EstadoJugador estadoActivo = estadoJugadorRepository.findByEstadoJugador(NombreEstadoJugador.ACTIVO);
         nuevoJugador.setEstadoJugador(estadoActivo);
         return jugadorRepository.save(nuevoJugador).getId() != null;
     }
 
-    public void save(Jugador jugador){
-        jugadorRepository.save(jugador);
+    public Jugador guardarJugador(Jugador jugador){
+        return jugadorRepository.save(jugador);
+    }
+
+    public Jugador save(Jugador jugador){
+        return jugadorRepository.save(jugador);
     }
 
     public void eliminar(Long id){
@@ -85,7 +93,7 @@ public class JugadorService {
     *   sea mayor a la fecha de su ultima transferencia
      */
     public boolean validarFechaCambioDeClub(LocalDate fechaCambioClub, Jugador jugador){
-        List<JugadorClub> historial = jugador.getHistorialClubes();
+        List<JugadorClub> historial = jugadorClubService.historialJugador(jugador.getId());
         JugadorClub ultimoPase = historial.get(historial.size() - 1);
         return fechaCambioClub.isAfter(ultimoPase.getFecha());
     }
@@ -95,7 +103,6 @@ public class JugadorService {
     *   en que se encuentra actualmente el jugador
      */
     public boolean validarClubNoIgualesAlCambiarDeClub(Club clubACambiar, Jugador jugador){
-        List<JugadorClub> historial = jugador.getHistorialClubes();
         if(clubACambiar.getId().equals(jugador.getClubActual().getId())){
             return false;
         }
@@ -107,7 +114,7 @@ public class JugadorService {
     *   Metodo que retorna la ultima transferencia realizada por un jugador
      */
     public JugadorClub getUltimaTransferencia(Jugador jugador){
-        List<JugadorClub> historial = jugador.getHistorialClubes();
+        List<JugadorClub> historial = jugadorClubService.historialJugador(jugador.getId());
         return historial.get(historial.size() - 1 );
     }
 
@@ -115,7 +122,16 @@ public class JugadorService {
     *   Metodo que retorna el club en que el jugador estuvo en una cierta fecha
      */
     public Club getClubEnFecha(Jugador jugador, LocalDate fecha){
-        return jugador.getClubEnFecha(fecha);
+        List<JugadorClub> historial = jugadorClubService.historialJugador(jugador.getId());
+        List<JugadorClub> historialHastaFecha =
+                historial.stream()
+                        .filter(pase -> pase.getFecha().isBefore(fecha) || pase.getFecha().equals(fecha))
+                        .collect(Collectors.toList());
+        if(historialHastaFecha.isEmpty()){
+            return null;
+        }
+        Club club = historialHastaFecha.get(historialHastaFecha.size() - 1).getClub();
+        return club;
     }
 
 

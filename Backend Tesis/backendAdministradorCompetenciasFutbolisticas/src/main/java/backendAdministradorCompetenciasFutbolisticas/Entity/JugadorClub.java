@@ -1,5 +1,6 @@
 package backendAdministradorCompetenciasFutbolisticas.Entity;
 
+import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -26,17 +27,24 @@ public class JugadorClub {
     @ManyToOne
     private Club club;
 
+    @NotNull
     private String motivo;
+
+
+    @ManyToOne
+    @JsonIgnoreProperties("roles")
+    private Usuario usuario;
 
     public JugadorClub(){
 
     }
 
-    public JugadorClub(@NotNull LocalDate fecha, @NotNull Jugador jugador, @NotNull Club club, String motivo) {
+    public JugadorClub(@NotNull LocalDate fecha, @NotNull Jugador jugador, @NotNull Club club, @NotNull String motivo, Usuario usuario) {
         this.fecha = fecha;
         this.jugador = jugador;
         this.club = club;
         this.motivo = motivo;
+        this.usuario = usuario;
     }
 
     public Long getId() {
@@ -77,5 +85,13 @@ public class JugadorClub {
 
     public void setMotivo(String motivo) {
         this.motivo = motivo;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 }

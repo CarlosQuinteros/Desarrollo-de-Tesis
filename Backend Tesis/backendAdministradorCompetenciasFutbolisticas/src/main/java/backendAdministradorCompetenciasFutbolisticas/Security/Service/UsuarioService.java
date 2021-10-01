@@ -3,6 +3,9 @@ package backendAdministradorCompetenciasFutbolisticas.Security.Service;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,6 +82,12 @@ public class UsuarioService {
 
     public boolean existByTokenPassword(String tokenPassword){
         return usuarioRepository.existsByTokenPassword(tokenPassword);
+    }
+
+    public Usuario getUsuarioLogueado(Authentication auth){
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        Usuario usuario = usuarioRepository.findByNombreUsuario(userDetails.getUsername()).get();
+        return usuario;
     }
 
 }

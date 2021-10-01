@@ -14,5 +14,8 @@ public interface JugadorClubRepository extends JpaRepository<JugadorClub, Long> 
 
     boolean existsByClub_Id(Long idClub);
 
-    //JugadorClub findTopByJugador_IdAndFechaBeforeOrderByFechaFechaAsc(Long id, LocalDate fecha);
+    List<JugadorClub> findByJugador_IdOrderByFechaAsc(Long id);
+
+    List<JugadorClub> findByClub_IdAndJugador_ClubActual_IdNot(Long idClub, Long id);
+
 }

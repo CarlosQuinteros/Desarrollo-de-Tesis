@@ -7,6 +7,9 @@ import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
 import backendAdministradorCompetenciasFutbolisticas.Entity.JugadorClub;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoJugador;
+import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
+import backendAdministradorCompetenciasFutbolisticas.Security.Entity.UsuarioPrincipal;
+import backendAdministradorCompetenciasFutbolisticas.Security.Service.UsuarioService;
 import backendAdministradorCompetenciasFutbolisticas.Service.ClubService;
 import backendAdministradorCompetenciasFutbolisticas.Service.JugadorClubService;
 import backendAdministradorCompetenciasFutbolisticas.Service.JugadorService;
@@ -14,6 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +46,9 @@ public class JugadorController {
     @Autowired
     JugadorClubService jugadorClubService;
 
+    @Autowired
+    UsuarioService usuarioService;
+
 
     /*
     *   Metodo que permite crear un jugador, no debe existir el mismo documento
@@ -57,12 +67,14 @@ public class JugadorController {
         if(!clubOptional.isPresent()){
             return new ResponseEntity<>(new Mensaje("El club no existe"), HttpStatus.BAD_REQUEST);
         }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioService.getUsuarioLogueado(auth);
         Club club = clubOptional.get();
         Jugador nuevoJugador = new Jugador(nuevoJugadorDto.getNombres(), nuevoJugadorDto.getApellidos(), nuevoJugadorDto.getDocumento(), nuevoJugadorDto.getFechaNacimiento() );
         nuevoJugador.setClubActual(club);
-        JugadorClub historiaClub = new JugadorClub(LocalDate.now(),nuevoJugador,club,"Inscripción");
-        nuevoJugador.agregarHistoriaClub(historiaClub);
-
+        JugadorClub historiaClub = new JugadorClub(LocalDate.now(),nuevoJugador,club,"Inscripción", usuario);
+        jugadorService.guardarNuevoJugador(nuevoJugador);
+        jugadorClubService.guardar(historiaClub);
         try {
             boolean resultado = jugadorService.guardarNuevoJugador(nuevoJugador);
             if(resultado){
@@ -209,6 +221,8 @@ public class JugadorController {
         if(!clubOptional.isPresent()){
             return new ResponseEntity<>(new Mensaje("El Club no existe"), HttpStatus.NOT_FOUND);
         }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioService.getUsuarioLogueado(auth);
         Jugador jugador = jugadorOptional.get();
         Club club = clubOptional.get();
         if(!jugadorService.validarFechaCambioDeClub(cambioDeClubDto.getFecha(), jugador)){
@@ -218,12 +232,13 @@ public class JugadorController {
             return new ResponseEntity<>(new Mensaje("El Club actual es el mismo club ingresado"),HttpStatus.BAD_REQUEST);
         }
         try {
-            JugadorClub nuevaHistoriaClub = new JugadorClub(cambioDeClubDto.getFecha(), jugador, club, cambioDeClubDto.getMotivo());
-            jugador.agregarHistoriaClub(nuevaHistoriaClub);
-            jugador.setClubActual(club);
-            jugadorService.save(jugador);
-
-            return new ResponseEntity<>(new Mensaje("Se cambio el club del jugador correctamente"), HttpStatus.OK);
+            JugadorClub nuevaHistoriaClub = new JugadorClub(cambioDeClubDto.getFecha(), jugador, club, cambioDeClubDto.getMotivo(), usuario);
+            Jugador jugadorActualizado = new Jugador();
+            if(jugadorClubService.guardar(nuevaHistoriaClub)){
+                jugador.setClubActual(club);
+                jugadorActualizado = jugadorService.save(jugador);
+            }
+            return new ResponseEntity<>(new Mensaje("Se cambio el club del jugador correctamente", jugadorActualizado), HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(new Mensaje("Fallo la operacion. No se registró el cambio de Club"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -241,7 +256,7 @@ public class JugadorController {
             return new ResponseEntity(new Mensaje("El Jugador no existe"), HttpStatus.NOT_FOUND);
         }
         Jugador jugador = jugadorOptional.get();
-        List<JugadorClub> historial = jugador.getHistorialClubes();
+        List<JugadorClub> historial = jugadorClubService.historialJugador(id);
         return new ResponseEntity<>(historial,HttpStatus.OK);
     }
 
@@ -265,6 +280,7 @@ public class JugadorController {
         }
         Jugador jugador = jugadorOptional.get();
         JugadorClub ultimoPase = jugadorService.getUltimaTransferencia(jugador);
+        List<JugadorClub> historial = jugadorClubService.historialJugador(id);
         return new ResponseEntity<>(ultimoPase, HttpStatus.OK);
     }
 
@@ -275,7 +291,7 @@ public class JugadorController {
             return new ResponseEntity<>(new Mensaje("El jugador no existe"), HttpStatus.NOT_FOUND);
         }
         Jugador jugador = jugadorOptional.get();
-        LocalDate fecha = LocalDate.of(2022, Month.SEPTEMBER, 30);
+        LocalDate fecha = LocalDate.of(2022, Month.MARCH, 30);
         Club club = jugadorService.getClubEnFecha(jugador, fecha);
         if(club == null){
             return new ResponseEntity<>(new Mensaje("No tiene clubes"),HttpStatus.BAD_REQUEST);

@@ -3,6 +3,9 @@ package backendAdministradorCompetenciasFutbolisticas.Controller;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.ClubDto;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
+import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
+import backendAdministradorCompetenciasFutbolisticas.Entity.JugadorClub;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.RecursoNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Service.AsociacionDeportivaService;
 import backendAdministradorCompetenciasFutbolisticas.Service.ClubService;
 import backendAdministradorCompetenciasFutbolisticas.Service.JugadorClubService;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/clubes")
@@ -65,7 +69,7 @@ public class ClubController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES', 'ENCARGADO_DE_TORNEOS')")
     @GetMapping("/listado")
     public ResponseEntity<List<Club>> listadoClubes(){
         List<Club>  listado = clubService.getListadoOrdenadoPorNombre();
@@ -108,13 +112,41 @@ public class ClubController {
             return new ResponseEntity<>(new Mensaje("Ya existe un Club con el email ingresado"), HttpStatus.NOT_FOUND);
         }
         clubActualizar.setAlias(clubDto.getAlias());
-        clubActualizar.setEmail(clubActualizar.getNombreClub());
+        clubActualizar.setNombreClub(clubDto.getNombre());
         clubActualizar.setEmail(clubDto.getEmail());
         Club clubActualizado = clubService.actualizarClub(clubActualizar);
         if(clubActualizado != null){
             return new ResponseEntity<>(new Mensaje("Club actualizado correctamente", clubActualizado), HttpStatus.OK);
         }
         return new ResponseEntity<>(new Mensaje("Club no actualizado correctamente"),HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
+    @GetMapping("/cantidadTotal")
+    public ResponseEntity<Integer> cantidadTotalDeClubes(){
+        Integer cantidad = clubService.getCantidadDeClubes();
+        return new ResponseEntity<>(cantidad, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
+    @GetMapping("/detalle/{id}")
+    public ResponseEntity<?> detalleClub(@PathVariable ("id") Long id){
+        Optional<Club> clubOptional = clubService.getById(id);
+        if(!clubOptional.isPresent()){
+            return new ResponseEntity<>(new Mensaje("El Club no existe"),HttpStatus.NOT_FOUND);
+        }
+        Club club = clubOptional.get();
+        return new ResponseEntity<>(club, HttpStatus.OK);
+    }
+
+    @GetMapping("/exjugadores/{id}")
+    public ResponseEntity<List<Jugador>> listadoExJugadoresPorClub(@PathVariable ("id") Long id){
+        Optional<Club> clubOptional = clubService.getById(id);
+        if(!clubOptional.isPresent()){
+            return new ResponseEntity(new Mensaje("El Club no existe"),HttpStatus.NOT_FOUND);
+        }
+        List<Jugador> historialExJugadores = jugadorClubService.historialExJugadoresPorIdClub(id).stream().map(JugadorClub::getJugador).collect(Collectors.toList());
+        return new ResponseEntity<>(historialExJugadores,HttpStatus.OK);
     }
 
 }

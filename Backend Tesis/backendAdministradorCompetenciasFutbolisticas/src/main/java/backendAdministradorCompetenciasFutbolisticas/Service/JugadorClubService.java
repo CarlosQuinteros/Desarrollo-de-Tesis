@@ -23,4 +23,12 @@ public class JugadorClubService {
         return jugadorClubRepository.existsByClub_Id(id);
     }
 
+    public List<JugadorClub> historialJugador(Long id){
+        return jugadorClubRepository.findByJugador_IdOrderByFechaAsc(id);
+    }
+
+    public List<JugadorClub> historialExJugadoresPorIdClub(Long idClub){
+        return jugadorClubRepository.findByClub_IdAndJugador_ClubActual_IdNot(idClub,idClub);
+    }
+
 }

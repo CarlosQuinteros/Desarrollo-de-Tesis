@@ -7,6 +7,8 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,9 +40,11 @@ public class Jugador {
     @ManyToOne
     private EstadoJugador estadoJugador;
 
+    /*
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "jugador", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("jugador")
     private List<JugadorClub> historialClubes = new ArrayList<JugadorClub>();
+    */
 
     @ManyToOne
     private Club clubActual;
@@ -129,8 +133,9 @@ public class Jugador {
         this.estadoJugador = estadoJugador;
     }
 
+    /*
     public List<JugadorClub> getHistorialClubes() {
-        return historialClubes;
+        return this.historialClubes;
     }
 
     public void setHistorialClubes(List<JugadorClub> historialClubes) {
@@ -153,4 +158,6 @@ public class Jugador {
         Club club = historialHastaFecha.get(historialHastaFecha.size() - 1).getClub();
         return club;
     }
+
+     */
 }

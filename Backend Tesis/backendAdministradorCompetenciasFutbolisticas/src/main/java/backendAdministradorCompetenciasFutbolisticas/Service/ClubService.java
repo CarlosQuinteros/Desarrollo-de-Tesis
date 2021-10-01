@@ -2,6 +2,7 @@ package backendAdministradorCompetenciasFutbolisticas.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Entity.AsociacionDeportiva;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.RecursoNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.ClubRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,6 +55,15 @@ public class ClubService {
 
     public List<Club> getListadoOrdenadoPorNombre(){
         return clubRepository.findByOrderByNombreClub();
+    }
+
+    public  Integer getCantidadDeClubes(){
+        return  clubRepository.countClubBy();
+    }
+
+    public  Club getClub(Long id){
+        Club club = getById(id).orElseThrow(()-> new RecursoNotFoundException("EL Club no existe"));
+        return club;
     }
 
 }
