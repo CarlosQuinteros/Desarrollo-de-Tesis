@@ -4,11 +4,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
+@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 @ResponseBody
-public class RecursoNotFoundException extends RuntimeException {
-
-    public RecursoNotFoundException(String mensaje){
+public class InternalServerErrorException extends RuntimeException{
+    public InternalServerErrorException(String mensaje){
         super(mensaje);
     }
 }

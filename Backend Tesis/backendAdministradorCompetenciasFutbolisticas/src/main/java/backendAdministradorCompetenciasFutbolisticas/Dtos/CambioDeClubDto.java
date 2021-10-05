@@ -6,10 +6,10 @@ import java.time.LocalDate;
 
 public class CambioDeClubDto {
 
-    @NotNull
+    @NotNull(message = "El campo fecha no debe ser null")
     private LocalDate fecha;
 
-    @NotNull
+    @NotNull(message = "El jugador es obligatorio")
     private Long idJugador;
 
     @NotNull

@@ -2,6 +2,7 @@ package backendAdministradorCompetenciasFutbolisticas.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Entity.AsociacionDeportiva;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.InternalServerErrorException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.RecursoNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.ClubRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,11 @@ public class ClubService {
 
 
     public boolean guardarNuevoClub(Club club) {
-        return clubRepository.save(club).getId()!=null;
+        try {
+            return clubRepository.save(club).getId()!=null;
+        }catch (Exception e){
+            throw new InternalServerErrorException("Fallo la operacion. Club no guardado correctamente");
+        }
     }
 
     public Club actualizarClub(Club club){
@@ -62,7 +67,7 @@ public class ClubService {
     }
 
     public  Club getClub(Long id){
-        Club club = getById(id).orElseThrow(()-> new RecursoNotFoundException("EL Club no existe"));
+        Club club = getById(id).orElseThrow(()-> new RecursoNotFoundException("EL Club con ID: " + id + " no existe"));
         return club;
     }
 

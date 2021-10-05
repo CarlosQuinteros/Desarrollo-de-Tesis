@@ -7,9 +7,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.Period;
 
 @Entity
-public class JugadorClub {
+public class Pase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,6 +18,13 @@ public class JugadorClub {
 
     @NotNull
     private LocalDate fecha;
+
+    @NotNull
+    private LocalDate fechaDesde;
+
+    private Integer edadEnPase;
+
+    private LocalDate fechaHasta;
 
     @NotNull
     @ManyToOne
@@ -35,16 +43,19 @@ public class JugadorClub {
     @JsonIgnoreProperties("roles")
     private Usuario usuario;
 
-    public JugadorClub(){
+    public Pase(){
 
     }
 
-    public JugadorClub(@NotNull LocalDate fecha, @NotNull Jugador jugador, @NotNull Club club, @NotNull String motivo, Usuario usuario) {
-        this.fecha = fecha;
+    public Pase(@NotNull LocalDate fechaDesde, LocalDate fechaHasta, @NotNull Jugador jugador, @NotNull Club club, @NotNull String motivo, Usuario usuario) {
+        this.fecha = LocalDate.now();
+        this.fechaDesde = fechaDesde;
+        this.fechaHasta = fechaHasta;
         this.jugador = jugador;
         this.club = club;
         this.motivo = motivo;
         this.usuario = usuario;
+        this.edadEnPase = Period.between(jugador.getFechaNacimiento(), fechaDesde).getYears();
     }
 
     public Long getId() {
@@ -53,6 +64,22 @@ public class JugadorClub {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public LocalDate getFechaDesde() {
+        return fechaDesde;
+    }
+
+    public void setFechaDesde(LocalDate fechaDesde) {
+        this.fechaDesde = fechaDesde;
+    }
+
+    public LocalDate getFechaHasta() {
+        return fechaHasta;
+    }
+
+    public void setFechaHasta(LocalDate fechaHasta) {
+        this.fechaHasta = fechaHasta;
     }
 
     public LocalDate getFecha() {
@@ -93,5 +120,9 @@ public class JugadorClub {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public Integer getEdadEnPase() {
+        return edadEnPase;
     }
 }

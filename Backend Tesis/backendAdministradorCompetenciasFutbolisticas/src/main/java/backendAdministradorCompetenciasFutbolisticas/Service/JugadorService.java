@@ -3,10 +3,13 @@ package backendAdministradorCompetenciasFutbolisticas.Service;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
 import backendAdministradorCompetenciasFutbolisticas.Entity.EstadoJugador;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
-import backendAdministradorCompetenciasFutbolisticas.Entity.JugadorClub;
+import backendAdministradorCompetenciasFutbolisticas.Entity.Pase;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoJugador;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.RecursoNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.EstadoJugadorRepository;
 import backendAdministradorCompetenciasFutbolisticas.Repository.JugadorRepository;
+import backendAdministradorCompetenciasFutbolisticas.Repository.PaseJugadorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +30,10 @@ public class JugadorService {
     EstadoJugadorRepository estadoJugadorRepository;
 
     @Autowired
-    JugadorClubService jugadorClubService;
+    PaseJugadorRepository paseJugadorRepository;
+
+    @Autowired
+    PaseJugadorService paseJugadorService;
 
     public boolean guardarNuevoJugador(Jugador nuevoJugador){
         EstadoJugador estadoActivo = estadoJugadorRepository.findByEstadoJugador(NombreEstadoJugador.ACTIVO);
@@ -59,6 +65,22 @@ public class JugadorService {
         return jugadorRepository.findById(id);
     }
 
+    public Jugador getJugador(Long id){
+        Optional<Jugador> jugadorOptional = jugadorRepository.findById(id);
+        if(!jugadorOptional.isPresent()){
+            throw new RecursoNotFoundException("El jugador con ID: " + id + " no existe");
+        }
+        return jugadorOptional.get();
+    }
+
+    public Jugador getJugadorPorDni(String dni){
+        Optional<Jugador> jugadorOptional = jugadorRepository.findByDocumento(dni);
+        if(!jugadorOptional.isPresent()){
+            throw new RecursoNotFoundException("El jugador con DNI: " + dni + " no existe");
+        }
+        return jugadorOptional.get();
+    }
+
     public boolean existePorId(Long id){
         return jugadorRepository.existsById(id);
     }
@@ -68,6 +90,9 @@ public class JugadorService {
     }
 
     public boolean cambiarEstadoAInactivo(Jugador jugador){
+        if(jugador.getEstadoJugador().getNombreEstado().equals(NombreEstadoJugador.ACTIVO)){
+            throw new BadRequestException("El jugador ya se encuentra Inactivo");
+        }
         EstadoJugador estadoInactivo = estadoJugadorRepository.findByEstadoJugador(NombreEstadoJugador.INACTIVO);
         jugador.setEstadoJugador(estadoInactivo);
         jugadorRepository.save(jugador);
@@ -75,6 +100,9 @@ public class JugadorService {
     }
 
     public boolean cambiarEstadoAActivo(Jugador jugador){
+        if(jugador.getEstadoJugador().getNombreEstado().equals(NombreEstadoJugador.ACTIVO)){
+            throw new BadRequestException("El jugador ya se encuentra Activo");
+        }
         EstadoJugador estadoActivo = estadoJugadorRepository.findByEstadoJugador(NombreEstadoJugador.ACTIVO);
         jugador.setEstadoJugador(estadoActivo);
         jugadorRepository.save(jugador);
@@ -82,6 +110,9 @@ public class JugadorService {
     }
 
     public boolean cambiarEstadoARetirado(Jugador jugador){
+        if(jugador.getEstadoJugador().getNombreEstado().equals(NombreEstadoJugador.RETIRADO)){
+            throw new BadRequestException("El jugador ya se encuentra Retirado");
+        }
         EstadoJugador estadoRetirado = estadoJugadorRepository.findByEstadoJugador(NombreEstadoJugador.RETIRADO);
         jugador.setEstadoJugador(estadoRetirado);
         jugadorRepository.save(jugador);
@@ -92,44 +123,56 @@ public class JugadorService {
     *   Metodo que valida que la fecha de realizacion de una transferencia (cambio de club de un jugador)
     *   sea mayor a la fecha de su ultima transferencia
      */
-    public boolean validarFechaCambioDeClub(LocalDate fechaCambioClub, Jugador jugador){
-        List<JugadorClub> historial = jugadorClubService.historialJugador(jugador.getId());
-        JugadorClub ultimoPase = historial.get(historial.size() - 1);
-        return fechaCambioClub.isAfter(ultimoPase.getFecha());
+    public void validarFechaCambioDeClub(LocalDate fechaCambioClub, Jugador jugador){
+        Pase ultimoPase = paseJugadorRepository.findByJugador_IdAndFechaHastaIsNull(jugador.getId());
+       // return fechaCambioClub.isAfter(ultimoPase.getFechaDesde());
+        if(!fechaCambioClub.isAfter(ultimoPase.getFechaDesde())){
+            throw new BadRequestException("La fecha ingresada no debe ser menor a la fecha de su ultimo cambio de club");
+        }
     }
 
     /*
     *   Metodo que valida que al realizar una transferencia, el club sea diferente del club
     *   en que se encuentra actualmente el jugador
      */
-    public boolean validarClubNoIgualesAlCambiarDeClub(Club clubACambiar, Jugador jugador){
+    public void validarClubNoIgualesAlCambiarDeClub(Club clubACambiar, Jugador jugador){
         if(clubACambiar.getId().equals(jugador.getClubActual().getId())){
-            return false;
+            throw new BadRequestException("El Club ingresado es el Club actual del jugador");
         }
-        return true;
     }
 
 
     /*
     *   Metodo que retorna la ultima transferencia realizada por un jugador
      */
-    public JugadorClub getUltimaTransferencia(Jugador jugador){
-        List<JugadorClub> historial = jugadorClubService.historialJugador(jugador.getId());
-        return historial.get(historial.size() - 1 );
+    public Pase getUltimaTransferencia(Long id){
+        Pase ultimoPase = paseJugadorRepository.findByJugador_IdAndFechaHastaIsNull(id);
+        return ultimoPase;
+    }
+
+
+    public Club getClubActualJugador(Long id){
+        Pase clubActual = paseJugadorRepository.findByJugador_IdAndFechaHastaIsNull(id);
+        return clubActual.getClub();
     }
 
     /*
     *   Metodo que retorna el club en que el jugador estuvo en una cierta fecha
      */
     public Club getClubEnFecha(Jugador jugador, LocalDate fecha){
-        List<JugadorClub> historial = jugadorClubService.historialJugador(jugador.getId());
-        List<JugadorClub> historialHastaFecha =
+        List<Pase> historial = paseJugadorService.historialJugador(jugador.getId());
+        System.out.println("historial cantidad " + historial.size());
+        List<Pase> historialHastaFecha =
                 historial.stream()
-                        .filter(pase -> pase.getFecha().isBefore(fecha) || pase.getFecha().equals(fecha))
+                        .filter(pase -> fecha.isAfter(pase.getFechaDesde()) || pase.getFechaDesde().isEqual(fecha)
+                                &&  (pase.getFechaHasta().isBefore(fecha) || pase.getFechaHasta() == null))
                         .collect(Collectors.toList());
+
+
         if(historialHastaFecha.isEmpty()){
             return null;
         }
+        System.out.println(historialHastaFecha.size());
         Club club = historialHastaFecha.get(historialHastaFecha.size() - 1).getClub();
         return club;
     }

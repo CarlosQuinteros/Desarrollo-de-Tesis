@@ -4,11 +4,10 @@ import backendAdministradorCompetenciasFutbolisticas.Dtos.ClubDto;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
-import backendAdministradorCompetenciasFutbolisticas.Entity.JugadorClub;
-import backendAdministradorCompetenciasFutbolisticas.Excepciones.RecursoNotFoundException;
+import backendAdministradorCompetenciasFutbolisticas.Entity.Pase;
 import backendAdministradorCompetenciasFutbolisticas.Service.AsociacionDeportivaService;
 import backendAdministradorCompetenciasFutbolisticas.Service.ClubService;
-import backendAdministradorCompetenciasFutbolisticas.Service.JugadorClubService;
+import backendAdministradorCompetenciasFutbolisticas.Service.PaseJugadorService;
 import backendAdministradorCompetenciasFutbolisticas.Service.LocalidadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,7 +37,7 @@ public class ClubController {
     AsociacionDeportivaService asociacionDeportivaService;
 
     @Autowired
-    JugadorClubService jugadorClubService;
+    PaseJugadorService paseJugadorService;
 
 
     /*
@@ -82,7 +81,7 @@ public class ClubController {
         if(!clubService.existById(id)){
             return new ResponseEntity<>(new Mensaje("El club no existe"), HttpStatus.NOT_FOUND);
         }
-        if(jugadorClubService.existeHistorialPorClub(id)){
+        if(paseJugadorService.existeHistorialPorClub(id)){
             return new ResponseEntity<>(new Mensaje("El club tiene transacciones con jugadores y no puede eliminarse"),HttpStatus.BAD_REQUEST);
         }
         try {
@@ -145,7 +144,7 @@ public class ClubController {
         if(!clubOptional.isPresent()){
             return new ResponseEntity(new Mensaje("El Club no existe"),HttpStatus.NOT_FOUND);
         }
-        List<Jugador> historialExJugadores = jugadorClubService.historialExJugadoresPorIdClub(id).stream().map(JugadorClub::getJugador).collect(Collectors.toList());
+        List<Jugador> historialExJugadores = paseJugadorService.historialExJugadoresPorIdClub(id).stream().map(Pase::getJugador).collect(Collectors.toList());
         return new ResponseEntity<>(historialExJugadores,HttpStatus.OK);
     }
 
