@@ -28,5 +28,7 @@ public interface JugadorRepository  extends JpaRepository<Jugador, Long> {
 
     List<Jugador> findByClubActual_Id(Long id);
 
+    Integer countJugadorBy();
+
 
 }

@@ -1,7 +1,9 @@
 package backendAdministradorCompetenciasFutbolisticas.Security.Service;
 
+import backendAdministradorCompetenciasFutbolisticas.Entity.Log;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Repository.UsuarioRepository;
+import backendAdministradorCompetenciasFutbolisticas.Service.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +20,9 @@ public class UsuarioService {
 
     @Autowired
     UsuarioRepository usuarioRepository;
+
+    @Autowired
+    LogService logService;
 
     public Optional<Usuario> getByNombreUsuario(String nombreUsuario){
         return usuarioRepository.findByNombreUsuario(nombreUsuario);
@@ -51,6 +56,7 @@ public class UsuarioService {
     }
 
     public void delete(Long id){
+        logService.eliminarActividadDeUsuario(id);
         usuarioRepository.deleteById(id);
     }
 

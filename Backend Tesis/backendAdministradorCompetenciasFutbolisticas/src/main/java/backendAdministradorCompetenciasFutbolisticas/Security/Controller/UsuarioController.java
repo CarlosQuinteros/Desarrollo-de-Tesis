@@ -1,6 +1,7 @@
 package backendAdministradorCompetenciasFutbolisticas.Security.Controller;
 
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
+import backendAdministradorCompetenciasFutbolisticas.Entity.Log;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.ActualizarUsuarioDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.CambiarPasswordDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.NuevoUsuarioDto;
@@ -11,10 +12,13 @@ import backendAdministradorCompetenciasFutbolisticas.Security.Enums.RolNombre;
 import backendAdministradorCompetenciasFutbolisticas.Security.Service.RolService;
 import backendAdministradorCompetenciasFutbolisticas.Security.Service.UsuarioService;
 import backendAdministradorCompetenciasFutbolisticas.Service.EnvioMailService;
+import backendAdministradorCompetenciasFutbolisticas.Service.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +45,9 @@ public class UsuarioController {
 
     @Autowired
     EnvioMailService envioMailService;
+
+    @Autowired
+    LogService logService;
 
 
     /*
@@ -71,7 +78,10 @@ public class UsuarioController {
             roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_TORNEOS).get());
         usuario.setRoles(roles);
         try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Usuario usuarioLogueado = usuarioService.getUsuarioLogueado(auth);
             usuarioService.save(usuario);
+            logService.guardarLogCreacionUsuario(usuario, usuarioLogueado);
             //envioMailService.sendEmailUsuarioCreado(usuarioDto); tarda varios segundos
             return new ResponseEntity(new Mensaje("Nuevo usuario guardado"), HttpStatus.CREATED);
         }catch (Exception e){
@@ -119,7 +129,7 @@ public class UsuarioController {
 
 
     /*
-        Metodo que permite eliminar un usuario a un usuario.
+        Metodo que permite eliminar a un usuario y su actividad de logs. solo en desarrollo
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{id}")
@@ -151,10 +161,13 @@ public class UsuarioController {
             return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
         }
         Usuario usuario = usuarioService.getById(id).get();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuarioLogueado = usuarioService.getUsuarioLogueado(auth);
         if (usuario.isActivo()) {
             return new ResponseEntity(new Mensaje("El usuario ya se encuentra Activo"), HttpStatus.BAD_REQUEST);
         }
         usuarioService.cambiarEstado(id);
+        logService.guardarAltaUsuario(usuario, usuarioLogueado);
         return  new ResponseEntity(new Mensaje("Usuario dado de alta correctamente"),HttpStatus.OK);
     }
 
@@ -170,6 +183,9 @@ public class UsuarioController {
             return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
         }
         Usuario usuario = usuarioService.getById(id).get();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuarioLogueado = usuarioService.getUsuarioLogueado(auth);
+
         if (!usuario.isActivo()){
 
             return new ResponseEntity(new Mensaje("El usuario ya se encuentra Inactivo"), HttpStatus.BAD_REQUEST);
@@ -178,6 +194,7 @@ public class UsuarioController {
             return new ResponseEntity(new Mensaje("El usuario administrador no puede darse de baja"), HttpStatus.NOT_FOUND);
         }
         usuarioService.cambiarEstado(id);
+        logService.guardarBajaUsuario(usuario, usuarioLogueado);
         return new ResponseEntity(new Mensaje("Usuario dado de baja correctamente"), HttpStatus.OK);
 
     }
@@ -334,5 +351,15 @@ public class UsuarioController {
         int cantidad = usuarioService.cantidadDeInactivos();
         return new ResponseEntity(cantidad, HttpStatus.OK);
 
+    }
+
+    /*
+        Metodo que retorna el historial de logs del usuario
+     */
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @GetMapping("/actividad/{id}")
+    public ResponseEntity<List<Log>> listadoLogsUsuario(@PathVariable ("id") Long id){
+        List<Log> actividad = logService.logsPorUsuario(id);
+        return new ResponseEntity<>(actividad, HttpStatus.OK);
     }
 }

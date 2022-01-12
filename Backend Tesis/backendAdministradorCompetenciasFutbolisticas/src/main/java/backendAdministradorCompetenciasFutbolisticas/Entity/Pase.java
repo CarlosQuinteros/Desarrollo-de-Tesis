@@ -8,6 +8,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 public class Pase {
@@ -22,13 +24,13 @@ public class Pase {
     @NotNull
     private LocalDate fechaDesde;
 
+    @Transient
     private Integer edadEnPase;
 
     private LocalDate fechaHasta;
 
     @NotNull
     @ManyToOne
-    @JsonIgnore
     private Jugador jugador;
 
     @NotNull
@@ -39,22 +41,17 @@ public class Pase {
     private String motivo;
 
 
-    @ManyToOne
-    @JsonIgnoreProperties("roles")
-    private Usuario usuario;
-
     public Pase(){
 
     }
 
-    public Pase(@NotNull LocalDate fechaDesde, LocalDate fechaHasta, @NotNull Jugador jugador, @NotNull Club club, @NotNull String motivo, Usuario usuario) {
+    public Pase(@NotNull LocalDate fechaDesde, LocalDate fechaHasta, @NotNull Jugador jugador, @NotNull Club club, @NotNull String motivo) {
         this.fecha = LocalDate.now();
         this.fechaDesde = fechaDesde;
         this.fechaHasta = fechaHasta;
         this.jugador = jugador;
         this.club = club;
         this.motivo = motivo;
-        this.usuario = usuario;
         this.edadEnPase = Period.between(jugador.getFechaNacimiento(), fechaDesde).getYears();
     }
 
@@ -66,6 +63,7 @@ public class Pase {
         this.id = id;
     }
 
+    @JsonIgnore
     public LocalDate getFechaDesde() {
         return fechaDesde;
     }
@@ -74,6 +72,7 @@ public class Pase {
         this.fechaDesde = fechaDesde;
     }
 
+    @JsonIgnore
     public LocalDate getFechaHasta() {
         return fechaHasta;
     }
@@ -82,6 +81,7 @@ public class Pase {
         this.fechaHasta = fechaHasta;
     }
 
+    @JsonIgnore
     public LocalDate getFecha() {
         return fecha;
     }
@@ -114,15 +114,26 @@ public class Pase {
         this.motivo = motivo;
     }
 
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
     public Integer getEdadEnPase() {
-        return edadEnPase;
+        return Period.between(this.getJugador().getFechaNacimiento(), this.fechaDesde).getYears();
     }
+
+    public void setEdadEnPase(Integer edadEnPase) {
+        this.edadEnPase = edadEnPase;
+    }
+
+    public String getFechaParsed( ){
+
+        return DateTimeFormatter.RFC_1123_DATE_TIME.format(fecha.atStartOfDay(ZoneId.of("UTC-3")));
+    };
+
+    public String getFechaHastaParsed(){
+        return fechaHasta!=null ? DateTimeFormatter.RFC_1123_DATE_TIME.format(fechaHasta.atStartOfDay(ZoneId.of("UTC-3"))) : null;
+    };
+
+    public String getFechaDesdeParsed(){
+        return DateTimeFormatter.RFC_1123_DATE_TIME.format(fechaDesde.atStartOfDay(ZoneId.of("UTC-3")));
+    };
+
+
 }

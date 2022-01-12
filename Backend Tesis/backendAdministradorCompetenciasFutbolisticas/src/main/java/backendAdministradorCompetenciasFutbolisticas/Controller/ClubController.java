@@ -4,15 +4,22 @@ import backendAdministradorCompetenciasFutbolisticas.Dtos.ClubDto;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
+import backendAdministradorCompetenciasFutbolisticas.Entity.Log;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Pase;
-import backendAdministradorCompetenciasFutbolisticas.Service.AsociacionDeportivaService;
-import backendAdministradorCompetenciasFutbolisticas.Service.ClubService;
-import backendAdministradorCompetenciasFutbolisticas.Service.PaseJugadorService;
-import backendAdministradorCompetenciasFutbolisticas.Service.LocalidadService;
+import backendAdministradorCompetenciasFutbolisticas.Enums.LogAccion;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.InternalServerErrorException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
+import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
+import backendAdministradorCompetenciasFutbolisticas.Security.Service.UsuarioService;
+import backendAdministradorCompetenciasFutbolisticas.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +46,12 @@ public class ClubController {
     @Autowired
     PaseJugadorService paseJugadorService;
 
+    @Autowired
+    LogService logService;
+
+    @Autowired
+    UsuarioService usuarioService;
+
 
     /*
         Metodo que permite crear un nuevo club
@@ -48,23 +61,26 @@ public class ClubController {
     @PostMapping("/crear")
     public ResponseEntity<?> crearClub(@Valid @RequestBody ClubDto clubDto, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
-            return new ResponseEntity<>(new Mensaje("Campos mal ingresados"), HttpStatus.NOT_FOUND);
+            throw new InvalidDataException(bindingResult);
         }
         if(clubService.existePorNombre(clubDto.getNombre())){
-            return new ResponseEntity<>(new Mensaje("Ya existe un Club con el nombre ingresado"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("Ya existe un Club con el nombre ingresado");
         }
         if(clubService.existByEmail(clubDto.getEmail())){
-            return new ResponseEntity<>(new Mensaje("Ya existe un Club con el email ingresado"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("Ya existe un Club con el email ingresado");
         }
         try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Usuario usuario = usuarioService.getUsuarioLogueado(auth);
             Club nuevoClub = new Club(clubDto.getAlias(), clubDto.getNombre(), clubDto.getEmail());
             boolean resultado = clubService.guardarNuevoClub(nuevoClub);
             if(resultado){
+                logService.guardarLogCreacionClub(nuevoClub, usuario);
                 return new ResponseEntity<>(new Mensaje("Club guardado correctamente"),HttpStatus.CREATED);
             }
-            return new ResponseEntity<>(new Mensaje("Club no guardado correctamten"), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Fallo la operacion. El club no se guardo correctamente");
         }catch (Exception e){
-            return new ResponseEntity<>(new Mensaje("Fallo la operacion. Club no guardado correctamten"), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Fallo la operacion. El club no se guardo correctamente");
         }
     }
 
@@ -79,17 +95,19 @@ public class ClubController {
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminarClub(@PathVariable ("id") Long id){
         if(!clubService.existById(id)){
-            return new ResponseEntity<>(new Mensaje("El club no existe"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("El club con ID: " + id +" no existe");
         }
         if(paseJugadorService.existeHistorialPorClub(id)){
-            return new ResponseEntity<>(new Mensaje("El club tiene transacciones con jugadores y no puede eliminarse"),HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("El club tiene transacciones con jugadores y no puede eliminarse");
         }
         try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Usuario usuario = usuarioService.getUsuarioLogueado(auth);
             clubService.eliminarClub(id);
+            logService.guardarLogEliminacionClub(id,usuario);
             return new ResponseEntity<>(new Mensaje("Club eliminado correctamente"), HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity<>(new Mensaje("Fallo la operacion. El club no se elimino"),HttpStatus.INTERNAL_SERVER_ERROR);
-
+            throw new InternalServerErrorException("Fallo la operacion. El club no se elimino");
         }
     }
 
@@ -97,27 +115,27 @@ public class ClubController {
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> editarClub(@PathVariable ("id") Long id, @Valid @RequestBody ClubDto clubDto , BindingResult bindingResult ){
         if(bindingResult.hasErrors()){
-            return new ResponseEntity<>(new Mensaje("campos mal ingresados"), HttpStatus.NOT_FOUND);
+            throw new InvalidDataException(bindingResult);
         }
-        Optional<Club> clubOptional = clubService.getById(id);
-        if(!clubOptional.isPresent()){
-            return new ResponseEntity<>(new Mensaje("El Club no existe"), HttpStatus.NOT_FOUND);
-        }
-        Club clubActualizar = clubOptional.get();
+        //el servicio genera notfound exception si no encuentra el club
+        Club clubActualizar = clubService.getClub(id);
         if(!clubActualizar.getNombreClub().equals(clubDto.getNombre()) && clubService.existePorNombre(clubDto.getNombre())){
-            return new ResponseEntity<>(new Mensaje("Ya existe un Club con el nombre ingresado"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("Ya existe un Club con el nombre ingresado");
         }
         if(!clubActualizar.getEmail().equals(clubDto.getEmail()) && clubService.existByEmail(clubDto.getEmail())){
-            return new ResponseEntity<>(new Mensaje("Ya existe un Club con el email ingresado"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("Ya existe un Club con el email ingresado");
         }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioService.getUsuarioLogueado(auth);
         clubActualizar.setAlias(clubDto.getAlias());
         clubActualizar.setNombreClub(clubDto.getNombre());
         clubActualizar.setEmail(clubDto.getEmail());
         Club clubActualizado = clubService.actualizarClub(clubActualizar);
         if(clubActualizado != null){
+            logService.guardarLogActualizacionClub(clubActualizado, usuario);
             return new ResponseEntity<>(new Mensaje("Club actualizado correctamente", clubActualizado), HttpStatus.OK);
         }
-        return new ResponseEntity<>(new Mensaje("Club no actualizado correctamente"),HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Club no actualizado correctamente");
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
@@ -130,22 +148,12 @@ public class ClubController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
     @GetMapping("/detalle/{id}")
     public ResponseEntity<?> detalleClub(@PathVariable ("id") Long id){
-        Optional<Club> clubOptional = clubService.getById(id);
-        if(!clubOptional.isPresent()){
-            return new ResponseEntity<>(new Mensaje("El Club no existe"),HttpStatus.NOT_FOUND);
-        }
-        Club club = clubOptional.get();
+
+        //el servicio genera notfound exception si no encuentra el club
+        Club club = clubService.getClub(id);
         return new ResponseEntity<>(club, HttpStatus.OK);
     }
 
-    @GetMapping("/exjugadores/{id}")
-    public ResponseEntity<List<Jugador>> listadoExJugadoresPorClub(@PathVariable ("id") Long id){
-        Optional<Club> clubOptional = clubService.getById(id);
-        if(!clubOptional.isPresent()){
-            return new ResponseEntity(new Mensaje("El Club no existe"),HttpStatus.NOT_FOUND);
-        }
-        List<Jugador> historialExJugadores = paseJugadorService.historialExJugadoresPorIdClub(id).stream().map(Pase::getJugador).collect(Collectors.toList());
-        return new ResponseEntity<>(historialExJugadores,HttpStatus.OK);
-    }
+
 
 }

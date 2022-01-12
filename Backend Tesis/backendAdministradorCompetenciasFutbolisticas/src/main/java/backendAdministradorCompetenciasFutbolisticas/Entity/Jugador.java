@@ -1,11 +1,14 @@
 package backendAdministradorCompetenciasFutbolisticas.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -109,7 +112,15 @@ public class Jugador {
         this.documento = documento;
     }
 
-    public LocalDate getFechaNacimiento() {
+
+    public String getFechaNacimientoParsed() {
+        DateTimeFormatter  dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        return DateTimeFormatter.RFC_1123_DATE_TIME.format(fechaNacimiento.atStartOfDay(ZoneId.of("UTC-3")));
+
+    }
+
+    @JsonIgnore
+    public LocalDate getFechaNacimiento(){
         return fechaNacimiento;
     }
 
@@ -132,32 +143,4 @@ public class Jugador {
     public void setEstadoJugador(EstadoJugador estadoJugador) {
         this.estadoJugador = estadoJugador;
     }
-
-    /*
-    public List<JugadorClub> getHistorialClubes() {
-        return this.historialClubes;
-    }
-
-    public void setHistorialClubes(List<JugadorClub> historialClubes) {
-        this.historialClubes = historialClubes;
-    }
-
-    public boolean agregarHistoriaClub(JugadorClub jugadorClub){
-        return this.getHistorialClubes().add(jugadorClub);
-    }
-
-    public Club getClubEnFecha(LocalDate fecha){
-        List<JugadorClub> historial = this.getHistorialClubes();
-        List<JugadorClub> historialHastaFecha =
-                historial.stream()
-                        .filter(pase -> pase.getFecha().isBefore(fecha))
-                        .collect(Collectors.toList());
-        if(historialHastaFecha.isEmpty()){
-            return null;
-        }
-        Club club = historialHastaFecha.get(historialHastaFecha.size() - 1).getClub();
-        return club;
-    }
-
-     */
 }

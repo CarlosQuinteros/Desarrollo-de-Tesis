@@ -1,31 +1,21 @@
 package backendAdministradorCompetenciasFutbolisticas.Dtos;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import org.apache.tomcat.jni.Local;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
-public class NuevoJugadorDto {
-
+public class EditarJugadorDto {
     @NotBlank(message = "El campo nombres es obligatorio")
     private String nombres;
 
     @NotBlank(message = "El campo apellidos es obligatorio")
     private String apellidos;
 
-    @NotNull(message = "La fecha de nacimiento es obligatoria")
+    @NotNull(message = "La fecha de nacimiento es obligatoria ")
     private LocalDate fechaNacimiento;
 
     @NotBlank(message = "El documento es obligatorio")
     private  String documento;
-
-    @NotNull(message = "El club es obligatorio")
-    private Long idClub;
-
-    @NotNull(message = "La fecha de inscripción es obligatoria")
-    private LocalDate fechaInscripcion;
 
     public String getNombres() {
         return nombres;
@@ -59,19 +49,4 @@ public class NuevoJugadorDto {
         this.documento = documento;
     }
 
-    public Long getIdClub() {
-        return idClub;
-    }
-
-    public void setIdClub(Long idClub) {
-        this.idClub = idClub;
-    }
-
-    public LocalDate getFechaInscripcion() {
-        return fechaInscripcion;
-    }
-
-    public void setFechaInscripcion(LocalDate fechaInscripcion) {
-        this.fechaInscripcion = fechaInscripcion;
-    }
 }

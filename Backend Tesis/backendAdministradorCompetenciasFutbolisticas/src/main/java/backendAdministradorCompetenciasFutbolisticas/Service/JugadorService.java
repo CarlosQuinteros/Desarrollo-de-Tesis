@@ -53,6 +53,10 @@ public class JugadorService {
         jugadorRepository.deleteById(id);
     }
 
+    public Integer cantidadJugadores(){
+        return jugadorRepository.countJugadorBy();
+    }
+
     public List<Jugador> getListadoJugadoresOrdenadoPorApellido(){
         return jugadorRepository.findByOrderByApellidosAsc();
     }
@@ -120,37 +124,52 @@ public class JugadorService {
     }
 
     /*
-    *   Metodo que valida que la fecha de realizacion de una transferencia (cambio de club de un jugador)
-    *   sea mayor a la fecha de su ultima transferencia
-     */
+        Metodo que valida que la fecha de realizacion de una transferencia (cambio de club de un jugador)
+        sea mayor a la fecha de su ultima transferencia
+    */
     public void validarFechaCambioDeClub(LocalDate fechaCambioClub, Jugador jugador){
-        Pase ultimoPase = paseJugadorRepository.findByJugador_IdAndFechaHastaIsNull(jugador.getId());
+        Pase ultimoPase = getUltimaTransferencia(jugador.getId());
        // return fechaCambioClub.isAfter(ultimoPase.getFechaDesde());
-        if(!fechaCambioClub.isAfter(ultimoPase.getFechaDesde())){
-            throw new BadRequestException("La fecha ingresada no debe ser menor a la fecha de su ultimo cambio de club");
+        if(fechaCambioClub.isBefore(ultimoPase.getFechaDesde())){
+            throw new BadRequestException("La fecha ingresada no debe ser menor a la fecha de su ultimo cambio de club: "+ ultimoPase.getFechaDesde());
         }
     }
 
     /*
-    *   Metodo que valida que al realizar una transferencia, el club sea diferente del club
-    *   en que se encuentra actualmente el jugador
-     */
+         Metodo que valida que al realizar una transferencia, el club sea diferente del club
+         en que se encuentra actualmente el jugador
+    */
     public void validarClubNoIgualesAlCambiarDeClub(Club clubACambiar, Jugador jugador){
-        if(clubACambiar.getId().equals(jugador.getClubActual().getId())){
+        if(jugador.getClubActual()!= null && clubACambiar.getId().equals(jugador.getClubActual().getId())){
             throw new BadRequestException("El Club ingresado es el Club actual del jugador");
         }
     }
 
+    /*
+        Metodo que retorna la primer transferencia realizada, es decir su primera inscripcion
+    */
+    public Pase getPrimerTransferencia(Long id){
+        Pase primerPase = paseJugadorRepository.findFirstByJugador_Id(id);
+        return primerPase;
+    }
+
 
     /*
-    *   Metodo que retorna la ultima transferencia realizada por un jugador
+    *   Metodo que retorna la ultima transferencia fecha hasta is null realizada por un jugador
      */
-    public Pase getUltimaTransferencia(Long id){
+    public Pase getUltimaTransferenciaFechaHastaIsNUll(Long id){
         Pase ultimoPase = paseJugadorRepository.findByJugador_IdAndFechaHastaIsNull(id);
         return ultimoPase;
     }
 
+    public Pase getUltimaTransferencia(Long id){
+        List<Pase> pases =  paseJugadorRepository.findByJugador_IdOrderByFechaDesdeAsc(id);
+        return pases.get(pases.size()-1);
+    }
 
+    /*
+     *   Metodo que retorna el club actual de un jugador, pase cuya fecha hasta es null
+     */
     public Club getClubActualJugador(Long id){
         Pase clubActual = paseJugadorRepository.findByJugador_IdAndFechaHastaIsNull(id);
         return clubActual.getClub();
@@ -158,6 +177,7 @@ public class JugadorService {
 
     /*
     *   Metodo que retorna el club en que el jugador estuvo en una cierta fecha
+    *   TODO: AUN NO FUNCIONA
      */
     public Club getClubEnFecha(Jugador jugador, LocalDate fecha){
         List<Pase> historial = paseJugadorService.historialJugador(jugador.getId());

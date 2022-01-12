@@ -4,12 +4,13 @@ import javax.validation.constraints.NotBlank;
 
 public class ClubDto {
 
-    @NotBlank
+    @NotBlank(message = "El alias no debe ser nulo")
     private  String alias;
-    @NotBlank
+
+    @NotBlank(message = "El nombre no debe ser nulo")
     private String nombre;
 
-    @NotBlank
+    @NotBlank(message = "El email no debe ser nulo")
     private String email;
 
     public String getNombre() {

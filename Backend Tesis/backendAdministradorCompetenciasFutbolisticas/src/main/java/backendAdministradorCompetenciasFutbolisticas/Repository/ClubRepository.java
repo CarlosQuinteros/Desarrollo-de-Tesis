@@ -24,4 +24,6 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
 
     Integer countClubBy();
 
+
+
 }

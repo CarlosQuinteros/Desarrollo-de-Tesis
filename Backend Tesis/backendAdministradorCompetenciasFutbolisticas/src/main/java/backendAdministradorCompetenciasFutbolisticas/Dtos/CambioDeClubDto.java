@@ -3,27 +3,28 @@ package backendAdministradorCompetenciasFutbolisticas.Dtos;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.Date;
 
 public class CambioDeClubDto {
 
-    @NotNull(message = "El campo fecha no debe ser null")
-    private LocalDate fecha;
+    @NotNull(message = "El campo fecha es obligatorio")
+    private Date fecha;
 
     @NotNull(message = "El jugador es obligatorio")
     private Long idJugador;
 
-    @NotNull
+    @NotNull (message = "El club es obligatorio")
     private Long idClub;
 
-    @NotBlank
+    @NotBlank (message = "El motivo es obligatorio")
     private String motivo;
 
 
-    public LocalDate getFecha() {
+    public Date getFecha() {
         return fecha;
     }
 
-    public void setFecha(LocalDate fecha) {
+    public void setFecha(Date fecha) {
         this.fecha = fecha;
     }
 
