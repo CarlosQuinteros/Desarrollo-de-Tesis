@@ -68,7 +68,9 @@ public class EmailController {
             return new ResponseEntity(new Mensaje("Te enviamos un correo"), HttpStatus.OK);
 
         }catch (Exception e){
+            System.out.println(e.getMessage());
             return  new ResponseEntity(new Mensaje("Error al enviar el correo"), HttpStatus.INTERNAL_SERVER_ERROR);
+
         }
 
     }

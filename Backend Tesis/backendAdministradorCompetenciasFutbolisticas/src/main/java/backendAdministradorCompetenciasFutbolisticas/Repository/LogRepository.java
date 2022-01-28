@@ -13,5 +13,10 @@ public interface LogRepository extends JpaRepository<Log, Long> {
 
     List<Log> findByUsuario_IdOrderByFechaDesc(Long id);
 
+    List<Log> findAllByOrderByFechaDesc();
+
+    List<Log> findByUsuario_NombreUsuarioOrderByFechaDesc(String nombreUsuario);
+
     Integer countByUsuario_Id(Long id);
+
 }

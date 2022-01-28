@@ -28,12 +28,17 @@ public class LogService {
 
 
     public List<Log> getListado(){
-        List<Log> listado = logRepository.findAll();
+        List<Log> listado = logRepository.findAllByOrderByFechaDesc();
         return listado;
     }
 
     public List<Log> logsPorUsuario(Long id){
         List<Log> listaLogs = logRepository.findByUsuario_IdOrderByFechaAsc(id);
+        return listaLogs;
+    }
+
+    public  List<Log> logsPorNombreDeUsuario(String username){
+        List<Log> listaLogs = logRepository.findByUsuario_NombreUsuarioOrderByFechaDesc(username);
         return listaLogs;
     }
 

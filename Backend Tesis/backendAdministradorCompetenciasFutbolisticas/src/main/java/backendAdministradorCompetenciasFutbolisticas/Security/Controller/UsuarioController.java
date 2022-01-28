@@ -1,7 +1,9 @@
 package backendAdministradorCompetenciasFutbolisticas.Security.Controller;
 
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
+import backendAdministradorCompetenciasFutbolisticas.Dtos.NuevoJugadorDto;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Log;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.InternalServerErrorException;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.ActualizarUsuarioDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.CambiarPasswordDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.NuevoUsuarioDto;
@@ -86,6 +88,17 @@ public class UsuarioController {
             return new ResponseEntity(new Mensaje("Nuevo usuario guardado"), HttpStatus.CREATED);
         }catch (Exception e){
             return new ResponseEntity<>(new Mensaje("Fallo la operacion, usuario no guardado"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize(("hasRole('ADMIN')"))
+    @PostMapping("/envio-email/usuario-nuevo")
+    public ResponseEntity<?> enviarEmailUsuarioNuevo(@Valid @RequestBody NuevoUsuarioDto nuevoUsuarioDto){
+        try{
+            envioMailService.sendEmailUsuarioCreado(nuevoUsuarioDto);
+            return new ResponseEntity(new Mensaje("Email enviado correctamente"), HttpStatus.OK);
+        }catch (Exception e){
+            throw new InternalServerErrorException("Fallo la operacion. Email no enviado");
         }
     }
 
