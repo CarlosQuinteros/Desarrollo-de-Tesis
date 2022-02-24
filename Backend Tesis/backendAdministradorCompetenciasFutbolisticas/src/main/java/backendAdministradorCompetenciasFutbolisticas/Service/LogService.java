@@ -131,10 +131,10 @@ public class LogService {
     public boolean ultimosNLogSonErrorLogin(Usuario usuario, Integer cantidadMax){
         boolean resultado = true;
         List<Log> ulitmos = getUltimosNLogPorUsuario(usuario.getId(), cantidadMax);
-        ulitmos.forEach( l -> System.out.println(l.getId()));
+        //ulitmos.forEach( l -> System.out.println(l.getId()));
         for (Log log : ulitmos ) {
             resultado = resultado && log.getLogAccion().equals(LogAccion.USUARIO_ERROR_LOGIN);
-            System.out.println(resultado);
+            //System.out.println(resultado);
         }
         return resultado;
     }
