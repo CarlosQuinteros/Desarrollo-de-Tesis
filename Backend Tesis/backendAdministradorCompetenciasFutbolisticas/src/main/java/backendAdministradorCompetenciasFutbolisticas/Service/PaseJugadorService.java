@@ -4,6 +4,7 @@ import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Pase;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.RecursoNotFoundException;
+import backendAdministradorCompetenciasFutbolisticas.Repository.JugadorRepository;
 import backendAdministradorCompetenciasFutbolisticas.Repository.PaseJugadorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,9 @@ public class PaseJugadorService {
 
     @Autowired
     PaseJugadorRepository paseJugadorRepository;
+
+    @Autowired
+    JugadorRepository jugadorRepository;
 
     public boolean guardar(Pase pase){
         return paseJugadorRepository.save(pase).getId() != null;
@@ -81,26 +85,14 @@ public class PaseJugadorService {
     public void eliminarPase(Long idPase){
         Pase pase = paseJugadorRepository.getById(idPase);
         Jugador  jugador = pase.getJugador();
-        if(paseJugadorRepository.countPaseByJugador_Id(jugador.getId()) == 1){
-            throw new BadRequestException("El jugador tiene solo un unico historial y no puede eliminarse");
+        if(pase.getFechaHasta() == null){
+            jugador.setClubActual(null);
+            paseJugadorRepository.delete(pase);
+            jugadorRepository.save(jugador);
         }
-        List<Pase> historial = historialJugador(jugador.getId());
-
-        if(paseJugadorRepository.existsByIdAndFechaHastaIsNull(idPase)){
-            historial.forEach(pase1 -> System.out.println(pase1.getId()));
-            Pase paseAnterior= historial.get(historial.size()-2);
-            System.out.println("\nel que deberia ser ultimo pase: " + paseAnterior.getId());
-            historial.remove(pase);
-            System.out.println("luego de eliminar el pase del historial obtenido");
-            System.out.println("el que deberia ser el ultimo pase: "+ historial.get(historial.size()-1).getId());
+        else{
+            paseJugadorRepository.delete(pase);
         }
-
-        System.out.println("como no tiene null en fecha desde, no obtengo el ultimo pase, solo elimino");
-        historial.remove(pase);
-        historial.forEach(pase1 -> System.out.println(pase1.getId()));
-
-
-
     }
 
 

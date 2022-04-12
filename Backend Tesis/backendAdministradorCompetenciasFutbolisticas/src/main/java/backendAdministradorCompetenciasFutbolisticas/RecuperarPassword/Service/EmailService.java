@@ -30,7 +30,7 @@ public class EmailService {
     TemplateEngine templateEngine;
 
 
-    public void sendEmailRecuperarContraseña(EmailValuesDto emailValuesDto){
+    public void sendEmailRecuperarPassword(EmailValuesDto emailValuesDto){
         MimeMessage message = javaMailSender.createMimeMessage();
         try{
             MimeMessageHelper helper = new MimeMessageHelper(message,true);

@@ -128,7 +128,7 @@ public class Pase {
     };
 
     public String getFechaHastaParsed(){
-        return fechaHasta!=null ? DateTimeFormatter.RFC_1123_DATE_TIME.format(fechaHasta.atStartOfDay(ZoneId.of("UTC-3"))) : null;
+        return fechaHasta != null ? DateTimeFormatter.RFC_1123_DATE_TIME.format(fechaHasta.atStartOfDay(ZoneId.of("UTC-3"))) : null;
     };
 
     public String getFechaDesdeParsed(){

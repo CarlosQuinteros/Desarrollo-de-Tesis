@@ -266,15 +266,16 @@ public class JugadorController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Usuario usuario = usuarioService.getUsuarioLogueado(auth);
 
-       //valida fecha ingresada de cambio de club, validar fecha genera badrequestException si no es valida
         LocalDate fechaDesde = cambioDeClubDto.getFecha().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-       jugadorService.validarFechaCambioDeClub(fechaDesde, jugador);
+
+        //valida fecha ingresada de cambio de club, validar fecha genera badrequestException si no es valida
+        jugadorService.validarFechaCambioDeClub(fechaDesde, jugador);
 
        //valida que el club ingresado no sea el el club actual del jugador, genera badrequest si es el caso
        jugadorService.validarClubNoIgualesAlCambiarDeClub(club,jugador);
         try {
             Pase ultimoPase = jugadorService.getUltimaTransferencia(jugador.getId());
-            if(ultimoPase.getFechaHasta()==null){
+            if(ultimoPase.getFechaHasta() == null){
                 ultimoPase.setFechaHasta(fechaDesde);
                 paseJugadorService.guardar(ultimoPase);
             }
@@ -293,20 +294,58 @@ public class JugadorController {
 
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
     @PutMapping("/pases/editar/{idPase}")
-    public ResponseEntity<?> editarPase(@PathVariable ("idPase") Long idPase, @Valid @RequestBody CambioDeClubDto paseDto, BindingResult bindingResult){
+    public ResponseEntity<?> editarPase(@PathVariable ("idPase") Long idPase, @Valid @RequestBody EditarPaseJugadorDto editarPaseJugadorDto, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             throw new InvalidDataException(bindingResult);
         }
-        return null;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioService.getUsuarioLogueado(auth);
+
+        //El servicio genera exception si no encuentra el pase
+        Pase paseJugador = paseJugadorService.getPaseById(idPase);
+
+        //El servicio genera exception si no encuentra el jugador
+        Jugador jugador = jugadorService.getJugador(paseJugador.getJugador().getId());
+
+        Club clubActualizado = clubService.getClub(editarPaseJugadorDto.getIdClub());
+
+        if(paseJugador.getFechaHasta() == null && paseJugador.getClub().getId() != clubActualizado.getId()){
+            System.out.println("La fecha hasta es null y clubes diferentes, debo actualizar club actual al club: " + clubActualizado.getNombreClub());
+            jugador.setClubActual(clubActualizado);
+        }
+        if(paseJugador.getFechaHasta() == null && editarPaseJugadorDto.getFechaHasta() != null){
+            //System.out.println("la fecha hasta del pase es null y viene del dto una fecha, debo actualizar club del jugador a null");
+            jugador.setClubActual(null);
+        }
+        //System.out.println("no hay restricciones y puedo guardar el pase actualizado");
+        paseJugador.setFecha(LocalDate.now());
+        paseJugador.setClub(clubActualizado);
+        paseJugador.setFechaDesde(editarPaseJugadorDto.getFechaDesde());
+        paseJugador.setFechaHasta(editarPaseJugadorDto.getFechaHasta());
+        paseJugador.setMotivo(editarPaseJugadorDto.getMotivo());
+        jugadorService.guardarJugador(jugador);
+        logService.guardarLogEdicionPase(paseJugador, usuario);
+        paseJugadorService.guardar(paseJugador);
+        return new ResponseEntity<>(new Mensaje("Pase actualizado correctamente"),HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
     @DeleteMapping("/pases/eliminar/{idPase}")
     public ResponseEntity<?> eliminarPase(@PathVariable("idPase") Long idPase){
         //el servicio genera exception si no obtiene el pase
         Pase pase = paseJugadorService.getPaseById(idPase);
-        paseJugadorService.eliminarPase(idPase);
-        return null;
+        try{
+            paseJugadorService.eliminarPase(pase.getId());
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Usuario usuario = usuarioService.getUsuarioLogueado(auth);
+            logService.guardarLogEliminacionPase(pase, usuario);
+            return new ResponseEntity<>(new Mensaje("Pase eliminado correctamente"), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(new Mensaje("Fallo la operacion. No se elimino el Pase"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     /*

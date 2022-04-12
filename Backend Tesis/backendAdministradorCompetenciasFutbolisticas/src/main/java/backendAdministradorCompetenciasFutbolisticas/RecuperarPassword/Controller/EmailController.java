@@ -61,7 +61,7 @@ public class EmailController {
             UUID uuid = UUID.randomUUID();
             String tokenPassword = uuid.toString();
             dto.setToken(tokenPassword);
-            emailService.sendEmailRecuperarContraseña(dto);
+            emailService.sendEmailRecuperarPassword(dto);
             usuario.setTokenPassword(dto.getToken());
 
             usuarioService.save(usuario);

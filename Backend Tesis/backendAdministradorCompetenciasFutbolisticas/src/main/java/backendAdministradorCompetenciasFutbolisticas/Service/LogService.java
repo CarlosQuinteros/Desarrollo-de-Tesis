@@ -91,6 +91,17 @@ public class LogService {
         logRepository.save(log);
     }
 
+    public void guardarLogEdicionPase(Pase paseJugador, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.PASES_EDICION, "Se modifico el pase ID: "+ paseJugador.getId(), paseJugador.getId());
+        logRepository.save(log);
+    }
+
+    public void guardarLogEliminacionPase(Pase paseJugador, Usuario usuario){
+
+        Log log = new Log(usuario, LogAccion.PASES_ELIMINACION, "Se elimino el Pase ID: " + paseJugador.getId() + " del jugador ID: " + paseJugador.getJugador().getId(), paseJugador.getId());
+        logRepository.save(log);
+    }
+
     // Metodos para Logs de USUARIOS
 
     public void guardarLogLoginUsuario(Usuario usuario){
