@@ -35,14 +35,6 @@ public class PaseController {
         return new ResponseEntity<>(cantidad,HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
-    @PostMapping("/prueba")
-    public ResponseEntity<?> prueba(@RequestBody CambioDeClubDto cambiio){
-        System.out.println("lo que viene de js Date:  " + cambiio.getFecha());
-        System.out.println("date de js a java to localdate: " + cambiio.getFecha().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-
-        return new ResponseEntity<>("todo parece ok", HttpStatus.OK);
-    }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
     @GetMapping("/detalle/{id}")

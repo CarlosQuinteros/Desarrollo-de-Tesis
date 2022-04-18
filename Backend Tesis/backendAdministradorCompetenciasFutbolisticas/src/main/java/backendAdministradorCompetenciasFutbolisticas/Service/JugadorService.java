@@ -6,7 +6,7 @@ import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Pase;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoJugador;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
-import backendAdministradorCompetenciasFutbolisticas.Excepciones.RecursoNotFoundException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.EstadoJugadorRepository;
 import backendAdministradorCompetenciasFutbolisticas.Repository.JugadorRepository;
 import backendAdministradorCompetenciasFutbolisticas.Repository.PaseJugadorRepository;
@@ -72,7 +72,7 @@ public class JugadorService {
     public Jugador getJugador(Long id){
         Optional<Jugador> jugadorOptional = jugadorRepository.findById(id);
         if(!jugadorOptional.isPresent()){
-            throw new RecursoNotFoundException("El jugador con ID: " + id + " no existe");
+            throw new ResourceNotFoundException("El jugador con ID: " + id + " no existe");
         }
         return jugadorOptional.get();
     }
@@ -80,7 +80,7 @@ public class JugadorService {
     public Jugador getJugadorPorDni(String dni){
         Optional<Jugador> jugadorOptional = jugadorRepository.findByDocumento(dni);
         if(!jugadorOptional.isPresent()){
-            throw new RecursoNotFoundException("El jugador con DNI: " + dni + " no existe");
+            throw new ResourceNotFoundException("El jugador con DNI: " + dni + " no existe");
         }
         return jugadorOptional.get();
     }

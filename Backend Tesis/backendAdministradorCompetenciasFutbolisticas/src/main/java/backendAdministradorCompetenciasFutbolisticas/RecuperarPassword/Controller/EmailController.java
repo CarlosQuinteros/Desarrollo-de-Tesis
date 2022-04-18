@@ -1,6 +1,10 @@
 package backendAdministradorCompetenciasFutbolisticas.RecuperarPassword.Controller;
 
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.InternalServerErrorException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.RecuperarPassword.Dto.RecuperarPasswordDto;
 import backendAdministradorCompetenciasFutbolisticas.RecuperarPassword.Dto.EmailValuesDto;
 import backendAdministradorCompetenciasFutbolisticas.RecuperarPassword.Service.EmailService;
@@ -32,8 +36,10 @@ public class EmailController {
 
     @GetMapping("/existe-token/{tokenPassword}")
     public ResponseEntity<?> existeTokenPassword(@PathVariable ("tokenPassword") String tokenPassword){
-        boolean existeToken = usuarioService.existByTokenPassword(tokenPassword);
-        return existeToken ? new ResponseEntity(new Mensaje("Token de recuperación válido"), HttpStatus.OK) : new ResponseEntity(new Mensaje("Token de recuperación incorrecto"), HttpStatus.NOT_FOUND);
+        if(!usuarioService.existByTokenPassword(tokenPassword)){
+            throw new ResourceNotFoundException("Token de recuperacion incorrecto");
+        }
+        return new ResponseEntity(new Mensaje("Token de recuperación válido"), HttpStatus.OK);
     }
 
 
@@ -42,7 +48,7 @@ public class EmailController {
     public  ResponseEntity<Usuario> getUsuarioByTokenPassword(@PathVariable ("tokenPassword") String tokenPassword){
         Optional<Usuario> usuarioOptional = usuarioService.getByTokenPassword(tokenPassword);
         if (!usuarioOptional.isPresent()){
-            return new ResponseEntity(new Mensaje("No existe ningún usuario con el token indicado."), HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("No existe ningún usuario con el token indicado");
         }
         Usuario usuario = usuarioOptional.get();
         return new ResponseEntity(usuario, HttpStatus.OK);
@@ -52,7 +58,7 @@ public class EmailController {
     public ResponseEntity<?> sendEmailPassword(@RequestBody EmailValuesDto dto){
         Optional<Usuario> usuarioOptional = usuarioService.getByNombreUsuarioOrEmail(dto.getMailTo());
         if (!usuarioOptional.isPresent()){
-            return new ResponseEntity(new Mensaje("No existe ningún usuario con las credenciales ingresadas."), HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("No existe el usuario: " + dto.getMailTo());
         }
         try{
             Usuario usuario = usuarioOptional.get();
@@ -68,9 +74,7 @@ public class EmailController {
             return new ResponseEntity(new Mensaje("Te enviamos un correo"), HttpStatus.OK);
 
         }catch (Exception e){
-            System.out.println(e.getMessage());
-            return  new ResponseEntity(new Mensaje("Error al enviar el correo"), HttpStatus.INTERNAL_SERVER_ERROR);
-
+            throw new InternalServerErrorException("Error al enviar el correo");
         }
 
     }
@@ -78,14 +82,14 @@ public class EmailController {
     @PostMapping("/recuperar-password")
     public ResponseEntity<?> cambiarPassword(@Valid @RequestBody RecuperarPasswordDto recuperarPasswordDto, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
-            return new ResponseEntity(new Mensaje("Campos mal ingresados"), HttpStatus.BAD_REQUEST);
+            throw new InvalidDataException(bindingResult);
         }
         if(!recuperarPasswordDto.getPassword().equals(recuperarPasswordDto.getConfirmarPassword())){
-            return new ResponseEntity(new Mensaje("Las contraseñas no coinciden"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("Las contraseñas no coinciden");
         }
         Optional<Usuario> usuarioOptional = usuarioService.getByTokenPassword(recuperarPasswordDto.getTokenPassword());
         if(!usuarioOptional.isPresent()){
-            return new ResponseEntity(new Mensaje("No existe ningún usuario con el token indicado"), HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("No existe un usuario con el token ingresado");
         }
         try {
             Usuario usuario = usuarioOptional.get();
@@ -97,7 +101,7 @@ public class EmailController {
             return new ResponseEntity(new Mensaje("Contraseña actualizada correctamente"), HttpStatus.OK);
 
         }catch (Exception e){
-            return new ResponseEntity(new Mensaje("Fallo la operación. La contraseña no se actualizó"), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Fallo la operación. La contraseña no se actualizó");
         }
 
     }

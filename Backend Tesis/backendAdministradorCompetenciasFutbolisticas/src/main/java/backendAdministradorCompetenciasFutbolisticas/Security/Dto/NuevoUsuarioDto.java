@@ -7,15 +7,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class NuevoUsuarioDto {
-    @NotBlank
+    @NotBlank(message = "El nombre no debe estar vacio")
     private String nombre;
-    @NotBlank
+    @NotBlank(message = "El apellido no debe estar vacio")
     private String apellido;
-    @Email
+    @Email(message = "El correo es obligatorio")
     private String email;
-    @NotBlank
+    @NotBlank(message = "El nombre de usuario es obligatorio")
     private String nombreUsuario;
-    @NotBlank
+    @NotBlank(message = "La contraseña no debe estar vacia")
     private String password;
     private Set<String> roles =  new HashSet<>();
     private String activo;

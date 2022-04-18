@@ -4,13 +4,13 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 public class PerfilUsuarioDto {
-    @NotBlank
+    @NotBlank(message = "El nombre no debe estar vacio")
     private String nombre;
-    @NotBlank
+    @NotBlank(message = "El apellido no debe estar vacio")
     private String apellido;
-    @Email
+    @Email(message = "El correo es obligatorio")
     private String email;
-    @NotBlank
+    @NotBlank(message = "El nombre de usuario es obligatorio")
     private String nombreUsuario;
 
     public String getNombre() {

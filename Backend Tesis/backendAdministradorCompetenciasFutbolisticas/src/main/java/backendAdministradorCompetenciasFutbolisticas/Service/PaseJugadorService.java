@@ -2,8 +2,7 @@ package backendAdministradorCompetenciasFutbolisticas.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Pase;
-import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
-import backendAdministradorCompetenciasFutbolisticas.Excepciones.RecursoNotFoundException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.JugadorRepository;
 import backendAdministradorCompetenciasFutbolisticas.Repository.PaseJugadorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +78,7 @@ public class PaseJugadorService {
 
     public Pase getPaseById(Long idPase){
         return paseJugadorRepository.findById(idPase)
-                .orElseThrow(() -> new RecursoNotFoundException("EL pase con ID: " + idPase + " no existe"));
+                .orElseThrow(() -> new ResourceNotFoundException("EL pase con ID: " + idPase + " no existe"));
     }
 
     public void eliminarPase(Long idPase){

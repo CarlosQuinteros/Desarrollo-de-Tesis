@@ -1,6 +1,7 @@
 package backendAdministradorCompetenciasFutbolisticas.Security.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Entity.Log;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Repository.UsuarioRepository;
 import backendAdministradorCompetenciasFutbolisticas.Service.LogService;
@@ -92,7 +93,8 @@ public class UsuarioService {
 
     public Usuario getUsuarioLogueado(Authentication auth){
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
-        Usuario usuario = usuarioRepository.findByNombreUsuario(userDetails.getUsername()).get();
+        Usuario usuario = usuarioRepository.findByNombreUsuario(userDetails.getUsername())
+                .orElseThrow(() -> new BadRequestException("El usuario no existe"));
         return usuario;
     }
 

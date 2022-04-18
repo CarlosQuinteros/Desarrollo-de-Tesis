@@ -3,7 +3,10 @@ package backendAdministradorCompetenciasFutbolisticas.Security.Controller;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.NuevoJugadorDto;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Log;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InternalServerErrorException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.ActualizarUsuarioDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.CambiarPasswordDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.NuevoUsuarioDto;
@@ -59,12 +62,11 @@ public class UsuarioController {
     @PostMapping("/nuevo")
     public ResponseEntity<?> nuevoUsuario(@Valid @RequestBody NuevoUsuarioDto usuarioDto, BindingResult bindingResult){
         if(bindingResult.hasErrors())
-            return new ResponseEntity( new Mensaje("Campos al ingresados o email invalido"), HttpStatus.BAD_REQUEST);
+            throw new InvalidDataException(bindingResult);
         if (usuarioService.existByNombreUsuario(usuarioDto.getNombreUsuario()))
-            return new ResponseEntity(new Mensaje("El nombre de usuario ya existe"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("El nombre de usuario " + usuarioDto.getNombreUsuario() + " ya existe");
         if (usuarioService.existByEmail(usuarioDto.getEmail()))
-            return  new ResponseEntity(new Mensaje("El correo electronico ya existe"), HttpStatus.BAD_REQUEST);
-
+            throw new BadRequestException("El correo " + usuarioDto.getEmail() + " ya existe");
         Usuario usuario =
                 new Usuario(usuarioDto.getNombre(), usuarioDto.getApellido(), usuarioDto.getEmail(), usuarioDto.getNombreUsuario(),
                         passwordEncoder.encode(usuarioDto.getPassword()));
@@ -87,7 +89,7 @@ public class UsuarioController {
             //envioMailService.sendEmailUsuarioCreado(usuarioDto); tarda varios segundos
             return new ResponseEntity(new Mensaje("Nuevo usuario guardado"), HttpStatus.CREATED);
         }catch (Exception e){
-            return new ResponseEntity<>(new Mensaje("Fallo la operacion, usuario no guardado"), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Fallo la operacion, usuario no guardado");
         }
     }
 
@@ -120,7 +122,7 @@ public class UsuarioController {
     @GetMapping("/detalle/{id}")
     public  ResponseEntity<Usuario> getDetalleUsuario(@PathVariable("id") Long id){
         if(!usuarioService.existById(id)){
-            return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("El usuario con ID: " + id + " no existe");
         }
         Usuario usuario = usuarioService.getById(id).get();
         return new ResponseEntity(usuario, HttpStatus.OK);
@@ -133,7 +135,7 @@ public class UsuarioController {
     public ResponseEntity<Usuario> getDetalleUsuarioPorNombreUsuario(@PathVariable("nombreUsuario") String nombreUsuario){
         Optional<Usuario> usuarioOptional = usuarioService.getByNombreUsuario(nombreUsuario);
         if (!usuarioOptional.isPresent()){
-            return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("El usuario: " + nombreUsuario + " no existe");
         }
         Usuario usuario = usuarioService.getByNombreUsuario(nombreUsuario).get();
         return new ResponseEntity(usuario, HttpStatus.OK);
@@ -148,18 +150,18 @@ public class UsuarioController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable ("id") long id){
         if (!usuarioService.existById(id)){
-            return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("El usuario con ID: " + id + " no existe");
         }
         Usuario usuario = usuarioService.getById(id).get();
         if (usuario.getNombreUsuario().contains("admin")){
-            return  new ResponseEntity(new Mensaje("El usuario administrador no se puede eliminar"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("El usuario administrador no se puede eliminar");
         }
         try {
             usuarioService.delete(id);
             return new ResponseEntity(new Mensaje("Usuario borrado correctamente"), HttpStatus.OK);
         }
         catch (Exception e) {
-            return new ResponseEntity(new Mensaje("Fallo la operacion, usuario no borrado"), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Fallo la operacion. El usuario no se borro correctamente");
         }
     }
 
@@ -171,13 +173,13 @@ public class UsuarioController {
     @PutMapping("/alta/{id}")
     public ResponseEntity<?> activarUsuario(@PathVariable ("id") Long id){
         if (!usuarioService.existById(id)){
-            return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("El usuario con ID: " + id + " no existe");
         }
         Usuario usuario = usuarioService.getById(id).get();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Usuario usuarioLogueado = usuarioService.getUsuarioLogueado(auth);
         if (usuario.isActivo()) {
-            return new ResponseEntity(new Mensaje("El usuario ya se encuentra Activo"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("El usuario ya se encuentra Activo");
         }
         usuarioService.cambiarEstado(id);
         logService.guardarAltaUsuario(usuario, usuarioLogueado);
@@ -193,18 +195,17 @@ public class UsuarioController {
         public ResponseEntity<?> bajaUsuario(@PathVariable ("id") Long id){
 
         if (!usuarioService.existById(id)){
-            return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("El usuario con ID: " + id + " no existe");
         }
         Usuario usuario = usuarioService.getById(id).get();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Usuario usuarioLogueado = usuarioService.getUsuarioLogueado(auth);
 
         if (!usuario.isActivo()){
-
-            return new ResponseEntity(new Mensaje("El usuario ya se encuentra Inactivo"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("El usuario ya se encuentra Inactivo");
         }
         if(usuario.getNombreUsuario().contains("admin")){
-            return new ResponseEntity(new Mensaje("El usuario administrador no puede darse de baja"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("El usuario administrador no puede darse de baja");
         }
         usuarioService.cambiarEstado(id);
         logService.guardarBajaUsuario(usuario, usuarioLogueado);
@@ -219,30 +220,29 @@ public class UsuarioController {
     @PreAuthorize("authenticated")
     @PutMapping("/cambiarContrasenia/{id}")
     public ResponseEntity<?> cambiarContrasenia(@PathVariable ("id") Long id, @Valid @RequestBody CambiarPasswordDto cambiarPasswordDto, BindingResult bindingResult){
-        //UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         if (!usuarioService.existById(id)){
-            return new ResponseEntity(new Mensaje("El usuario no existe"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("El usuario con ID: " + id + " no existe");
         }
         Usuario usuario = usuarioService.getById(id).get();
         if(bindingResult.hasErrors()){
-            return  new ResponseEntity(new Mensaje("Campos mal ingresados"), HttpStatus.BAD_REQUEST);
+            throw new InvalidDataException(bindingResult);
         }
         if(!passwordEncoder.matches(cambiarPasswordDto.getPasswordActual(),usuario.getPassword())) {
-            return  new ResponseEntity(new Mensaje("La contraseña actual y la ingresada son incorrectas"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("La contraseña actual y la ingresada son incorrectas");
         }
         if(!cambiarPasswordDto.getPasswordNuevo().equals(cambiarPasswordDto.getRepetirPassword())){
-            return new ResponseEntity(new Mensaje("La contraseña nueva debe concidir"), HttpStatus.NOT_FOUND);
+            throw new BadRequestException("La contraseña nueva debe concidir con la ingresada");
         }
         if (passwordEncoder.matches(cambiarPasswordDto.getPasswordNuevo(),usuario.getPassword())){
-            return new ResponseEntity(new Mensaje("La contraseña nueva no puede ser igual a la actual"),HttpStatus.NOT_FOUND);
+            throw new BadRequestException("La contraseña nueva no puede ser igual a la actual");
         }
         try{
             usuario.setPassword(passwordEncoder.encode(cambiarPasswordDto.getPasswordNuevo()));
             usuarioService.save(usuario);
             return  new ResponseEntity(new Mensaje("Contraseña cambiada correctamente"), HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity(new Mensaje("Fallo la operacion. La contraseña no fue cambiada"), HttpStatus.BAD_REQUEST);
+            throw new InternalServerErrorException("Fallo la operacion. La contraseña no fue cambiada");
         }
 
     }
@@ -255,21 +255,21 @@ public class UsuarioController {
     @PutMapping("/editar/{id}")
     public  ResponseEntity<Usuario> actualizarUsuario(@PathVariable ("id") Long id, @Valid @RequestBody ActualizarUsuarioDto usuarioDto, BindingResult bindingResult ){
         if(bindingResult.hasErrors()){
-            return new ResponseEntity(new Mensaje("Campos mal ingresado"), HttpStatus.BAD_REQUEST);
+            throw new InvalidDataException(bindingResult);
         }
         Optional<Usuario> usuarioOptional = usuarioService.getById(id);
         if(!usuarioOptional.isPresent()) {
-            return new ResponseEntity(new Mensaje("No existe el usuario"), HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("El usuario con ID: " + id + " no existe");
         }
         Usuario usuarioActualizar = usuarioOptional.get();
         if(usuarioActualizar.getNombreUsuario().contains("admin")){
-            return  new ResponseEntity(new Mensaje("El usuario administrador no puede editarse"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("El usuario administrador no puede editarse");
         }
         if (usuarioService.existByNombreUsuario(usuarioDto.getNombreUsuario()) && !usuarioActualizar.getNombreUsuario().equals(usuarioDto.getNombreUsuario())){
-            return new ResponseEntity(new Mensaje("El nombre de usuario ya existe"),HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("El nombre de usuario " + usuarioDto.getNombreUsuario() + " ya existe");
         }
         if(usuarioService.existByEmail(usuarioDto.getEmail()) && !usuarioActualizar.getEmail().equals(usuarioDto.getEmail())){
-            return new ResponseEntity(new Mensaje("El correo electrónico ya existe"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("El correo " + usuarioDto.getEmail() + " ya existe");
         }
         usuarioActualizar.setNombre(usuarioDto.getNombre());
         usuarioActualizar.setApellido(usuarioDto.getApellido());
@@ -292,7 +292,7 @@ public class UsuarioController {
             return new ResponseEntity(usuarioActualizar, HttpStatus.OK);
 
         } catch (Exception e){
-            return new ResponseEntity(new Mensaje("Fallo la operacion, usuario no actualizado"), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Fallo la operacion, usuario no actualizado");
         }
     }
 
@@ -302,21 +302,21 @@ public class UsuarioController {
     @PutMapping("/perfil/actualizarDatos/{id}")
     public ResponseEntity<Usuario> actualizarDatosPerfil(@PathVariable ("id") Long id, @Valid @RequestBody  PerfilUsuarioDto usuarioDto, BindingResult bindingResult ){
         if(bindingResult.hasErrors()){
-            return new ResponseEntity(new Mensaje("Camnpos mal ingresados"), HttpStatus.BAD_REQUEST);
+            throw new InvalidDataException(bindingResult);
         }
         Optional<Usuario> usuarioOptional = usuarioService.getById(id);
         if (!usuarioOptional.isPresent()){
-            return new ResponseEntity(new Mensaje("No existe el usuario"), HttpStatus.BAD_REQUEST);
+            throw new ResourceNotFoundException("El usuario con ID: " + id + " no existe");
         }
         Usuario usuarioActualizar = usuarioOptional.get();
         if(usuarioActualizar.getNombreUsuario().contains("admin")){
-            return  new ResponseEntity(new Mensaje("El usuario administrador no puede editarse"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("El usuario administrador no puede editarse");
         }
         if (usuarioService.existByNombreUsuario(usuarioDto.getNombreUsuario()) && !usuarioActualizar.getNombreUsuario().equals(usuarioDto.getNombreUsuario())){
-            return new ResponseEntity(new Mensaje("El nombre de usuario ya existe"),HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("El nombre de usuario " + usuarioDto.getNombreUsuario() + " ya existe");
         }
         if(usuarioService.existByEmail(usuarioDto.getEmail()) && !usuarioActualizar.getEmail().equals(usuarioDto.getEmail())){
-            return new ResponseEntity(new Mensaje("El correo electrónico ya existe"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("El correo " + usuarioDto.getEmail() + " ya existe");
         }
         usuarioActualizar.setNombre(usuarioDto.getNombre());
         usuarioActualizar.setApellido(usuarioDto.getApellido());
@@ -327,7 +327,7 @@ public class UsuarioController {
             return new ResponseEntity(usuarioActualizar, HttpStatus.OK);
 
         } catch (Exception e){
-            return new ResponseEntity(new Mensaje("Fallo la operación. Usuario no actualizado"), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Fallo la operacion, usuario no actualizado");
         }
 
     }

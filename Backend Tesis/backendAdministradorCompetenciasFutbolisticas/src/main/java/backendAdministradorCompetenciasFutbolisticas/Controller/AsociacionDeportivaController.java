@@ -3,6 +3,10 @@ package backendAdministradorCompetenciasFutbolisticas.Controller;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.AsociacionDeportivaDto;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
 import backendAdministradorCompetenciasFutbolisticas.Entity.AsociacionDeportiva;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.InternalServerErrorException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Service.AsociacionDeportivaService;
 import backendAdministradorCompetenciasFutbolisticas.Service.ClubService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +36,10 @@ public class AsociacionDeportivaController {
     @PostMapping("/crear")
     public ResponseEntity<?> crearAsociacion(@Valid @RequestBody AsociacionDeportivaDto asociacionDeportivaDto, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
-            bindingResult.getAllErrors().forEach(objectError -> objectError.getDefaultMessage());
-            return new ResponseEntity<>(new Mensaje(bindingResult.getFieldError().getDefaultMessage()), HttpStatus.NOT_FOUND);
+            throw new InvalidDataException(bindingResult);
         }
         if(asociacionDeportivaService.existePorNombre(asociacionDeportivaDto.getNombre())){
-            return new ResponseEntity<>(new Mensaje("La Asociacion Deportiva ingresada ya existe"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("La Asociacion Deportiva ingresada ya existe");
         }
         AsociacionDeportiva asociacionDeportiva =  new AsociacionDeportiva(asociacionDeportivaDto.getNombre());
         try{
@@ -44,9 +47,9 @@ public class AsociacionDeportivaController {
             if(resultado){
                 return new ResponseEntity<>(new Mensaje("Asociacion Deportiva guardada correctamente"),HttpStatus.OK);
             }
-            return  new ResponseEntity<>(new Mensaje("Asociacion Deportiva no guardada correctamente"),HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("La asociacion no fue guardada correctamente");
         }catch (Exception e){
-            return new ResponseEntity<>(new Mensaje("Fallo la operacion. Asociacion Deportiva no guardada"), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Fallo la operacion. Asociacion Deportiva no guardada");
         }
     }
 
@@ -57,23 +60,23 @@ public class AsociacionDeportivaController {
     @PutMapping("editar/{id}")
     public ResponseEntity<?> editarAsociacion(@PathVariable ("id") Long id, @Valid @RequestBody AsociacionDeportivaDto asociacionDeportivaDto, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
-            return new ResponseEntity<>(new Mensaje("Campos mal ingresados"), HttpStatus.NOT_FOUND);
+            throw new InvalidDataException(bindingResult);
         }
         Optional<AsociacionDeportiva> asociacionDeportivaOptional = asociacionDeportivaService.getById(id);
 
         if(!asociacionDeportivaOptional.isPresent()){
-            return new ResponseEntity<>(new Mensaje("No existe la Asociacion Deportiva a editar"), HttpStatus.BAD_REQUEST);
+            throw new ResourceNotFoundException("La Asociacion Deportiva ID: " + id + " no existe");
         }
         AsociacionDeportiva asociacionDeportivaActualizar = asociacionDeportivaOptional.get();
         if(asociacionDeportivaActualizar.getNombre()!= asociacionDeportivaDto.getNombre() && asociacionDeportivaService.existePorNombre(asociacionDeportivaDto.getNombre())){
-            return new ResponseEntity<>(new Mensaje("Ya existe una Asociacion Deportiva con el nombre ingresado"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("Ya existe una Asociacion Deportiva con el nombre ingresado");
         }
         try{
             asociacionDeportivaActualizar.setNombre(asociacionDeportivaDto.getNombre());
             asociacionDeportivaService.actualizarAsociacion(asociacionDeportivaActualizar);
             return new ResponseEntity<>(new Mensaje("Asociacion Deportiva actualizada correctamente"), HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity<>(new Mensaje("Fallo la operacion. La Asociacion Deportiva no se actualizo"),HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Fallo la operacion. La Asociacion Deportiva no se actualizo");
         }
     }
 
@@ -86,14 +89,14 @@ public class AsociacionDeportivaController {
     public ResponseEntity<?> eliminarAsociacion(@PathVariable ("id") Long id){
         Optional<AsociacionDeportiva> asociacionDeportivaOptional = asociacionDeportivaService.getById(id);
         if(!asociacionDeportivaOptional.isPresent()){
-            return new ResponseEntity<>(new Mensaje("La Asociacion Deportiva a eliminar no existe"), HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("La Asociacion Deportiva ID: " + id + " no existe");
         }
         AsociacionDeportiva asociacionDeportiva = asociacionDeportivaOptional.get();
         try{
             asociacionDeportivaService.eliminarAsociacion(asociacionDeportiva);
             return new ResponseEntity<>(new Mensaje("Asociacion Deportiva eliminada correctamente"), HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity<>(new Mensaje("Fallo la operacion. La Asociacion Deportiva no se elimino"), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Fallo la operacion. La Asociacion Deportiva no se elimino");
         }
     }
 

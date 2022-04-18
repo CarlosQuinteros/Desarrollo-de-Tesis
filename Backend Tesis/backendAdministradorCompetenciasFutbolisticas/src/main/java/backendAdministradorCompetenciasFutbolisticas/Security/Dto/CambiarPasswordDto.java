@@ -3,11 +3,11 @@ package backendAdministradorCompetenciasFutbolisticas.Security.Dto;
 import javax.validation.constraints.NotBlank;
 
 public class CambiarPasswordDto {
-    @NotBlank
+    @NotBlank(message = "La contraseña actual no debe estar vacia")
     private String passwordActual;
-    @NotBlank
+    @NotBlank(message = "La contraseña nueva no debe estar vacia")
     private String passwordNuevo;
-    @NotBlank
+    @NotBlank(message = "Confirmar la contraseña es obligatorio")
     private String repetirPassword;
 
     public String getPasswordActual() {

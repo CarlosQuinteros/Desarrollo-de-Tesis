@@ -1,6 +1,9 @@
 package backendAdministradorCompetenciasFutbolisticas.Security.Controller;
 
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.UnauthorizedException;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.JwtDto;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.LoginUsuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Dto.NuevoUsuarioDto;
@@ -57,9 +60,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtDto> login(@Valid @RequestBody LoginUsuario loginUsuario, BindingResult bindingResult){
         if (bindingResult.hasErrors())
-            return new ResponseEntity(new Mensaje("Campos mal ingresados"), HttpStatus.BAD_REQUEST);
-
-
+            throw new InvalidDataException(bindingResult);
         try {
             Authentication authentication =
                     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginUsuario.getNombreUsuario(), loginUsuario.getPassword()));
@@ -68,12 +69,11 @@ public class AuthController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             Usuario usuario = usuarioService.getByNombreUsuario(userDetails.getUsername()).get();
 
-            //JwtDto jwtDto = new JwtDto(jwt, userDetails.getUsername(), userDetails.getAuthorities());
             JwtDto jwtDto = new JwtDto(jwt);
             logService.guardarLogLoginUsuario(usuario);
             return new ResponseEntity(jwtDto, HttpStatus.OK);
         }catch (InternalAuthenticationServiceException e) {
-            return new ResponseEntity(new Mensaje("Nombre de usuario incorrecto"), HttpStatus.UNAUTHORIZED);
+            throw new UnauthorizedException("Nombre de usuario incorrecto");
         }catch (BadCredentialsException e){
             Usuario usuario = usuarioService.getByNombreUsuarioOrEmail(loginUsuario.getNombreUsuario()).get();
             Integer cantidadIntentosMax = 3;
@@ -81,13 +81,13 @@ public class AuthController {
             if(!usuario.getNombreUsuario().equals("admin") && logService.cantidadLogUsuarioMayorOIgualAN(usuario, cantidadIntentosMax) && logService.ultimosNLogSonErrorLogin(usuario, cantidadIntentosMax) ){
                 usuarioService.cambiarEstado(usuario.getId());
                 logService.guardarLogBajaUsuarioLuegoDeNErrorLoginSeguidos(usuario);
-                return new ResponseEntity(new Mensaje("El usuario fue dado de baja por realizar " + cantidadIntentosMax + " intentos fallidos"), HttpStatus.BAD_REQUEST);
+                throw new BadRequestException("El usuario fue dado de baja por realizar " + cantidadIntentosMax + " intentos fallidos");
             }
-            return new ResponseEntity(new Mensaje("Contraseña incorrecta"),HttpStatus.UNAUTHORIZED);
+            throw new UnauthorizedException("Contraseña incorrecta");
         }catch (LockedException e){
             Usuario usuario = usuarioService.getByNombreUsuarioOrEmail(loginUsuario.getNombreUsuario()).get();
             logService.guardarLogErrorLoginDeUsuarioInactivo(usuario);
-            return new ResponseEntity(new Mensaje("El usuario se encuentra bloqueado. Solicite su alta con el administrador del sistema"), HttpStatus.UNAUTHORIZED);
+            throw new UnauthorizedException("El usuario se encuentra bloqueado. Solicite su alta con el administrador del sistema");
         }
     }
 }

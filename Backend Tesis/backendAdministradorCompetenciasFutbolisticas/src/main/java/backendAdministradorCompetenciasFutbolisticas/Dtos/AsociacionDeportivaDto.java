@@ -4,7 +4,7 @@ import javax.validation.constraints.NotBlank;
 
 public class AsociacionDeportivaDto {
 
-    @NotBlank (message = "El campo nombre no puede estar blanco")
+    @NotBlank (message = "El nombre no debe ser vacio")
     private String nombre;
 
     public String getNombre() {

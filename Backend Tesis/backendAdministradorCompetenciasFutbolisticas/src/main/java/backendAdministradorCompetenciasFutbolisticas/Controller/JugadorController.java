@@ -7,7 +7,7 @@ import backendAdministradorCompetenciasFutbolisticas.Entity.Pase;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InternalServerErrorException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
-import backendAdministradorCompetenciasFutbolisticas.Excepciones.RecursoNotFoundException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Service.UsuarioService;
 import backendAdministradorCompetenciasFutbolisticas.Service.ClubService;
@@ -62,7 +62,7 @@ public class JugadorController {
             throw new InvalidDataException(bindingResult);
         }
         if(jugadorService.existeJugadorPorDocumento(nuevoJugadorDto.getDocumento())){
-            throw new BadRequestException("Ya existe un jugador con el DNI ingresado");
+            throw new BadRequestException("Ya existe un jugador con el DNI: " + nuevoJugadorDto.getDocumento());
         }
 
         try {
@@ -97,7 +97,7 @@ public class JugadorController {
         Jugador jugador = jugadorService.getJugador(id);
 
         if(!jugador.getDocumento().equals(editarJugadorDto.getDocumento()) && jugadorService.existeJugadorPorDocumento(editarJugadorDto.getDocumento())){
-            throw new BadRequestException("Ya existe un jugador con el DNI ingresado");
+            throw new BadRequestException("Ya existe un jugador con el DNI: " + editarJugadorDto.getDocumento());
         }
         try {
 
@@ -107,10 +107,6 @@ public class JugadorController {
             jugador.setNombre((editarJugadorDto.getNombres()));
             jugador.setDocumento(editarJugadorDto.getDocumento());
             jugador.setFechaNacimiento(editarJugadorDto.getFechaNacimiento());
-            //Pase inscripcion = jugadorService.getPrimerTransferencia(id);
-            //inscripcion.setEdadEnPase(Period.between(editarJugadorDto.getFechaNacimiento(),LocalDate.now()).getYears());
-            //paseJugadorService.guardar(inscripcion);
-
             Jugador jugadorActualizado = jugadorService.guardarJugador(jugador);
             if(jugadorActualizado != null){
                 logService.guardarLogModificacionJugador(jugador, usuario);
@@ -255,7 +251,6 @@ public class JugadorController {
     @PostMapping("/pases/nuevo")
     public ResponseEntity<?> cambioDeClubJugador(@Valid @RequestBody CambioDeClubDto cambioDeClubDto, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
-            //return new ResponseEntity<>(new Mensaje("Campos mal ingresados"),HttpStatus.NOT_FOUND);
             throw new InvalidDataException(bindingResult);
         }
 
@@ -281,10 +276,9 @@ public class JugadorController {
             }
 
             Pase nuevaHistoriaClub = new Pase(fechaDesde, null, jugador, club, cambioDeClubDto.getMotivo());
-            Jugador jugadorActualizado = new Jugador();
             if(paseJugadorService.guardar(nuevaHistoriaClub)) {
                 jugador.setClubActual(club);
-                jugadorActualizado = jugadorService.save(jugador);
+                jugadorService.save(jugador);
                 logService.guardarLogCreacionPase(nuevaHistoriaClub, usuario);
             }
             return new ResponseEntity<>(new Mensaje("Se cambio el club del jugador correctamente", nuevaHistoriaClub), HttpStatus.OK);
@@ -312,7 +306,7 @@ public class JugadorController {
         Club clubActualizado = clubService.getClub(editarPaseJugadorDto.getIdClub());
 
         if(paseJugador.getFechaHasta() == null && paseJugador.getClub().getId() != clubActualizado.getId()){
-            System.out.println("La fecha hasta es null y clubes diferentes, debo actualizar club actual al club: " + clubActualizado.getNombreClub());
+            //System.out.println("La fecha hasta es null y clubes diferentes, debo actualizar club actual al club: " + clubActualizado.getNombreClub());
             jugador.setClubActual(clubActualizado);
         }
         if(paseJugador.getFechaHasta() == null && editarPaseJugadorDto.getFechaHasta() != null){
@@ -343,7 +337,7 @@ public class JugadorController {
             logService.guardarLogEliminacionPase(pase, usuario);
             return new ResponseEntity<>(new Mensaje("Pase eliminado correctamente"), HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity<>(new Mensaje("Fallo la operacion. No se elimino el Pase"), HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Fallo la operacion. No se elimino el Pase");
         }
 
     }
@@ -369,11 +363,8 @@ public class JugadorController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")
     @GetMapping("/club/{idClub}")
     public ResponseEntity<List<Jugador>> listaJugadoresDeUnClub(@PathVariable ("idClub") Long idClub){
-        //List<Jugador> listado = jugadorService.getListadoJugadoresDeUnClub(idClub);
-        if(!clubService.existById(idClub)){
-            throw new RecursoNotFoundException("El club con ID: "+ idClub + " no existe");
-        }
-        List<Jugador> jugadores = paseJugadorService.jugadoresActualesPorClub(idClub);
+        Club club = clubService.getClub(idClub);
+        List<Jugador> jugadores = paseJugadorService.jugadoresActualesPorClub(club.getId());
         return new ResponseEntity<>(jugadores,HttpStatus.OK);
     }
 
@@ -382,7 +373,7 @@ public class JugadorController {
     public ResponseEntity<List<Jugador>> listadoExJugadoresPorClub(@PathVariable ("id") Long id){
         //el servicio genera notfound exception si no encuentra el club
         Club club = clubService.getClub(id);
-        List<Jugador> historialExJugadores = paseJugadorService.exJugadoresPorClub(id);
+        List<Jugador> historialExJugadores = paseJugadorService.exJugadoresPorClub(club.getId());
         return new ResponseEntity<>(historialExJugadores,HttpStatus.OK);
     }
 
@@ -401,7 +392,7 @@ public class JugadorController {
         //el servicio genera notFound exception si no encuentra el jugador
         Jugador jugador =jugadorService.getJugador(id);
 
-        Pase ultimoPase = jugadorService.getUltimaTransferencia(id);
+        Pase ultimoPase = jugadorService.getUltimaTransferencia(jugador.getId());
         return new ResponseEntity<>(ultimoPase, HttpStatus.OK);
     }
 
@@ -411,25 +402,8 @@ public class JugadorController {
         //el servicio genera notFound exception si no encuentra el jugador
         Jugador jugador =jugadorService.getJugador(id);
 
-        Club club = jugadorService.getClubActualJugador(id);
+        Club club = jugadorService.getClubActualJugador(jugador.getId());
         return new ResponseEntity<>(club, HttpStatus.OK);
-    }
-
-    //TODO: NO FUNCIONA CORRECTAMENTE
-    @GetMapping("ClubEnFecha/{id}")
-    public ResponseEntity<?> clubEnCiertaFecha(@PathVariable ("id") Long id){
-
-        //el servicio genera notFound exception si no encuentra el jugador
-        Jugador jugador =jugadorService.getJugador(id);
-
-        //prueba con "2022-03-30"
-        LocalDate fecha = LocalDate.of(2021, Month.OCTOBER, 4);
-        Club club = jugadorService.getClubEnFecha(jugador, fecha);
-        if(club == null){
-            //return new ResponseEntity<>(new Mensaje("No tiene clubes"),HttpStatus.BAD_REQUEST);
-            throw new BadRequestException("El jugador no tiene historial de clubes hasta la fecha indicada");
-        }
-        return new ResponseEntity<>(club,HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','ENCARGADO_DE_JUGADORES', 'USER')")

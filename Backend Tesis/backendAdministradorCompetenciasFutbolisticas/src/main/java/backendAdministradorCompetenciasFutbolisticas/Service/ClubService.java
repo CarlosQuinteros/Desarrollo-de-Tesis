@@ -1,18 +1,15 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
-import backendAdministradorCompetenciasFutbolisticas.Entity.AsociacionDeportiva;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InternalServerErrorException;
-import backendAdministradorCompetenciasFutbolisticas.Excepciones.RecursoNotFoundException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.ClubRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -67,7 +64,7 @@ public class ClubService {
     }
 
     public  Club getClub(Long id){
-        Club club = getById(id).orElseThrow(()-> new RecursoNotFoundException("EL Club con ID: " + id + " no existe"));
+        Club club = getById(id).orElseThrow(()-> new ResourceNotFoundException("EL Club con ID: " + id + " no existe"));
         return club;
     }
 
