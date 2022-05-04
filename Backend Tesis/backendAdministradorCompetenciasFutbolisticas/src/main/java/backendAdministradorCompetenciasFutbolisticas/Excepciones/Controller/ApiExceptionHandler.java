@@ -57,10 +57,10 @@ public class ApiExceptionHandler {
         un correo indicando lo que sucedio para su analisis
         */
         ErrorMessage errorMessage = new ErrorMessage(exception, request.getRequestURI());
-        String message = exception.getMessage() == null
-                ? "Ocurrio un error inesperado. Operacion no realizada"
-                : exception.getMessage();
-        errorMessage.setMessage(message);
+        errorMessage.setMessage("Ocurrio un error inesperado. Operacion no realizada");
+        System.out.println(exception.getMessage());
+        System.out.println(exception.getClass());
+        System.out.println(exception.getCause());
         return errorMessage;
     }
 

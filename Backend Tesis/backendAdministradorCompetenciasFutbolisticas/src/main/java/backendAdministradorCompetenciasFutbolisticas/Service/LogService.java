@@ -1,9 +1,6 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
-import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Log;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Pase;
+import backendAdministradorCompetenciasFutbolisticas.Entity.*;
 import backendAdministradorCompetenciasFutbolisticas.Enums.LogAccion;
 import backendAdministradorCompetenciasFutbolisticas.Repository.LogRepository;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
@@ -12,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +27,11 @@ public class LogService {
 
     public List<Log> getListado(){
         List<Log> listado = logRepository.findAllByOrderByFechaDesc();
+        return listado;
+    }
+
+    public List<String> getListadoAcciones(){
+        List<String> listado = Arrays.stream(LogAccion.values()).map(logAccion -> logAccion.name()).collect(Collectors.toList());
         return listado;
     }
 
@@ -92,7 +95,7 @@ public class LogService {
     }
 
     public void guardarLogEdicionPase(Pase paseJugador, Usuario usuario){
-        Log log = new Log(usuario, LogAccion.PASES_EDICION, "Se modifico el pase ID: "+ paseJugador.getId(), paseJugador.getId());
+        Log log = new Log(usuario, LogAccion.PASES_MODIFICACION, "Se modifico el pase ID: "+ paseJugador.getId(), paseJugador.getId());
         logRepository.save(log);
     }
 
@@ -157,6 +160,23 @@ public class LogService {
 
     public  void guardarBajaUsuario(Usuario usuarioDadoDeBaja, Usuario usuarioEncargado){
         Log log = new Log(usuarioEncargado, LogAccion.USUARIO_BAJA, "El Usuario ID: " + usuarioEncargado.getId() + " dio de baja al usuario ID: "+ usuarioDadoDeBaja.getId(), usuarioDadoDeBaja.getId());
+        logRepository.save(log);
+    }
+
+    //Metodos para logs de jueces
+
+    public void guardarLogCreacionJuez(Juez juezCreado, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.JUEZ_CREACION, "Se creo el Juez ID: " + juezCreado.getId(),juezCreado.getId());
+        logRepository.save(log);
+    }
+
+    public void guardarLogEdicionJuez(Juez juezEditado, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.JUEZ_MODIFICACION, "Se edito el Juez ID: " + juezEditado.getId(),juezEditado.getId());
+        logRepository.save(log);
+    }
+
+    public void guardarLogEliminacionJuez(Long idJuez, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.JUEZ_ELIMINACION, "Se elimino el Juez ID: " + idJuez, idJuez);
         logRepository.save(log);
     }
 }

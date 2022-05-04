@@ -73,11 +73,10 @@ public class JugadorController {
             Jugador nuevoJugador = new Jugador(nuevoJugadorDto.getNombres(), nuevoJugadorDto.getApellidos(), nuevoJugadorDto.getDocumento(), nuevoJugadorDto.getFechaNacimiento() );
             nuevoJugador.setClubActual(club);
             Pase historiaClub = new Pase(nuevoJugadorDto.getFechaInscripcion(),null,nuevoJugador,club,"Inscripcion");
-            jugadorService.guardarNuevoJugador(nuevoJugador);
-            paseJugadorService.guardar(historiaClub);
-
+            //jugadorService.guardarNuevoJugador(nuevoJugador);
             boolean resultado = jugadorService.guardarNuevoJugador(nuevoJugador);
             if(resultado){
+                paseJugadorService.guardar(historiaClub);
                 logService.guardarLogCreacionJugador(nuevoJugador, historiaClub, usuario);
                 return new ResponseEntity<>(new Mensaje("Jugador guardado correctamente"), HttpStatus.CREATED);
             }
@@ -319,9 +318,9 @@ public class JugadorController {
         paseJugador.setFechaDesde(editarPaseJugadorDto.getFechaDesde());
         paseJugador.setFechaHasta(editarPaseJugadorDto.getFechaHasta());
         paseJugador.setMotivo(editarPaseJugadorDto.getMotivo());
+        paseJugadorService.guardar(paseJugador);
         jugadorService.guardarJugador(jugador);
         logService.guardarLogEdicionPase(paseJugador, usuario);
-        paseJugadorService.guardar(paseJugador);
         return new ResponseEntity<>(new Mensaje("Pase actualizado correctamente"),HttpStatus.OK);
     }
 
