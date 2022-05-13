@@ -179,4 +179,20 @@ public class LogService {
         Log log = new Log(usuario, LogAccion.JUEZ_ELIMINACION, "Se elimino el Juez ID: " + idJuez, idJuez);
         logRepository.save(log);
     }
+
+    //Metodos para logs de asociaciones deportivas
+    public void guardarLogCreacionAsociacion(AsociacionDeportiva asociacionNueva, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.ASOCIACION_DEP_CREACION, "Se creo la Asociacion Dept. ID: " + asociacionNueva.getId(), asociacionNueva.getId());
+        logRepository.save(log);
+    }
+
+    public void guardarLogEdicionAsociacion(AsociacionDeportiva asociacionEditada, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.ASOCIACION_DEP_MODIFICACION, "Se edito la Asociacion Dept. ID: " + asociacionEditada.getId(), asociacionEditada.getId());
+        logRepository.save(log);
+    }
+
+    public void guardarLogEliminacionAsociacion(Long idAsociacion, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.ASOCIACION_DEP_ELIMINACION, "Se elimino la Asociacion Dept. ID: " + idAsociacion, idAsociacion);
+        logRepository.save(log);
+    }
 }

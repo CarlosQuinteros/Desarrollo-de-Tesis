@@ -1,13 +1,16 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Entity.Juez;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreRolJuez;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.JuezRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -50,6 +53,13 @@ public class JuezService {
     public Juez getJuezPorDocumentoOrLegajo(String documentoOrLegajo){
         return juezRepository.findByDocumentoOrAndLegajo(documentoOrLegajo, documentoOrLegajo)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe un Juez con el documento o legajo: " + documentoOrLegajo));
+    }
+
+    public List<String> getListadoNombreRolJuez(){
+        List<String> roles = Arrays.stream(NombreRolJuez.values())
+                .map(NombreRolJuez::name)
+                .collect(Collectors.toList());
+        return roles;
     }
 
     public Boolean existeJuezPorId(Long id){

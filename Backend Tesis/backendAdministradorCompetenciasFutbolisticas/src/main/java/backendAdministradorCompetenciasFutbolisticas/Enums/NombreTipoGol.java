@@ -1,0 +1,16 @@
+package backendAdministradorCompetenciasFutbolisticas.Enums;
+
+public enum NombreTipoGol {
+    JUGADA_COLECTIVA,
+    JUGADA_INDIVIDUAL,
+    CABEZA,
+    REMATE_LARGA_DISTANCIA,
+    REMATE_CORTA_DISTANCIA,
+    PENAL_DIRECTO,
+    PENAL_INDIRECTO,
+    TIRO_LIBRE_DIRECTO,
+    TIRO_LIBRE_INDIRECTO,
+    SAQUE_DE_META,
+    OLIMPICO,
+    GOL_EN_CONTRA
+}

@@ -11,7 +11,11 @@ import java.util.stream.Collectors;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 @ResponseBody
 public class InvalidDataException extends RuntimeException {
+
     public InvalidDataException(BindingResult result){
-        super(result.getFieldErrors().stream().map(FieldError::getDefaultMessage).collect(Collectors.joining(". ")));
+        super(result.getFieldErrors().stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.joining(". "))
+        );
     }
 }

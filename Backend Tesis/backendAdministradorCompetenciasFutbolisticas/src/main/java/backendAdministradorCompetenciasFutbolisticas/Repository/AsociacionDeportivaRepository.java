@@ -15,4 +15,6 @@ public interface AsociacionDeportivaRepository extends JpaRepository<AsociacionD
     List<AsociacionDeportiva> findByOrderByNombre();
 
     boolean existsByNombre(String nombre);
+
+    boolean existsByEmail(String email);
 }

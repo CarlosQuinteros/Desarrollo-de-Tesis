@@ -122,4 +122,11 @@ public class JuezController {
         Integer cantidadJueces = juezService.getCantidadTotalJueces();
         return new ResponseEntity<>(cantidadJueces, HttpStatus.OK);
     }
+
+    @GetMapping("/roles")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<String>> getListadoNombreRolJuez(){
+        List<String> roles = juezService.getListadoNombreRolJuez();
+        return new ResponseEntity<>(roles, HttpStatus.OK);
+    }
 }

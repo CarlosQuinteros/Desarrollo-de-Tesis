@@ -1,6 +1,7 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Entity.AsociacionDeportiva;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.AsociacionDeportivaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,16 +21,17 @@ public class AsociacionDeportivaService {
         return asociacionDeportivaRepository.save(asociacionDeportiva).getNombre() != null;
     }
 
-    public void actualizarAsociacion(AsociacionDeportiva asociacionDeportiva){
-        asociacionDeportivaRepository.save(asociacionDeportiva);
+    public AsociacionDeportiva actualizarAsociacion(AsociacionDeportiva asociacionDeportiva){
+        return asociacionDeportivaRepository.save(asociacionDeportiva);
     }
 
     public void eliminarAsociacion(AsociacionDeportiva asociacionDeportiva){
         asociacionDeportivaRepository.delete(asociacionDeportiva);
     }
 
-    public Optional<AsociacionDeportiva> getById(Long id){
-        return asociacionDeportivaRepository.findById(id);
+    public AsociacionDeportiva getById(Long id){
+        return asociacionDeportivaRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("No existe una Asociacion con ID: " + id));
     }
 
     public List<AsociacionDeportiva> getListadoOrdenadoPorNombre(){
@@ -38,6 +40,10 @@ public class AsociacionDeportivaService {
 
     public boolean existePorNombre(String nombre){
         return asociacionDeportivaRepository.existsByNombre(nombre);
+    }
+
+    public boolean existePorEmail(String email){
+        return  asociacionDeportivaRepository.existsByEmail(email);
     }
 
 }
