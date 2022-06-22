@@ -3,12 +3,15 @@ package backendAdministradorCompetenciasFutbolisticas.Controller;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.NuevoJuezDto;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Juez;
+import backendAdministradorCompetenciasFutbolisticas.Entity.JuezRol;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Service.UsuarioService;
+import backendAdministradorCompetenciasFutbolisticas.Service.JuezRolService;
 import backendAdministradorCompetenciasFutbolisticas.Service.JuezService;
 import backendAdministradorCompetenciasFutbolisticas.Service.LogService;
+import backendAdministradorCompetenciasFutbolisticas.Service.PartidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +38,9 @@ public class JuezController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private JuezRolService juezRolService;
 
     @PostMapping("/crear")
     @PreAuthorize("hasAnyRole('ADMIN','ENCARGADO_DE_TORNEOS')")
@@ -81,14 +87,14 @@ public class JuezController {
         return new ResponseEntity<>(juezEditado, HttpStatus.OK);
     }
 
-    //TODO: Si tiene referencias en partidos no debe eliminarse
     @DeleteMapping("/eliminar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> eliminarJuez(@PathVariable("id") Long id){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Usuario usuario = usuarioService.getUsuarioLogueado(auth);
         Juez juezEliminar = juezService.getJuezPorId(id);
-        juezService.eliminarJuez(id);
+        //el servicio genera excepcion si el juez participo en algun partido
+        juezService.eliminarJuez(juezEliminar.getId());
         logService.guardarLogEliminacionJuez(id, usuario);
         return new ResponseEntity<>(new Mensaje("Juez eliminado correctamente"), HttpStatus.OK);
     }
@@ -128,5 +134,13 @@ public class JuezController {
     public ResponseEntity<List<String>> getListadoNombreRolJuez(){
         List<String> roles = juezService.getListadoNombreRolJuez();
         return new ResponseEntity<>(roles, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/participaciones")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<JuezRol>> participacionesPorJuez(@PathVariable ("id") Long id){
+        Juez juez = juezService.getJuezPorId(id);
+        List<JuezRol> listadoParticipaciones = juezRolService.getParticipacionesPorIdJuez(juez.getId());
+        return new ResponseEntity<>(listadoParticipaciones,HttpStatus.OK);
     }
 }

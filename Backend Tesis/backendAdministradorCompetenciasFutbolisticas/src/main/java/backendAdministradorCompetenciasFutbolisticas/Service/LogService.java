@@ -195,4 +195,10 @@ public class LogService {
         Log log = new Log(usuario, LogAccion.ASOCIACION_DEP_ELIMINACION, "Se elimino la Asociacion Dept. ID: " + idAsociacion, idAsociacion);
         logRepository.save(log);
     }
+
+    //Metodos para logs de partidos
+    public void guardarLogCreacionPartido(Partido nuevoPartido, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.PARTIDO_CREACION, "Se creo el Partido ID: " + nuevoPartido.getId(), nuevoPartido.getId());
+        logRepository.save(log);
+    }
 }

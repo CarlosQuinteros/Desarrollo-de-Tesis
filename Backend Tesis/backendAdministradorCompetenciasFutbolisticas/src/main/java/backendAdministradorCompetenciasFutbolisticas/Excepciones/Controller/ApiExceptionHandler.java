@@ -2,6 +2,8 @@ package backendAdministradorCompetenciasFutbolisticas.Excepciones.Controller;
 
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -45,6 +47,23 @@ public class ApiExceptionHandler {
     @ResponseBody
     public ErrorMessage interalServerException(HttpServletRequest request, Exception exception){
         return new ErrorMessage(exception, request.getRequestURI());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseBody
+    public ErrorMessage handleHttpMessageNotReadable(HttpServletRequest request, Exception exception){
+        ErrorMessage errorMessage = new ErrorMessage(exception, request.getRequestURI());
+        errorMessage.setMessage("La peticion no debe tener un cuerpo vacio");
+        return errorMessage;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseBody
+    public ErrorMessage httpRequestMethodNotSupported(HttpServletRequest request, Exception exception){
+        ErrorMessage errorMessage = new ErrorMessage(exception, request.getRequestURI());
+        return errorMessage;
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

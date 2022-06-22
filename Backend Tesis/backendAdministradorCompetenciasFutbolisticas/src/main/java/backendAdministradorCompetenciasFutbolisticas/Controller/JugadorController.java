@@ -269,7 +269,7 @@ public class JugadorController {
        jugadorService.validarClubNoIgualesAlCambiarDeClub(club,jugador);
         try {
             Pase ultimoPase = jugadorService.getUltimaTransferencia(jugador.getId());
-            if(ultimoPase.getFechaHasta() == null){
+            if(ultimoPase!= null && ultimoPase.getFechaHasta() == null){
                 ultimoPase.setFechaHasta(fechaDesde);
                 paseJugadorService.guardar(ultimoPase);
             }

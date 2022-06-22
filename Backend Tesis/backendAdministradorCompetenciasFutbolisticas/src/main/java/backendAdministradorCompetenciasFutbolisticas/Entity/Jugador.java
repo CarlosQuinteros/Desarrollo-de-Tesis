@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -69,6 +70,11 @@ public class Jugador {
     }
 
     public Integer getEdadEnFecha(LocalDate fecha){
+
+        System.out.println("cn dias chonos: " + ChronoUnit.DAYS.between(this.getFechaNacimiento(),fecha));
+        System.out.println("cn años con period: " +Period.between(this.fechaNacimiento, fecha).getYears());
+        System.out.println("cn años con chronos: " + ChronoUnit.YEARS.between(this.getFechaNacimiento(), fecha));
+        //return (int) (long)ChronoUnit.YEARS.between(this.fechaNacimiento, fecha);
         return Period.between(this.fechaNacimiento, fecha).getYears();
     }
 

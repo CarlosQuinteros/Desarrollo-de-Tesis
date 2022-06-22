@@ -2,6 +2,7 @@ package backendAdministradorCompetenciasFutbolisticas.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Entity.Juez;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreRolJuez;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.JuezRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class JuezService {
     @Autowired
     private JuezRepository juezRepository;
 
+    @Autowired
+    private JuezRolService juezRolService;
+
     public List<Juez> getListadoJueces() {
         return juezRepository.findByOrderByApellidos();
     }
@@ -32,6 +36,9 @@ public class JuezService {
     }
 
     public void eliminarJuez(Long id){
+        if(juezRolService.existeParticipacionDeJuez(id)){
+            throw new BadRequestException("El juez tiene referencias con partidos y no puede eliminarse");
+        }
         juezRepository.deleteById(id);
     }
 

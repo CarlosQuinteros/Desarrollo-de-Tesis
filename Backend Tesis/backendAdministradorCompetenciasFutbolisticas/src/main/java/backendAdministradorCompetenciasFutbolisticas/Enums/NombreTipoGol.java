@@ -12,5 +12,10 @@ public enum NombreTipoGol {
     TIRO_LIBRE_INDIRECTO,
     SAQUE_DE_META,
     OLIMPICO,
-    GOL_EN_CONTRA
+    CHILENA,
+    TIJERA,
+    VOLEA,
+    REBOTE,
+    GOL_EN_CONTRA,
+    SIN_INFORMACION
 }
