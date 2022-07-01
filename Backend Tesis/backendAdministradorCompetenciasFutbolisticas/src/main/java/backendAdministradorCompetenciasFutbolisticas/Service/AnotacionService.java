@@ -1,0 +1,118 @@
+package backendAdministradorCompetenciasFutbolisticas.Service;
+
+import backendAdministradorCompetenciasFutbolisticas.Entity.Anotacion;
+import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
+import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
+import backendAdministradorCompetenciasFutbolisticas.Entity.Partido;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreTipoGol;
+import backendAdministradorCompetenciasFutbolisticas.Enums.TipoAnotacion;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
+import backendAdministradorCompetenciasFutbolisticas.Repository.AnotacionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class AnotacionService {
+
+    @Autowired
+    private PartidoService partidoService;
+
+    @Autowired
+    private JugadorPartidoService jugadorPartidoService;
+
+    @Autowired
+    private JugadorService jugadorService;
+
+    @Autowired
+    private ClubService clubService;
+
+    @Autowired
+    private AnotacionRepository anotacionRepository;
+
+    @Autowired
+    private SustitucionService sustitucionService;
+
+
+    public Anotacion guardarAnotacion(Anotacion nuevaAnotacion){
+        Partido partido = partidoService.getDetallePartido(nuevaAnotacion.getPartido().getId());
+        Club clubAnota = clubService.getClub(nuevaAnotacion.getClubAnota().getId());
+        Jugador jugadorAnota = jugadorService.getJugador(nuevaAnotacion.getJugador().getId());
+        if(!partidoService.clubFormaParteDePartido(partido,clubAnota)){
+            throw new BadRequestException("El club "+ clubAnota.getNombreClub() + " no forma parte del partido");
+        }
+        if(sustitucionService.existeSustitucionPorPartidoYJugadorSale(partido.getId(),jugadorAnota.getId())){
+            throw new BadRequestException("El jugador que anota ya fue sustituido y no puede anotar");
+        }
+        if(nuevaAnotacion.getTipoGol().equals(NombreTipoGol.GOL_EN_CONTRA) && !jugadorFormaParteDelEquipoContrarioAlQueAnota(partido,clubAnota,jugadorAnota)){
+            throw new BadRequestException("Para guardar un gol en contra, el jugador " + jugadorAnota.getApellidos() + ", " + jugadorAnota.getNombre() + " debe formar parte del equipo contrario");
+        }
+        if(!nuevaAnotacion.getTipoGol().equals(NombreTipoGol.GOL_EN_CONTRA) && !jugadorAnotaEsTitularOIngresoEnSustitucion(partido.getId(), clubAnota.getId(),jugadorAnota.getId())){
+            throw new BadRequestException("El jugador debe formar parte de los titulares de " + clubAnota.getNombreClub() + " o haber ingresado en una sustitucion");
+        }
+        return anotacionRepository.save(nuevaAnotacion);
+    }
+
+    public List<NombreTipoGol> getListadoTipoAnotaciones(){
+        return Arrays.stream(NombreTipoGol.values()).collect(Collectors.toList());
+    }
+
+    public List<String> getListadoStringTipoAnotaciones(){
+        return getListadoTipoAnotaciones().stream()
+                .map(NombreTipoGol::name)
+                .collect(Collectors.toList());
+    }
+
+    public NombreTipoGol getTipoAnotacionPorNombre(String nombre){
+        return getListadoTipoAnotaciones().stream()
+                .filter(tipoGol -> tipoGol.name().equals(nombre))
+                .findFirst()
+                .orElseThrow(()-> new ResourceNotFoundException("No existe el tipo de gol: " + nombre));
+    }
+
+    public Anotacion getAnotacion(Long id){
+        return anotacionRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("No existe la anotacion con Id: " + id));
+    }
+
+    public void eliminarAnotacion(Long id){
+        Anotacion anotacion = getAnotacion(id);
+        anotacionRepository.deleteById(anotacion.getId());
+    }
+
+    public List<Anotacion> getListadoAnotacionesPorPartidoYClub(Long idPartido, Long idClub){
+        return anotacionRepository.findByPartido_IdAndClubAnota_Id(idPartido,idClub);
+    }
+
+    public List<Anotacion> getListadoAnotacionesClubLocal(Partido partido){
+        return getListadoAnotacionesPorPartidoYClub(partido.getId(), partido.getClubLocal().getId());
+    }
+
+    public List<Anotacion> getListadoAnotacionesClubVisitante(Partido partido){
+        return getListadoAnotacionesPorPartidoYClub(partido.getId(), partido.getClubVisitante().getId());
+    }
+
+    public List<Anotacion> getListadoTodasLasAnotacionesDeUnJugador(Long idJugador){
+        return anotacionRepository.findByJugador_Id(idJugador);
+    }
+
+    public boolean jugadorFormaParteDelEquipoContrarioAlQueAnota(Partido partido, Club clubAnota, Jugador jugador ){
+        Club clubContrario = partido.getClubLocal().getId().equals(clubAnota.getId())? partido.getClubVisitante() : partido.getClubLocal();
+        return jugadorAnotaEsTitularOIngresoEnSustitucion(partido.getId(),clubContrario.getId(),jugador.getId());
+    }
+
+    public boolean jugadorAnotaEsTitularOIngresoEnSustitucion(Long idPartido, Long idCub, Long idJugador){
+        return jugadorPartidoService.jugadorFormaParteDeTitulares(idPartido,idCub,idJugador)
+                || sustitucionService.existeSustitucionPorPartidoYClubYJugadorEntra(idPartido,idCub,idJugador);
+    }
+
+
+
+}

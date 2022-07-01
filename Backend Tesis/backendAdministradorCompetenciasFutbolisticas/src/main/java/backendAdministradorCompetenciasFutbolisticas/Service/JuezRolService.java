@@ -61,6 +61,15 @@ public class JuezRolService {
         if(existeParticipacionDeJuezEnPartido(juezRol.getJuez().getId(), juezRol.getPartido().getId())){
             throw new BadRequestException("El juez solo puede tener un rol en un partido");
         }
+        if(juezRol.getRol().equals(NombreRolJuez.ARBITRO_PRINCIPAL) && existeArbitroPrincipalEnPartido(juezRol.getPartido().getId())){
+            throw new BadRequestException("Ya existe el arbitro principal");
+        }
+        if(juezRol.getRol().equals(NombreRolJuez.PRIMER_ASISTENTE) && existePrimerAsistenteEnPartido(juezRol.getPartido().getId())){
+            throw new BadRequestException("Ya existe el primer asistente");
+        }
+        if(juezRol.getRol().equals(NombreRolJuez.SEGUNDO_ASISTENTE) && existeSegundoAsistenteEnPartido(juezRol.getPartido().getId())){
+            throw new BadRequestException("Ya existe el segundo asistente");
+        }
         return juezRolRepository.save(juezRol);
     }
 
@@ -94,6 +103,21 @@ public class JuezRolService {
 
     public boolean existeParticipacionDeJuezEnPartido(Long idJuez, Long idPartido){
         boolean result = juezRolRepository.existsByJuez_IdAndPartido_Id(idJuez,idPartido);
+        return result;
+    }
+
+    public boolean existeArbitroPrincipalEnPartido(Long idPartido){
+        boolean result = juezRolRepository.existsByPartido_IdAndRol(idPartido, NombreRolJuez.ARBITRO_PRINCIPAL);
+        return result;
+    }
+
+    public boolean existePrimerAsistenteEnPartido(Long idPartido){
+        boolean result = juezRolRepository.existsByPartido_IdAndRol(idPartido, NombreRolJuez.PRIMER_ASISTENTE);
+        return result;
+    }
+
+    public boolean existeSegundoAsistenteEnPartido(Long idPartido){
+        boolean result = juezRolRepository.existsByPartido_IdAndRol(idPartido, NombreRolJuez.SEGUNDO_ASISTENTE);
         return result;
     }
 

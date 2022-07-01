@@ -3,24 +3,42 @@ package backendAdministradorCompetenciasFutbolisticas.Entity;
 import backendAdministradorCompetenciasFutbolisticas.Enums.PosicionJugador;
 import backendAdministradorCompetenciasFutbolisticas.Enums.TipoRolJugador;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+
+@Entity
 public class JugadorPartido {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
     private Partido partido;
 
+    @ManyToOne
     private Club club;
 
+    @ManyToOne
     private Jugador jugador;
 
+    @Enumerated(EnumType.STRING)
     private TipoRolJugador rol;
 
     private Integer nroCamiseta;
 
+    @Enumerated(EnumType.STRING)
     private PosicionJugador posicion;
 
+    @Transient
+    private Integer edadEnPartido;
 
-    public JugadorPartido(Partido partido, Club club, Jugador jugador, TipoRolJugador rol, Integer nroCamiseta, PosicionJugador posicion) {
+
+    public JugadorPartido(){
+
+    }
+
+    public JugadorPartido(@NotNull Partido partido, @NotNull Club club, @NotNull Jugador jugador, @NotNull TipoRolJugador rol, @NotNull Integer nroCamiseta, @NotNull PosicionJugador posicion) {
         this.partido = partido;
         this.club = club;
         this.jugador = jugador;
@@ -49,6 +67,17 @@ public class JugadorPartido {
         return rol;
     }
 
+    public Integer getNroCamiseta() {
+        return nroCamiseta;
+    }
+
+    public PosicionJugador getPosicion() {
+        return posicion;
+    }
+
+    public Integer getEdadEnPartido(){
+        return this.jugador.getEdadEnFecha(this.partido.getFecha().toLocalDate());
+    }
 
     public void setId(Long id) {
         this.id = id;
@@ -78,11 +107,7 @@ public class JugadorPartido {
         this.posicion = posicion;
     }
 
-    public Integer getNroCamiseta() {
-        return nroCamiseta;
-    }
-
-    public PosicionJugador getPosicion() {
-        return posicion;
+    public void setEdadEnPartido(Integer edadEnPartido) {
+        this.edadEnPartido = edadEnPartido;
     }
 }

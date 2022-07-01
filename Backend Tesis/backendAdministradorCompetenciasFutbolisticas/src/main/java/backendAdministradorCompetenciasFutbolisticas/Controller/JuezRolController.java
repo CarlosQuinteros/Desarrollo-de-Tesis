@@ -52,22 +52,25 @@ public class JuezRolController {
 
     @PutMapping("/editar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
-    public ResponseEntity<JuezRol> editarParticipacionDeJuesEnPartido(@PathVariable ("id") Long id, @Valid @RequestBody JuezRolDto juezRolDto, BindingResult bindingResult){
+    public ResponseEntity<JuezRol> editarParticipacionDeJuezEnPartido(@PathVariable ("id") Long id, @Valid @RequestBody JuezRolDto juezRolDto, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             throw new InvalidDataException(bindingResult);
         }
-        JuezRol juezRolEditar = juezRolService.getDetalleJuezRolPorId(id);
+        JuezRol juezRol = juezRolService.getDetalleJuezRolPorId(id);
         Juez juez = juezService.getJuezPorId(juezRolDto.getIdJuez());
         NombreRolJuez rolJuez = juezRolService.getNombreRolJuezPorNombre(juezRolDto.getRol());
 
-        if(!juezRolEditar.getJuez().getId().equals(juez.getId())
-                && juezRolService.existeParticipacionDeJuezEnPartido(juez.getId(),juezRolEditar.getPartido().getId())){
+        if(!juezRol.getJuez().getId().equals(juez.getId())
+                && juezRolService.existeParticipacionDeJuezEnPartido(juez.getId(),juezRol.getPartido().getId())){
             throw new BadRequestException("El juez solo puede tener un rol en un partido");
         }
-        juezRolEditar.setJuez(juez);
-        juezRolEditar.setRol(rolJuez);
-        juezRolEditar = juezRolService.guardarJuezRol(juezRolEditar);
-        return new ResponseEntity<>(juezRolEditar, HttpStatus.CREATED);
+        if(rolJuez.equals(NombreRolJuez.ARBITRO_PRINCIPAL) && juezRolService.existeArbitroPrincipalEnPartido(juezRol.getPartido().getId())){
+            throw new BadRequestException("Ya existe el arbitro principal");
+        }
+        juezRol.setJuez(juez);
+        juezRol.setRol(rolJuez);
+        juezRol = juezRolService.guardarJuezRol(juezRol);
+        return new ResponseEntity<>(juezRol, HttpStatus.CREATED);
 
     }
 

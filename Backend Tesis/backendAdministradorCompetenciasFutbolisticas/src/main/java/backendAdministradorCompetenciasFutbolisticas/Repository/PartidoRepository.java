@@ -10,4 +10,6 @@ import java.util.List;
 public interface PartidoRepository extends JpaRepository<Partido,Long> {
 
     List<Partido> findByClubLocal_IdAndClubVisitante_IdOrClubLocal_IdAndClubVisitante_Id(Long idClubLocal, Long idClubVisitante, Long idClubVisitanteToLocal, Long idClubLocalToVisitante);
+
+    boolean existsByIdAndClubLocal_IdOrClubVisitante_Id(Long idPartido, Long idClubLocal, Long idClubVisitante);
 }

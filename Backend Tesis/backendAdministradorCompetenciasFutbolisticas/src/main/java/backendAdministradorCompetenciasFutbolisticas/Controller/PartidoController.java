@@ -1,18 +1,14 @@
 package backendAdministradorCompetenciasFutbolisticas.Controller;
 
+import backendAdministradorCompetenciasFutbolisticas.Dtos.DetalleGeneralPartidoDto;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.PartidoDto;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
-import backendAdministradorCompetenciasFutbolisticas.Entity.JuezRol;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Partido;
+import backendAdministradorCompetenciasFutbolisticas.Entity.*;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Service.UsuarioService;
-import backendAdministradorCompetenciasFutbolisticas.Service.ClubService;
-import backendAdministradorCompetenciasFutbolisticas.Service.JuezRolService;
-import backendAdministradorCompetenciasFutbolisticas.Service.LogService;
-import backendAdministradorCompetenciasFutbolisticas.Service.PartidoService;
+import backendAdministradorCompetenciasFutbolisticas.Service.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,6 +43,15 @@ public class PartidoController {
     @Autowired
     private JuezRolService juezRolService;
 
+    @Autowired
+    private JugadorPartidoService jugadorPartidoService;
+
+    @Autowired
+    private SustitucionService sustitucionService;
+
+    @Autowired
+    private AnotacionService anotacionService;
+
     @PostMapping("/crear")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> crearPartido(@Valid @RequestBody PartidoDto nuevoPartido, BindingResult bindingResult){
@@ -75,12 +80,84 @@ public class PartidoController {
         return new ResponseEntity<>(partido,HttpStatus.OK);
     }
 
+    @GetMapping("/{id}/detalle-general")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<DetalleGeneralPartidoDto> detalleDatosGeneralesPartido(@PathVariable("id") Long id){
+        Partido partido = partidoService.getDetallePartido(id);
+        DetalleGeneralPartidoDto detalleGeneralPartidoDto = partidoService.mapPartidoToDetalleGeneralPartidoDto(partido);
+        return new ResponseEntity<>(detalleGeneralPartidoDto,HttpStatus.OK);
+    }
+
     @GetMapping("/detalle/{id}/jueces")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<List<JuezRol>> listadoDeJuecesDePartido(@PathVariable ("id") Long id){
         List<JuezRol> jueces = juezRolService.getParticipacionesPorIdPartido(id);
         return new ResponseEntity<>(jueces, HttpStatus.OK);
     }
+
+    @GetMapping("/detalle/{id}/club-local/titulares")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<JugadorPartido>>listadoDeTitularesDelClubLocal(@PathVariable ("id") Long id){
+        Partido partido = partidoService.getDetallePartido(id);
+        List<JugadorPartido> titularesClubLocal = jugadorPartidoService.getListadoJugadoresTitularesClubLocal(partido);
+        return new ResponseEntity<>(titularesClubLocal,HttpStatus.OK);
+    }
+
+    @GetMapping("/detalle/{id}/club-local/suplentes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<JugadorPartido>>listadoDeSuplentesDelClubLocal(@PathVariable ("id") Long id){
+        Partido partido = partidoService.getDetallePartido(id);
+        List<JugadorPartido> suplentesClubLocal = jugadorPartidoService.getListadoJugadoresSuplentesClubLocal(partido);
+        return new ResponseEntity<>(suplentesClubLocal,HttpStatus.OK);
+    }
+
+    @GetMapping("/detalle/{id}/club-visitante/titulares")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<JugadorPartido>>listadoDeTitularesDelClubVisitante(@PathVariable ("id") Long id){
+        Partido partido = partidoService.getDetallePartido(id);
+        List<JugadorPartido> titularesClubVisitante = jugadorPartidoService.getListadoJugadoresTitularesClubVisitante(partido);
+        return new ResponseEntity<>(titularesClubVisitante,HttpStatus.OK);
+    }
+
+    @GetMapping("/detalle/{id}/club-visitante/suplentes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<JugadorPartido>>listadoDeSuplentesDelClubVisitante(@PathVariable ("id") Long id){
+        Partido partido = partidoService.getDetallePartido(id);
+        List<JugadorPartido> suplentesClubVisitante = jugadorPartidoService.getListadoJugadoresSuplentesClubVisitante(partido);
+        return new ResponseEntity<>(suplentesClubVisitante,HttpStatus.OK);
+    }
+
+    @GetMapping("/detalle/{id}/club-local/sustituciones")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<Sustitucion>> listadoSustitucionesDelClubLocal(@PathVariable ("id") Long id){
+        Partido partido = partidoService.getDetallePartido(id);
+        List<Sustitucion> sustituciones = sustitucionService.getListadoSustitucionesClubLocal(partido);
+        return new ResponseEntity<>(sustituciones,HttpStatus.OK);
+    }
+
+    @GetMapping("/detalle/{id}/club-visitante/sustituciones")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<Sustitucion>> listadoSustitucionesDelClubVisitante(@PathVariable ("id") Long id){
+        Partido partido = partidoService.getDetallePartido(id);
+        List<Sustitucion> sustituciones = sustitucionService.getListadoSustitucionesClubVisitante(partido);
+        return new ResponseEntity<>(sustituciones,HttpStatus.OK);
+    }
+
+    @GetMapping("/detalle/{id}/club-local/anotaciones")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<Anotacion>> listadoAnotacionesDelClubLocal(@PathVariable Long id){
+        Partido partido = partidoService.getDetallePartido(id);
+        List<Anotacion> anotaciones = anotacionService.getListadoAnotacionesClubLocal(partido);
+        return new ResponseEntity<>(anotaciones,HttpStatus.OK);
+    }
+    @GetMapping("/detalle/{id}/club-visitante/anotaciones")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<Anotacion>> listadoAnotacionesDelClubVisitante(@PathVariable Long id){
+        Partido partido = partidoService.getDetallePartido(id);
+        List<Anotacion> anotaciones = anotacionService.getListadoAnotacionesClubVisitante(partido);
+        return new ResponseEntity<>(anotaciones,HttpStatus.OK);
+    }
+
 
 
 

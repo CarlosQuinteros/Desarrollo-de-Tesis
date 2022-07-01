@@ -5,5 +5,5 @@ public enum  PosicionJugador {
     DEF,
     MED,
     DEL,
-    NA
+    JUG
 }

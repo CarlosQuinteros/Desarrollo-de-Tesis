@@ -6,8 +6,7 @@ public enum NombreTipoGol {
     CABEZA,
     REMATE_LARGA_DISTANCIA,
     REMATE_CORTA_DISTANCIA,
-    PENAL_DIRECTO,
-    PENAL_INDIRECTO,
+    PENAL,
     TIRO_LIBRE_DIRECTO,
     TIRO_LIBRE_INDIRECTO,
     SAQUE_DE_META,
@@ -16,6 +15,5 @@ public enum NombreTipoGol {
     TIJERA,
     VOLEA,
     REBOTE,
-    GOL_EN_CONTRA,
-    SIN_INFORMACION
+    GOL_EN_CONTRA
 }
