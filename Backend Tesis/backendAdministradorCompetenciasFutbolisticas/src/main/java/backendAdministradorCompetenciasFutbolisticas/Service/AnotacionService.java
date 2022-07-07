@@ -1,9 +1,6 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
-import backendAdministradorCompetenciasFutbolisticas.Entity.Anotacion;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Partido;
+import backendAdministradorCompetenciasFutbolisticas.Entity.*;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreTipoGol;
 import backendAdministradorCompetenciasFutbolisticas.Enums.TipoAnotacion;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
@@ -39,6 +36,9 @@ public class AnotacionService {
 
     @Autowired
     private SustitucionService sustitucionService;
+
+    @Autowired
+    private CompetenciaService competenciaService;
 
 
     public Anotacion guardarAnotacion(Anotacion nuevaAnotacion){
@@ -100,7 +100,7 @@ public class AnotacionService {
     }
 
     public List<Anotacion> getListadoTodasLasAnotacionesDeUnJugador(Long idJugador){
-        return anotacionRepository.findByJugador_Id(idJugador);
+        return anotacionRepository.findByJugador_IdAndTipoGolNot(idJugador, NombreTipoGol.GOL_EN_CONTRA);
     }
 
     public boolean jugadorFormaParteDelEquipoContrarioAlQueAnota(Partido partido, Club clubAnota, Jugador jugador ){
@@ -111,6 +111,15 @@ public class AnotacionService {
     public boolean jugadorAnotaEsTitularOIngresoEnSustitucion(Long idPartido, Long idCub, Long idJugador){
         return jugadorPartidoService.jugadorFormaParteDeTitulares(idPartido,idCub,idJugador)
                 || sustitucionService.existeSustitucionPorPartidoYClubYJugadorEntra(idPartido,idCub,idJugador);
+    }
+
+    public boolean existeAnotacionEnPartidoDeJugador(Long idPartido, Long idJugador){
+        return anotacionRepository.existsByPartido_IdAndJugador_Id(idPartido, idJugador);
+    }
+
+    public List<Anotacion> anotacionesDeUnaCompetencia(Long idCompetencia){
+        Competencia competencia = competenciaService.getCompetencia(idCompetencia);
+        return anotacionRepository.findByPartidoJornadaCompetencia_Id(competencia.getId());
     }
 
 

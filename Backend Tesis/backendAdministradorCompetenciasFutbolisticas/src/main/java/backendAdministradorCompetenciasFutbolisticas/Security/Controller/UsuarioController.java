@@ -165,6 +165,20 @@ public class UsuarioController {
         }
     }
 
+    /*
+        Metodo que permite actividad de usuario. solo en desarrollo
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}/actividad")
+    public ResponseEntity<?> deleteActividadUser(@PathVariable ("id") long id){
+        if (!usuarioService.existById(id)){
+            throw new BadRequestException("El usuario con ID: " + id + " no existe");
+        }
+        Usuario usuario = usuarioService.getById(id).get();
+        logService.eliminarActividadDeUsuario(usuario.getId());
+        return new ResponseEntity<>(new Mensaje("Actividad de usuario eliminada correctamente"),HttpStatus.OK);
+    }
+
 
     /*
         Metodo que permite dar de alta a un usurio

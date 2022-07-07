@@ -1,6 +1,7 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Entity.AsociacionDeportiva;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.AsociacionDeportivaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ public class AsociacionDeportivaService {
     @Autowired
     AsociacionDeportivaRepository asociacionDeportivaRepository;
 
+    @Autowired
+    CompetenciaService competenciaService;
+
     public boolean guardarNuevaAsociacion(AsociacionDeportiva asociacionDeportiva){
         return asociacionDeportivaRepository.save(asociacionDeportiva).getNombre() != null;
     }
@@ -26,6 +30,9 @@ public class AsociacionDeportivaService {
     }
 
     public void eliminarAsociacion(AsociacionDeportiva asociacionDeportiva){
+        if(competenciaService.existeReferenciasConAsociacionDeportiva(asociacionDeportiva.getId())){
+            throw new BadRequestException("La Asociacion tiene referencias con competencias y no se puede eliminar");
+        }
         asociacionDeportivaRepository.delete(asociacionDeportiva);
     }
 

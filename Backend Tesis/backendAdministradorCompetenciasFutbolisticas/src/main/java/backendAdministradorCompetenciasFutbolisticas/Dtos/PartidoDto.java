@@ -3,6 +3,7 @@ package backendAdministradorCompetenciasFutbolisticas.Dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -11,8 +12,11 @@ public class PartidoDto {
 
     //@JsonFormat("")
     private LocalDateTime fecha;
+
     private String observaciones;
 
+    @NotNull(message = "El idJornada no puede estar vacio")
+    @Min(value = 1, message = "El minimo valor de idJornada es 1")
     private Long idJornada;
 
     @NotNull(message = "El club local no puede estar vacio")
@@ -37,6 +41,10 @@ public class PartidoDto {
         return idClubVisitante;
     }
 
+    public Long getIdJornada() {
+        return idJornada;
+    }
+
     public void setFecha(LocalDateTime fecha) {
         this.fecha = fecha;
     }
@@ -51,5 +59,9 @@ public class PartidoDto {
 
     public void setIdClubVisitante(Long idClubVisitante) {
         this.idClubVisitante = idClubVisitante;
+    }
+
+    public void setIdJornada(Long idJornada) {
+        this.idJornada = idJornada;
     }
 }

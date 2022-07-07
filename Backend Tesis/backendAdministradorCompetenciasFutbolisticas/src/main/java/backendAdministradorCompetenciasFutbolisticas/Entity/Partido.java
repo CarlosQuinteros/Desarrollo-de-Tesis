@@ -35,15 +35,18 @@ public class Partido {
     @ManyToOne
     private Club clubVisitante;
 
-    //TODO: faltan jugadores, goles, amarillas, rojas, sustituciones
+    @NotNull
+    @ManyToOne
+    private Jornada jornada;
 
     public Partido(){}
 
-    public Partido(@NotNull LocalDateTime fechaYHora, @NotNull String observaciones, @NotNull Club clubLocal, @NotNull Club clubVisitante ){
+    public Partido(@NotNull LocalDateTime fechaYHora, @NotNull String observaciones, @NotNull Club clubLocal, @NotNull Club clubVisitante, @NotNull Jornada jornada){
         this.fecha = fechaYHora;
         this.observaciones = observaciones;
         this.clubLocal = clubLocal;
         this.clubVisitante = clubVisitante;
+        this.jornada = jornada;
         this.estado = NombreEstadoPartido.PENDIENTE;
     }
 
@@ -69,6 +72,10 @@ public class Partido {
 
     public Club getClubVisitante() {
         return clubVisitante;
+    }
+
+    public Jornada getJornada() {
+        return jornada;
     }
 
     public void setId(Long id) {
@@ -97,5 +104,11 @@ public class Partido {
 
     public void cambiarEstadoAFinalizado(){
         this.estado = NombreEstadoPartido.FINALIZADO;
+    }
+
+    public void cambiarEstadoAPendiente(){ this.estado = NombreEstadoPartido.PENDIENTE;}
+
+    public void setJornada(Jornada jornada) {
+        this.jornada = jornada;
     }
 }

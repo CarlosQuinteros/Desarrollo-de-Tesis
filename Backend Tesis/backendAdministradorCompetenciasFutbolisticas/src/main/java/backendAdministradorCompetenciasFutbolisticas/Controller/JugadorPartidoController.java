@@ -89,4 +89,12 @@ public class JugadorPartidoController {
         jugadorPartidoService.guardarParticipacionJugador(participacionJugador);
         return new ResponseEntity<>(participacionJugador, HttpStatus.OK);
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<?> eliminarParticipacionJugador(@PathVariable Long id){
+        jugadorPartidoService.eliminarParticipacionJugador(id);
+        return new ResponseEntity<>(new Mensaje("Participacion eliminada correctamente"),HttpStatus.OK);
+    }
+
 }

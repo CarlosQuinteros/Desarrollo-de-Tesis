@@ -125,4 +125,9 @@ public class JuezRolService {
         boolean result = juezRolRepository.existsByJuez_Id(idJuez);
         return result;
     }
+
+    public boolean existeReferenciasConPartido(Long idPartido){
+        boolean result = juezRolRepository.existsByPartido_Id(idPartido);
+        return result;
+    }
 }

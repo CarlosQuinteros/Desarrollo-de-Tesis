@@ -1,9 +1,6 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
-import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
-import backendAdministradorCompetenciasFutbolisticas.Entity.JugadorPartido;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Partido;
+import backendAdministradorCompetenciasFutbolisticas.Entity.*;
 import backendAdministradorCompetenciasFutbolisticas.Enums.PosicionJugador;
 import backendAdministradorCompetenciasFutbolisticas.Enums.TipoRolJugador;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
@@ -24,6 +21,9 @@ public class JugadorPartidoService {
 
     @Autowired
     private JugadorPartidoRepository jugadorPartidoRepository;
+
+    @Autowired
+    private AnotacionService anotacionService;
 
     public List<PosicionJugador> getListadoPosicionJugador(){
         return Arrays.stream(PosicionJugador.values()).collect(Collectors.toList());
@@ -77,6 +77,10 @@ public class JugadorPartidoService {
 
     //TODO: No se puede eliminar si el jugador tiene goles, tarjetas o cambio.
     public void eliminarParticipacionJugador(Long idJugadorPartido){
+        JugadorPartido participacionJugador = getJugadorPartidoById(idJugadorPartido);
+        if(anotacionService.existeAnotacionEnPartidoDeJugador(participacionJugador.getPartido().getId(), participacionJugador.getJugador().getId())){
+            throw new BadRequestException("El jugador anoto un gol y no se puede eliminar su participacion");
+        }
         jugadorPartidoRepository.deleteById(idJugadorPartido);
     }
 
@@ -136,6 +140,10 @@ public class JugadorPartidoService {
 
     public boolean jugadorFormaParteDeSuplentes(Long idPartido, Long idClub, Long idJugador){
         return jugadorPartidoRepository.existsByPartido_IdAndClub_IdAndJugador_IdAndRol(idPartido,idClub, idJugador,TipoRolJugador.SUPLENTE);
+    }
+
+    public boolean existeReferenciasConPartido(Long idPartido){
+        return jugadorPartidoRepository.existsByPartido_Id(idPartido);
     }
 
 

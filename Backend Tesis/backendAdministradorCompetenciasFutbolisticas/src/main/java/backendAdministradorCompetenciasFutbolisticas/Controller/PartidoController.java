@@ -52,6 +52,9 @@ public class PartidoController {
     @Autowired
     private AnotacionService anotacionService;
 
+    @Autowired
+    private JornadaService jornadaService;
+
     @PostMapping("/crear")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> crearPartido(@Valid @RequestBody PartidoDto nuevoPartido, BindingResult bindingResult){
@@ -64,12 +67,15 @@ public class PartidoController {
         System.out.println("sout toString: " + fecha.toString());
         Club clubLocal = clubService.getClub(nuevoPartido.getIdClubLocal());
         Club clubVisitante = clubService.getClub(nuevoPartido.getIdClubVisitante());
+        Jornada jornada = jornadaService.getJornada(nuevoPartido.getIdJornada());
+        Partido partido = new Partido(fecha, nuevoPartido.getObservaciones(), clubLocal, clubVisitante, jornada);
 
-        Partido partido = new Partido(fecha, nuevoPartido.getObservaciones(), clubLocal, clubVisitante);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Usuario usuario = usuarioService.getUsuarioLogueado(auth);
+
         partidoService.guardarPartido(partido);
         logService.guardarLogCreacionPartido(partido,usuario);
+
         return new ResponseEntity<>(new Mensaje("Partido guardado correctamente", partido), HttpStatus.CREATED);
     }
 
@@ -159,14 +165,9 @@ public class PartidoController {
     }
 
 
-
-
     @DeleteMapping("/eliminar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> eliminarPartido(@PathVariable ("id") Long id){
-        if(!partidoService.existePartidoPorId(id)){
-            throw new BadRequestException("No existe el partido con ID: " + id);
-        }
         partidoService.eliminarPartido(id);
         return new ResponseEntity<>(new Mensaje("Partido eliminado correctamente"),HttpStatus.OK);
     }
@@ -176,6 +177,13 @@ public class PartidoController {
     public ResponseEntity<?> establecerPartidoComoFinalizado(@PathVariable ("id") Long id){
         partidoService.finalizarPartido(id);
         return new ResponseEntity<>(new Mensaje("Partido finalizado correctamente"),HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/pendiente")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<?> establecerPartidoComoPendiente(@PathVariable Long id){
+        partidoService.finalizarPartido(id);
+        return new ResponseEntity<>(new Mensaje("Partido establecido como 'Pendiente' correctamente"),HttpStatus.OK);
     }
 
 

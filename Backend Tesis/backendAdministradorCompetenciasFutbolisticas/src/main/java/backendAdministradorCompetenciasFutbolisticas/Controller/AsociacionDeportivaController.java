@@ -111,21 +111,16 @@ public class AsociacionDeportivaController {
 
     /*
         Metodo que permite eliminar una asociacion deportiva
-        TODO: NO SE PUEDE ELIMINAR SI TIENE REFERENCIAS EN TORNEOS.
      */
     @DeleteMapping("/eliminar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> eliminarAsociacion(@PathVariable ("id") Long id){
         AsociacionDeportiva asociacionDeportiva = asociacionDeportivaService.getById(id);
-        try{
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            Usuario usuario = usuarioService.getUsuarioLogueado(auth);
-            asociacionDeportivaService.eliminarAsociacion(asociacionDeportiva);
-            logService.guardarLogEliminacionAsociacion(id, usuario);
-            return new ResponseEntity<>(new Mensaje("Asociacion Deportiva eliminada correctamente"), HttpStatus.OK);
-        }catch (Exception e){
-            throw new InternalServerErrorException("Fallo la operacion. La Asociacion Deportiva no se elimino");
-        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioService.getUsuarioLogueado(auth);
+        asociacionDeportivaService.eliminarAsociacion(asociacionDeportiva);
+        logService.guardarLogEliminacionAsociacion(id, usuario);
+        return new ResponseEntity<>(new Mensaje("Asociacion Deportiva eliminada correctamente"), HttpStatus.OK);
     }
 
     @GetMapping("/listado")

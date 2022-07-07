@@ -1,9 +1,11 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InternalServerErrorException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.ClubRepository;
+import backendAdministradorCompetenciasFutbolisticas.Repository.CompetenciaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,15 @@ public class ClubService {
 
     @Autowired
     ClubRepository clubRepository;
+
+    @Autowired
+    CompetenciaRepository competenciaRepository;
+
+    @Autowired
+    JugadorPartidoService jugadorPartidoService;
+
+    @Autowired
+    PartidoService partidoService;
 
 
     public boolean guardarNuevoClub(Club club) {
@@ -53,7 +64,16 @@ public class ClubService {
         return clubRepository.findAll();
     }
 
-    public void eliminarClub(Long id) { clubRepository.deleteById(id);}
+    public void eliminarClub(Long id) {
+        Club club = getClub(id);
+        if(partidoService.existeReferenciasConClub(club.getId())){
+            throw new BadRequestException("El club tiene referencias con partidos y no puede eliminarse");
+        }
+        if(competenciaRepository.existsByClubesParticipantesContains(club)){
+            throw new BadRequestException("El Club tiene referencias con competencias y no puede eliminarse");
+        }
+        clubRepository.deleteById(club.getId());
+    }
 
     public List<Club> getListadoOrdenadoPorNombre(){
         return clubRepository.findByOrderByNombreClub();

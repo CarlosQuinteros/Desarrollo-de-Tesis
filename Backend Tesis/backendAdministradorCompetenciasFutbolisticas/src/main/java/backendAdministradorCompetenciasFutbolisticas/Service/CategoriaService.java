@@ -17,6 +17,9 @@ public class CategoriaService {
     @Autowired
     private CategoriaRepository categoriaRepository;
 
+    @Autowired
+    private CompetenciaService competenciaService;
+
     public Categoria guardarCategoria(Categoria categoria){
         //dependiendo tipo categoria llamo a un metodo
         if(categoria.esCategoriaSinRestricciones()) return crearCategoriaSinRestricciones(categoria);
@@ -69,7 +72,10 @@ public class CategoriaService {
 
     public void eliminarCategoria(Long id){
         Categoria categoria = getDetalleCategoria(id);
-        categoriaRepository.deleteById(id);
+        if(competenciaService.existeReferenciasConCategoria(categoria.getId())){
+            throw new BadRequestException("La categoria tiene referencias con competencias y no se puede eliminar");
+        }
+        categoriaRepository.deleteById(categoria.getId());
     }
 
     public boolean existeCategoriaPorNombre(String nombreCategoria){

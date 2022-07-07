@@ -2,16 +2,15 @@ package backendAdministradorCompetenciasFutbolisticas.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Dtos.DetalleGeneralPartidoDto;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
-import backendAdministradorCompetenciasFutbolisticas.Entity.JuezRol;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Partido;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
-import backendAdministradorCompetenciasFutbolisticas.Repository.JuezRolRepository;
 import backendAdministradorCompetenciasFutbolisticas.Repository.PartidoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -21,12 +20,33 @@ public class PartidoService {
     private PartidoRepository partidoRepository;
 
     @Autowired
-    private JuezRolRepository juezRolRepository;
+    private JuezRolService juezRolService;
 
     @Autowired
     private AnotacionService anotacionService;
 
+    @Autowired
+    private JugadorPartidoService jugadorPartidoService;
+
     public Partido guardarPartido(Partido partido) {
+        if(partido.getClubVisitante().getId().equals(partido.getClubLocal().getId())){
+            throw new BadRequestException("Para guardar un partido los clubes que se enfrentan no deben ser los mismos");
+        }
+        if(!partido.getJornada().getCompetencia().getClubesParticipantes().contains(partido.getClubLocal())){
+            throw new BadRequestException("El club "+ partido.getClubLocal().getNombreClub() + " no forma parte de los clubes participantes de la competencia");
+        }
+        if(!partido.getJornada().getCompetencia().getClubesParticipantes().contains(partido.getClubVisitante())){
+            throw new BadRequestException("El club "+ partido.getClubVisitante().getNombreClub() + " no forma parte de los clubes participantes de la competencia");
+        }
+        if(existeParticipacionDeClubEnJornada(partido.getJornada().getId(),partido.getClubLocal().getId())){
+            throw new BadRequestException("El club " + partido.getClubLocal().getNombreClub() + " ya participa en un partido en la fecha ingresada");
+        }
+        if(existeParticipacionDeClubEnJornada(partido.getJornada().getId(),partido.getClubVisitante().getId())){
+            throw new BadRequestException("El club " + partido.getClubVisitante().getNombreClub() + " ya participa en un partido en la fecha ingresada");
+        }
+        if(existePartidoConMismoClubLocalYClubVisitanteEnCompetencia(partido.getJornada().getCompetencia().getId(), partido.getClubLocal().getId(), partido.getClubVisitante().getId())){
+            throw new BadRequestException("Ya existe un partido con el mismo club local y club visitante");
+        }
         return partidoRepository.save(partido);
     }
 
@@ -38,9 +58,31 @@ public class PartidoService {
 
     public void eliminarPartido(Long id) {
         Partido partido = getDetallePartido(id);
-        List<JuezRol> juecesDelPartido = juezRolRepository.findByPartido_Id(id);
-        juezRolRepository.deleteAll(juecesDelPartido);
+        if(juezRolService.existeReferenciasConPartido(partido.getId())){
+            throw new BadRequestException("El partido tiene referencias con jueces y no puede eliminarse");
+        }
+        if(jugadorPartidoService.existeReferenciasConPartido(partido.getId())){
+            throw new BadRequestException("El partido tiene referencias con jugadores y no puede eliminarse");
+        }
         partidoRepository.deleteById(id);
+    }
+
+    public List<DetalleGeneralPartidoDto> listadoDePartidosPorJornada(Long idJornada){
+        List<DetalleGeneralPartidoDto> partidosPorJornada =
+                partidoRepository.findByJornada_Id(idJornada)
+                .stream()
+                .map(partido -> mapPartidoToDetalleGeneralPartidoDto(partido))
+                .collect(Collectors.toList());
+        return partidosPorJornada;
+    }
+
+    public List<DetalleGeneralPartidoDto> listadoDePartidosPorCompetencia(Long idCompetencia){
+        List<DetalleGeneralPartidoDto> partidosPorJornada =
+                partidoRepository.findByJornada_Competencia_Id(idCompetencia)
+                        .stream()
+                        .map(partido -> mapPartidoToDetalleGeneralPartidoDto(partido))
+                        .collect(Collectors.toList());
+        return partidosPorJornada;
     }
 
     public List<Partido> historialEntreClubes(Long idClub1, Long idClub2) {
@@ -55,6 +97,13 @@ public class PartidoService {
     public void finalizarPartido(Long id) {
         Partido partido = getDetallePartido(id);
         partido.cambiarEstadoAFinalizado();
+        partidoRepository.save(partido);
+    }
+
+    public void establecerPartidoComoPendiente(Long id){
+        Partido partido = getDetallePartido(id);
+        partido.cambiarEstadoAPendiente();
+        partidoRepository.save(partido);
     }
 
     public boolean clubFormaParteDePartido(Partido partido, Club club) {
@@ -77,6 +126,23 @@ public class PartidoService {
         );
         return  informacionGeneral;
     }
+
+    public boolean existeParticipacionDeClubEnJornada(Long idJornada, Long idClub){
+        return partidoRepository.existsByJornada_IdAndClubLocal_IdOrClubVisitante_Id(idJornada,idClub,idClub);
+    }
+
+    public boolean existePartidoConMismoClubLocalYClubVisitanteEnCompetencia(Long idCompetencia, Long idClubLocal, Long idClubVisitante){
+        return partidoRepository.existsByJornada_Competencia_IdAndAndClubLocal_IdAndClubVisitante_Id(idCompetencia, idClubLocal, idClubVisitante);
+    }
+
+    public boolean existeReferenciasConJornada(Long idJornada){
+        return partidoRepository.existsByJornada_Id(idJornada);
+    }
+
+    public boolean existeReferenciasConClub(Long idClub){
+        return partidoRepository.existsByClubLocal_IdOrClubVisitante_Id(idClub, idClub);
+    }
+
 
 
 }

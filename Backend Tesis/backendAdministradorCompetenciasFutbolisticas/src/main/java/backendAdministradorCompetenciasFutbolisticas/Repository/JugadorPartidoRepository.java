@@ -12,6 +12,9 @@ import java.util.List;
 public interface JugadorPartidoRepository extends JpaRepository<JugadorPartido,Long> {
 
 
+    //existe referencias con partido
+    boolean existsByPartido_Id(Long idPartido);
+
     //existe cierta posicion (AR,DEF,MED,DEL) en partido por club y rol de jugador (Titular o suplente)
     boolean existsByPartido_IdAndClub_IdAndRolAndPosicion(Long idPartido, Long idClub, TipoRolJugador tipoRolJugador, PosicionJugador posicionJugador);
 

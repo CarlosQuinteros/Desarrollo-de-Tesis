@@ -6,11 +6,9 @@ import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Partido;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Sustitucion;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
-import backendAdministradorCompetenciasFutbolisticas.Service.ClubService;
-import backendAdministradorCompetenciasFutbolisticas.Service.JugadorService;
-import backendAdministradorCompetenciasFutbolisticas.Service.PartidoService;
-import backendAdministradorCompetenciasFutbolisticas.Service.SustitucionService;
+import backendAdministradorCompetenciasFutbolisticas.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +35,9 @@ public class SustitucionController {
     @Autowired
     private JugadorService jugadorService;
 
+    @Autowired
+    private AnotacionService anotacionService;
+
     @PostMapping("/crear")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> crearSustitucion(@Valid @RequestBody SustitucionDto nuevaSustitucion, BindingResult bindingResult){
@@ -49,14 +50,17 @@ public class SustitucionController {
         Club clubSustituye = clubService.getClub(nuevaSustitucion.getIdClubSustituye());
         Sustitucion sustitucion = new Sustitucion(partido,clubSustituye,nuevaSustitucion.getMinuto(),jugadorSale,jugadorEntra);
         sustitucionService.guardarSustitucion(sustitucion);
-        return new ResponseEntity<>(new Mensaje("Sustitucion guardada correctamente"), HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Sustitucion guardada correctamente"), HttpStatus.CREATED);
     }
 
-    //TODO: NO se puede eliminar sustitucion si el jugador que entro marco un gol
     @DeleteMapping("/eliminar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> eliminarSustitucion(@PathVariable Long id){
         Sustitucion sustitucion = sustitucionService.getDetalleSustitucion(id);
+        if (anotacionService.existeAnotacionEnPartidoDeJugador(sustitucion.getPartido().getId(), sustitucion.getJugadorEntra().getId())) {
+
+            throw new BadRequestException("No se puede eliminar la sustitucion porque el jugador que entro marco un gol");
+        }
         sustitucionService.eliminarSustitucion(sustitucion.getId());
         return new ResponseEntity<>(new Mensaje("Sustitucion eliminada correctamente"),HttpStatus.OK);
     }

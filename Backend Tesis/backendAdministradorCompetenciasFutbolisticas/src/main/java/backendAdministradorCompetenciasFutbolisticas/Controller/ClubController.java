@@ -100,15 +100,11 @@ public class ClubController {
         if(paseJugadorService.existeHistorialPorClub(id)){
             throw new BadRequestException("El club tiene transacciones con jugadores y no puede eliminarse");
         }
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            Usuario usuario = usuarioService.getUsuarioLogueado(auth);
-            clubService.eliminarClub(id);
-            logService.guardarLogEliminacionClub(id,usuario);
-            return new ResponseEntity<>(new Mensaje("Club eliminado correctamente"), HttpStatus.OK);
-        }catch (Exception e){
-            throw new InternalServerErrorException("Fallo la operacion. El club no se elimino");
-        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioService.getUsuarioLogueado(auth);
+        clubService.eliminarClub(id);
+        logService.guardarLogEliminacionClub(id,usuario);
+        return new ResponseEntity<>(new Mensaje("Club eliminado correctamente"), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")

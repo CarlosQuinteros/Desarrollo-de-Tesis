@@ -74,8 +74,6 @@ public class CategoriaController {
     @DeleteMapping("/eliminar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> eliminarCategoria(@PathVariable ("id") Long id){
-
-        //TODO: no se puede eliminar categoria si hay transacciones con competencias
         categoriaService.eliminarCategoria(id);
         return new ResponseEntity<>(new Mensaje("Categoria eliminada correctamente"),HttpStatus.OK);
     }

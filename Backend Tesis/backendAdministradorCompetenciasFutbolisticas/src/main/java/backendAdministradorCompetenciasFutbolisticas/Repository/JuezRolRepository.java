@@ -16,6 +16,8 @@ public interface JuezRolRepository extends JpaRepository<JuezRol, Long> {
 
     boolean existsByPartido_IdAndRol(Long idPartido, NombreRolJuez rol);
 
+    boolean existsByPartido_Id(Long idPartido);
+
     List<JuezRol> findByJuez_Id(Long idJuez);
 
     List<JuezRol> findByJuez_DocumentoOrJuez_Legajo(String documento, String legajo);
