@@ -50,6 +50,23 @@ public class PartidoService {
         return partidoRepository.save(partido);
     }
 
+    public Partido editarPartido(Long idPartido, Partido partidoEditado){
+        Partido partidoEditar = getDetallePartido(idPartido);
+        if(partidoEditar.getClubVisitante().getId().equals(partidoEditado.getClubVisitante().getId())
+                && partidoEditar.getClubLocal().getId().equals(partidoEditado.getClubLocal().getId())
+
+        ){
+            partidoEditar.setFecha(partidoEditado.getFecha());
+            partidoEditar.setObservaciones(partidoEditado.getObservaciones());
+            return partidoRepository.save(partidoEditar);
+        }
+        partidoEditar.setFecha(partidoEditado.getFecha());
+        partidoEditar.setClubLocal(partidoEditado.getClubLocal());
+        partidoEditar.setClubVisitante(partidoEditado.getClubVisitante());
+        partidoEditar.setObservaciones(partidoEditado.getObservaciones());
+        return guardarPartido(partidoEditar);
+    }
+
     public Partido getDetallePartido(Long id) {
         Partido partido = partidoRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("No existe el partido con ID: " + id));
@@ -96,6 +113,9 @@ public class PartidoService {
 
     public void finalizarPartido(Long id) {
         Partido partido = getDetallePartido(id);
+        if(!jugadorPartidoService.existeReferenciasConPartido(id)){
+            throw new BadRequestException("No se puede finalizar un partido sin participacion de jugadores");
+        }
         partido.cambiarEstadoAFinalizado();
         partidoRepository.save(partido);
     }

@@ -15,4 +15,6 @@ public interface CompetenciaRepository extends JpaRepository<Competencia,Long> {
     boolean existsByCategoria_Id(Long idCategoria);
 
     boolean existsByClubesParticipantesContains(Club club);
+
+    Integer countCompetenciaBy();
 }

@@ -4,6 +4,7 @@ import backendAdministradorCompetenciasFutbolisticas.Dtos.DetalleGeneralPartidoD
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.PartidoDto;
 import backendAdministradorCompetenciasFutbolisticas.Entity.*;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoPartido;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
@@ -61,14 +62,10 @@ public class PartidoController {
         if(bindingResult.hasErrors()){
             throw new InvalidDataException(bindingResult);
         }
-        LocalDateTime fecha = LocalDateTime.now();
-        System.out.println("sout localdatetime: " + fecha);
-        System.out.println("sout to localdate: " + fecha.toLocalDate());
-        System.out.println("sout toString: " + fecha.toString());
         Club clubLocal = clubService.getClub(nuevoPartido.getIdClubLocal());
         Club clubVisitante = clubService.getClub(nuevoPartido.getIdClubVisitante());
         Jornada jornada = jornadaService.getJornada(nuevoPartido.getIdJornada());
-        Partido partido = new Partido(fecha, nuevoPartido.getObservaciones(), clubLocal, clubVisitante, jornada);
+        Partido partido = new Partido(nuevoPartido.getFecha(), nuevoPartido.getObservaciones(), clubLocal, clubVisitante, jornada);
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Usuario usuario = usuarioService.getUsuarioLogueado(auth);
@@ -77,6 +74,35 @@ public class PartidoController {
         logService.guardarLogCreacionPartido(partido,usuario);
 
         return new ResponseEntity<>(new Mensaje("Partido guardado correctamente", partido), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/editar/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<?> editarPartido(@PathVariable Long id, @Valid @RequestBody PartidoDto partidoDto, BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            throw new InvalidDataException(bindingResult);
+        }
+        Partido partidoEditar = partidoService.getDetallePartido(id);
+        if(partidoEditar.getEstado().equals(NombreEstadoPartido.FINALIZADO)){
+            throw new BadRequestException("No se puede editar un partido finalizado");
+        }
+        Club clubLocal = clubService.getClub(partidoDto.getIdClubLocal());
+        Club clubVisitante = clubService.getClub(partidoDto.getIdClubVisitante());
+        Partido partidoEditado = new Partido();
+        if(jugadorPartidoService.existeReferenciasConPartido(partidoEditar.getId())){
+            partidoEditado.setClubLocal(partidoEditar.getClubLocal());
+            partidoEditado.setClubVisitante(partidoEditar.getClubLocal());
+            partidoEditado.setFecha(partidoDto.getFecha());
+            partidoEditado.setObservaciones(partidoDto.getObservaciones());
+        }
+        else{
+            partidoEditado.setClubLocal(clubLocal);
+            partidoEditado.setClubVisitante(clubVisitante);
+            partidoEditado.setFecha(partidoDto.getFecha());
+            partidoEditado.setObservaciones(partidoDto.getObservaciones());
+        }
+        partidoService.editarPartido(partidoEditar.getId(), partidoEditado);
+        return new ResponseEntity<>(new Mensaje("Partido guardado correctamente"),HttpStatus.OK);
     }
 
     @GetMapping("/detalle/{id}")
@@ -182,7 +208,7 @@ public class PartidoController {
     @PutMapping("/{id}/pendiente")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> establecerPartidoComoPendiente(@PathVariable Long id){
-        partidoService.finalizarPartido(id);
+        partidoService.establecerPartidoComoPendiente(id);
         return new ResponseEntity<>(new Mensaje("Partido establecido como 'Pendiente' correctamente"),HttpStatus.OK);
     }
 

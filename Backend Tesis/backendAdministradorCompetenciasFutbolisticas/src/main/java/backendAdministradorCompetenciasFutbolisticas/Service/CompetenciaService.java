@@ -60,5 +60,9 @@ public class CompetenciaService {
         return competenciaRepository.existsByAsociacionDeportiva_Id(idAsociacion);
     }
 
+    public Integer cantidadTotalCompetencias(){
+        return competenciaRepository.countCompetenciaBy();
+    }
+
 
 }

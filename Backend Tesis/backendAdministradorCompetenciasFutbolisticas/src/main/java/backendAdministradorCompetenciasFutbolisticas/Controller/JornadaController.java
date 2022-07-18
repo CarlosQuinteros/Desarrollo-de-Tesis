@@ -70,6 +70,14 @@ public class JornadaController {
         return new ResponseEntity<>(partidosPorJornada, HttpStatus.OK);
     }
 
+    @GetMapping("/detalle/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<Jornada> detalleJornada(@PathVariable Long id){
+        Jornada jornada = jornadaService.getJornada(id);
+        return new ResponseEntity<>(jornada,HttpStatus.OK);
+    }
+
+
     @DeleteMapping("/eliminar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> eliminarJornada(@PathVariable Long id){

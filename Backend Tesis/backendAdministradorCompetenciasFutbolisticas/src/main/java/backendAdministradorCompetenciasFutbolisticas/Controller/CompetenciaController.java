@@ -103,6 +103,13 @@ public class CompetenciaController {
         return new ResponseEntity<>(new Mensaje("Competencia guardada correctamente"), HttpStatus.OK);
     }
 
+    @GetMapping("/detalle/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<Competencia> listadoDeCompetencias(@PathVariable Long id){
+        Competencia competencia = competenciaService.getCompetencia(id);
+        return new ResponseEntity<>(competencia,HttpStatus.OK);
+    }
+
     @GetMapping("/listado")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<List<Competencia>> listadoDeCompetencias(){
@@ -133,6 +140,13 @@ public class CompetenciaController {
     public ResponseEntity<?> eliminarCompetencia(@PathVariable Long id){
         competenciaService.eliminarCompetencia(id);
         return new ResponseEntity<>(new Mensaje("Competencia eliminada correctamente"),HttpStatus.OK);
+    }
+
+    @GetMapping("/cantidad-total")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<Integer> cantidadTotalCompetencias(){
+        Integer cantidadTotal = competenciaService.cantidadTotalCompetencias();
+        return new ResponseEntity<>(cantidadTotal,HttpStatus.OK);
     }
 
 

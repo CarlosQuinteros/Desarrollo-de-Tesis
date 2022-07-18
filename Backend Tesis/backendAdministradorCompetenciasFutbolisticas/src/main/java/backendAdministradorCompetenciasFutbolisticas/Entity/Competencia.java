@@ -5,6 +5,8 @@ import backendAdministradorCompetenciasFutbolisticas.Enums.TipoGenero;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -116,6 +118,7 @@ public class Competencia {
     }
 
     public List<Club> getClubesParticipantes() {
+        clubesParticipantes.sort((club1, club2) -> club1.getNombreClub().compareToIgnoreCase(club2.getNombreClub()));
         return clubesParticipantes;
     }
 

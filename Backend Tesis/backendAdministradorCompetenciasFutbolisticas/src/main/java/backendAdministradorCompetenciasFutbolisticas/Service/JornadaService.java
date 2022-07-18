@@ -1,5 +1,6 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
+import backendAdministradorCompetenciasFutbolisticas.Entity.Competencia;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Jornada;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
@@ -35,10 +36,18 @@ public class JornadaService {
 
     public void eliminarJornada(Long id){
         Jornada jornada = getJornada(id);
+        Competencia competencia = jornada.getCompetencia();
         if(partidoService.existeReferenciasConJornada(jornada.getId())){
             throw new BadRequestException("La jornada tiene referencias con partidos y no puede eliminarse");
         }
         jornadaRepository.deleteById(jornada.getId());
+        List<Jornada> jornadas = getListadoJornadasPorCompetencia(competencia.getId());
+        for (int i = 0; i < jornadas.size(); i++) {
+            Integer numero = i + 1;
+            jornadas.get(i).setNumero(numero);
+            jornadas.get(i).setDescripcion("Fecha: " + numero);
+            jornadaRepository.save(jornadas.get(i));
+        }
     }
 
     public boolean existeReferenciasConCompetencia(Long idCompetencia){

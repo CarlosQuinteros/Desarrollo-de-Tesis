@@ -4,15 +4,20 @@ package backendAdministradorCompetenciasFutbolisticas.Dtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class PartidoDto {
 
-    //@JsonFormat("")
-    private LocalDateTime fecha;
+    @NotNull(message = "La fecha no debe estar vacia")
+    private Date fecha;
 
+    @NotBlank(message = "Las observaciones no debe estar vacia")
     private String observaciones;
 
     @NotNull(message = "El idJornada no puede estar vacio")
@@ -20,13 +25,15 @@ public class PartidoDto {
     private Long idJornada;
 
     @NotNull(message = "El club local no puede estar vacio")
+    @Min(value = 1, message = "El minimo valor para idClubLocal es 1")
     private Long idClubLocal;
 
     @NotNull(message = "El club visitante no puede estar vacio")
+    @Min(value = 1, message = "El minimo valor para idClubVisitante es 1")
     private Long idClubVisitante;
 
     public LocalDateTime getFecha() {
-        return fecha;
+        return fecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
     public String getObservaciones() {
@@ -45,7 +52,7 @@ public class PartidoDto {
         return idJornada;
     }
 
-    public void setFecha(LocalDateTime fecha) {
+    public void setFecha(Date fecha) {
         this.fecha = fecha;
     }
 
