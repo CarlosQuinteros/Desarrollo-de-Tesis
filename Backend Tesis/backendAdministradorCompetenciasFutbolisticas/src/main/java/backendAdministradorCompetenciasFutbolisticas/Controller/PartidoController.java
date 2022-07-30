@@ -91,7 +91,7 @@ public class PartidoController {
         Partido partidoEditado = new Partido();
         if(jugadorPartidoService.existeReferenciasConPartido(partidoEditar.getId())){
             partidoEditado.setClubLocal(partidoEditar.getClubLocal());
-            partidoEditado.setClubVisitante(partidoEditar.getClubLocal());
+            partidoEditado.setClubVisitante(partidoEditar.getClubVisitante());
             partidoEditado.setFecha(partidoDto.getFecha());
             partidoEditado.setObservaciones(partidoDto.getObservaciones());
         }

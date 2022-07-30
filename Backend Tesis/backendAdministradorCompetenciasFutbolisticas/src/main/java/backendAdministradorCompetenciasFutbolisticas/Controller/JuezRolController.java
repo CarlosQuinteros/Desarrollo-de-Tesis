@@ -52,7 +52,7 @@ public class JuezRolController {
 
     @PutMapping("/editar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
-    public ResponseEntity<JuezRol> editarParticipacionDeJuezEnPartido(@PathVariable ("id") Long id, @Valid @RequestBody JuezRolDto juezRolDto, BindingResult bindingResult){
+    public ResponseEntity<?> editarParticipacionDeJuezEnPartido(@PathVariable ("id") Long id, @Valid @RequestBody JuezRolDto juezRolDto, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             throw new InvalidDataException(bindingResult);
         }
@@ -70,7 +70,7 @@ public class JuezRolController {
         juezRol.setJuez(juez);
         juezRol.setRol(rolJuez);
         juezRol = juezRolService.guardarJuezRol(juezRol);
-        return new ResponseEntity<>(juezRol, HttpStatus.CREATED);
+        return new ResponseEntity<>(new Mensaje("Participacion de juez guardada correctamente"), HttpStatus.OK);
 
     }
 

@@ -25,6 +25,9 @@ public class JugadorPartidoService {
     @Autowired
     private AnotacionService anotacionService;
 
+    @Autowired
+    private SustitucionService sustitucionService;
+
     public List<PosicionJugador> getListadoPosicionJugador(){
         return Arrays.stream(PosicionJugador.values()).collect(Collectors.toList());
     }
@@ -75,11 +78,17 @@ public class JugadorPartidoService {
                 .orElseThrow(()-> new ResourceNotFoundException("No existe la participacion con Id: " + id));
     }
 
-    //TODO: No se puede eliminar si el jugador tiene goles, tarjetas o cambio.
+    //TODO: No se puede eliminar si el jugador tiene tarjetas
     public void eliminarParticipacionJugador(Long idJugadorPartido){
         JugadorPartido participacionJugador = getJugadorPartidoById(idJugadorPartido);
         if(anotacionService.existeAnotacionEnPartidoDeJugador(participacionJugador.getPartido().getId(), participacionJugador.getJugador().getId())){
             throw new BadRequestException("El jugador anoto un gol y no se puede eliminar su participacion");
+        }
+        if(sustitucionService.existeSustitucionPorPartidoYClubYJugadorSale(participacionJugador.getPartido().getId(), participacionJugador.getClub().getId(),participacionJugador.getJugador().getId())){
+            throw new BadRequestException("El jugador salio en una sustitucion y no se puede eliminar su participacion");
+        }
+        if(sustitucionService.existeSustitucionPorPartidoYClubYJugadorEntra(participacionJugador.getPartido().getId(), participacionJugador.getClub().getId(),participacionJugador.getJugador().getId())){
+            throw new BadRequestException("El jugador entro en una sustitucion y no se puede eliminar su participacion");
         }
         jugadorPartidoRepository.deleteById(idJugadorPartido);
     }

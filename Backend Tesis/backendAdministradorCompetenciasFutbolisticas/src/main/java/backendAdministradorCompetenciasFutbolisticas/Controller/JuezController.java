@@ -23,6 +23,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @RestController
@@ -116,7 +117,7 @@ public class JuezController {
 
     @GetMapping("/detalle/dni-legajo/{dniOLegajo}")
     @PreAuthorize("hasAnyRole('ADMIN','ENCARGADO_DE_TORNEOS')")
-    public ResponseEntity<Juez> getDetalleJuezPorDocumentoOLegajo(@PathVariable ("dniOLegajo") String dniOLegajo){
+    public ResponseEntity<Juez> getDetalleJuezPorDocumentoOLegajo(@PathVariable ("dniOLegajo") @NotBlank String dniOLegajo){
         //el servicio genera exception si no obtiene el juez
         Juez juez = juezService.getJuezPorDocumentoOrLegajo(dniOLegajo);
         return new ResponseEntity<>(juez, HttpStatus.OK);

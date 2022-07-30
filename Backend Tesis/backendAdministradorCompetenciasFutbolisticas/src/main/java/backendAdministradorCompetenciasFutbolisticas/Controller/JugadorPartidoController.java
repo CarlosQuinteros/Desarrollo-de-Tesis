@@ -22,6 +22,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/participaciones-jugadores")
@@ -78,7 +79,7 @@ public class JugadorPartidoController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     @PutMapping("/editar/{id}")
-    public ResponseEntity<JugadorPartido> EditarParticipacionJugador(@PathVariable("id") Long id, @Valid @RequestBody JugadorPartidoDto participacionJugadorDto, BindingResult bindingResult){
+    public ResponseEntity<?> EditarParticipacionJugador(@PathVariable("id") Long id, @Valid @RequestBody JugadorPartidoDto participacionJugadorDto, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             throw new InvalidDataException(bindingResult);
         }
@@ -87,7 +88,7 @@ public class JugadorPartidoController {
         participacionJugador.setNroCamiseta(participacionJugadorDto.getNroCamiseta());
         participacionJugador.setPosicion(posicion);
         jugadorPartidoService.guardarParticipacionJugador(participacionJugador);
-        return new ResponseEntity<>(participacionJugador, HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Participacion guardada correctamente"), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
@@ -95,6 +96,12 @@ public class JugadorPartidoController {
     public ResponseEntity<?> eliminarParticipacionJugador(@PathVariable Long id){
         jugadorPartidoService.eliminarParticipacionJugador(id);
         return new ResponseEntity<>(new Mensaje("Participacion eliminada correctamente"),HttpStatus.OK);
+    }
+
+    @GetMapping("/posiciones")
+    public ResponseEntity<List<String>> listadoDePosiciones(){
+        List<String> posiciones = jugadorPartidoService.getListadoStringPosiciones();
+        return new ResponseEntity<>(posiciones, HttpStatus.OK);
     }
 
 }

@@ -58,7 +58,7 @@ public class AnotacionController {
         return new ResponseEntity<>(new Mensaje("Anotacion guardada correctamente"), HttpStatus.CREATED);
     }
 
-    @PostMapping("/editar/{id}")
+    @PutMapping("/editar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> editarAnotacion(@PathVariable ("id") Long id, @Valid @RequestBody AnotacionDto editarAnotacion, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
@@ -84,6 +84,13 @@ public class AnotacionController {
         List<String> tipoGoles = anotacionService.getListadoStringTipoAnotaciones();
         return new ResponseEntity<>(tipoGoles,HttpStatus.OK);
     }
+
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<?> eliminarAnotacion(@PathVariable Long id){
+        anotacionService.eliminarAnotacion(id);
+        return new ResponseEntity<>(new Mensaje("Anotacion eliminada correctamente"),HttpStatus.OK);
+    }
+
 
 
 

@@ -1,11 +1,10 @@
 package backendAdministradorCompetenciasFutbolisticas.Controller;
 
 import backendAdministradorCompetenciasFutbolisticas.Dtos.CompetenciaDto;
+import backendAdministradorCompetenciasFutbolisticas.Dtos.Interface.IGoleador;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
 import backendAdministradorCompetenciasFutbolisticas.Entity.*;
-import backendAdministradorCompetenciasFutbolisticas.Enums.NombreTipoGol;
 import backendAdministradorCompetenciasFutbolisticas.Enums.TipoGenero;
-import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
 import backendAdministradorCompetenciasFutbolisticas.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -127,12 +125,9 @@ public class CompetenciaController {
 
     @GetMapping("/{id}/goleadores")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
-    public ResponseEntity<?> listadoDeGoleadoresDeCompetencia(@PathVariable Long id){
-        Map<Jugador, List<Anotacion>> anotacionesPorJugador = anotacionService.anotacionesDeUnaCompetencia(id)
-                .stream()
-                .filter(anotacion -> !anotacion.getTipoGol().equals(NombreTipoGol.GOL_EN_CONTRA))
-                .collect(Collectors.groupingBy(Anotacion::getJugador));
-        return new ResponseEntity<>(anotacionesPorJugador, HttpStatus.OK);
+    public ResponseEntity<List<IGoleador>> listadoDeGoleadoresDeCompetencia(@PathVariable Long id){
+        List<IGoleador> goleadores = competenciaService.goleadoresDeUnaCompetencia(id);
+        return new ResponseEntity<>(goleadores, HttpStatus.OK);
     }
 
     @DeleteMapping("/eliminar/{id}")

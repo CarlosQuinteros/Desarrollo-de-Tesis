@@ -1,8 +1,7 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
-import backendAdministradorCompetenciasFutbolisticas.Entity.AsociacionDeportiva;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Competencia;
-import backendAdministradorCompetenciasFutbolisticas.Entity.Jornada;
+import backendAdministradorCompetenciasFutbolisticas.Dtos.Interface.IGoleador;
+import backendAdministradorCompetenciasFutbolisticas.Entity.*;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.CompetenciaRepository;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,6 +30,9 @@ public class CompetenciaService {
 
     @Autowired
     private JornadaService jornadaService;
+
+    @Autowired
+    private AnotacionService anotacionService;
 
     public Competencia guardarCompetencia(Competencia competencia){
         return competenciaRepository.save(competencia);
@@ -62,6 +65,14 @@ public class CompetenciaService {
 
     public Integer cantidadTotalCompetencias(){
         return competenciaRepository.countCompetenciaBy();
+    }
+
+    public List<IGoleador> goleadoresDeUnaCompetencia(Long idCompetencia){
+        List<IGoleador> IGoleadores = anotacionService.goleadoresDeUnaCompetencia(idCompetencia)
+                .stream()
+                .limit(12)
+                .collect(Collectors.toList());
+        return IGoleadores;
     }
 
 

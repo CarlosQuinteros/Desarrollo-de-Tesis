@@ -1,15 +1,14 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
+import backendAdministradorCompetenciasFutbolisticas.Dtos.Interface.IGoleador;
 import backendAdministradorCompetenciasFutbolisticas.Entity.*;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreTipoGol;
-import backendAdministradorCompetenciasFutbolisticas.Enums.TipoAnotacion;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.AnotacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +51,7 @@ public class AnotacionService {
             throw new BadRequestException("El jugador que anota ya fue sustituido y no puede anotar");
         }
         if(nuevaAnotacion.getTipoGol().equals(NombreTipoGol.GOL_EN_CONTRA) && !jugadorFormaParteDelEquipoContrarioAlQueAnota(partido,clubAnota,jugadorAnota)){
-            throw new BadRequestException("Para guardar un gol en contra, el jugador " + jugadorAnota.getApellidos() + ", " + jugadorAnota.getNombre() + " debe formar parte del equipo contrario");
+            throw new BadRequestException("Para guardar un gol en contra, el jugador " + jugadorAnota.getApellidos() + ", " + jugadorAnota.getNombre() + " debe ser titular o haber entrado en una sustitucion del equipo contrario");
         }
         if(!nuevaAnotacion.getTipoGol().equals(NombreTipoGol.GOL_EN_CONTRA) && !jugadorAnotaEsTitularOIngresoEnSustitucion(partido.getId(), clubAnota.getId(),jugadorAnota.getId())){
             throw new BadRequestException("El jugador debe formar parte de los titulares de " + clubAnota.getNombreClub() + " o haber ingresado en una sustitucion");
@@ -121,6 +120,12 @@ public class AnotacionService {
         Competencia competencia = competenciaService.getCompetencia(idCompetencia);
         return anotacionRepository.findByPartidoJornadaCompetencia_Id(competencia.getId());
     }
+
+    public List<IGoleador> goleadoresDeUnaCompetencia(Long idCompetencia){
+        return anotacionRepository.findGoleadoresByCompetencia_Id(idCompetencia);
+    }
+
+
 
 
 

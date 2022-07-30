@@ -149,4 +149,9 @@ public class Jugador {
     public void setEstadoJugador(EstadoJugador estadoJugador) {
         this.estadoJugador = estadoJugador;
     }
+
+    @JsonIgnore
+    public String nombreCompleto(){
+        return apellidos + ", " + nombre;
+    }
 }
