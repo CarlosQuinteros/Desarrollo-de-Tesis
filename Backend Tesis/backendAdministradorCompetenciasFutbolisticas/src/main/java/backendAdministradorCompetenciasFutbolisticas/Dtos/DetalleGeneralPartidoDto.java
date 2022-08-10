@@ -20,9 +20,15 @@ public class DetalleGeneralPartidoDto {
 
     private Integer cantidadGolesClubVisitante;
 
+    private String competencia;
+
+    private String jornada;
+
+    private String categoria;
+
     public DetalleGeneralPartidoDto(){}
 
-    public DetalleGeneralPartidoDto(Long idPartido, LocalDateTime fecha, String observaciones, String estado, String clubLocal, String clubVisitante, Integer cantidadGolesClubLocal, Integer cantidadGolesClubVisitante) {
+    public DetalleGeneralPartidoDto(Long idPartido, LocalDateTime fecha, String observaciones, String estado, String clubLocal, String clubVisitante, Integer cantidadGolesClubLocal, Integer cantidadGolesClubVisitante, String competencia, String jornada, String categoria) {
         this.idPartido = idPartido;
         this.fecha = fecha;
         this.observaciones = observaciones;
@@ -31,6 +37,9 @@ public class DetalleGeneralPartidoDto {
         this.clubVisitante = clubVisitante;
         this.cantidadGolesClubLocal = cantidadGolesClubLocal;
         this.cantidadGolesClubVisitante = cantidadGolesClubVisitante;
+        this.competencia = competencia;
+        this.jornada = jornada;
+        this.categoria = categoria;
     }
 
     public Long getIdPartido() {
@@ -95,5 +104,29 @@ public class DetalleGeneralPartidoDto {
 
     public void setCantidadGolesClubVisitante(Integer cantidadGolesClubVisitante) {
         this.cantidadGolesClubVisitante = cantidadGolesClubVisitante;
+    }
+
+    public String getCompetencia() {
+        return competencia;
+    }
+
+    public void setCompetencia(String competencia) {
+        this.competencia = competencia;
+    }
+
+    public String getJornada() {
+        return jornada;
+    }
+
+    public void setJornada(String jornada) {
+        this.jornada = jornada;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
 }

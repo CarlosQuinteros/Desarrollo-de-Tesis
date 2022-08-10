@@ -24,7 +24,6 @@ public class LogService {
     UsuarioRepository usuarioRepository;
 
 
-
     public List<Log> getListado(){
         List<Log> listado = logRepository.findAllByOrderByFechaDesc();
         return listado;
@@ -199,6 +198,32 @@ public class LogService {
     //Metodos para logs de partidos
     public void guardarLogCreacionPartido(Partido nuevoPartido, Usuario usuario){
         Log log = new Log(usuario, LogAccion.PARTIDO_CREACION, "Se creo el Partido ID: " + nuevoPartido.getId(), nuevoPartido.getId());
+        logRepository.save(log);
+    }
+
+    public void guardarLogEliminacionPartido(Long idPartido, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.PARTIDO_ELIMINACION, "Se elimino el partido ID: " + idPartido, idPartido);
+        logRepository.save(log);
+    }
+
+    public void guardarLogEdicionPartido(Long idPartido, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.PARTIDO_MODIFICACION, "Se edito el partido ID: " + idPartido, idPartido);
+        logRepository.save(log);
+    }
+
+    //Metodos para logs de competencias
+    public void guardarLogCreacionCompetencia(Competencia competencia, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.COMPETENCIA_CREACION, "Se creo la competencia ID: " + competencia.getId(), competencia.getId());
+        logRepository.save(log);
+    }
+
+    public void guardarLogEdicionCompetencia(Competencia competenciaEditada, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.COMPETENCIA_MODIFICACION, "Se edito la competencia ID: " + competenciaEditada.getId(), competenciaEditada.getId());
+        logRepository.save(log);
+    }
+
+    public void guardarLogEliminacionCompetencia(Long idCompetencia, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.COMPETENCIA_ELIMINACION, "Se elimino la competencia ID: " + idCompetencia, idCompetencia);
         logRepository.save(log);
     }
 }

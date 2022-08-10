@@ -84,8 +84,10 @@ public class PartidoController {
         }
         Partido partidoEditar = partidoService.getDetallePartido(id);
         if(partidoEditar.getEstado().equals(NombreEstadoPartido.FINALIZADO)){
-            throw new BadRequestException("No se puede editar un partido finalizado");
+            throw new BadRequestException("No se puede editar un partido finalizado. Debes solicitar el cambio de estado a PENDIENTE");
         }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioService.getUsuarioLogueado(auth);
         Club clubLocal = clubService.getClub(partidoDto.getIdClubLocal());
         Club clubVisitante = clubService.getClub(partidoDto.getIdClubVisitante());
         Partido partidoEditado = new Partido();
@@ -102,6 +104,7 @@ public class PartidoController {
             partidoEditado.setObservaciones(partidoDto.getObservaciones());
         }
         partidoService.editarPartido(partidoEditar.getId(), partidoEditado);
+        logService.guardarLogEdicionPartido(id, usuario);
         return new ResponseEntity<>(new Mensaje("Partido guardado correctamente"),HttpStatus.OK);
     }
 
@@ -194,7 +197,10 @@ public class PartidoController {
     @DeleteMapping("/eliminar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> eliminarPartido(@PathVariable ("id") Long id){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioService.getUsuarioLogueado(auth);
         partidoService.eliminarPartido(id);
+        logService.guardarLogEliminacionPartido(id,usuario);
         return new ResponseEntity<>(new Mensaje("Partido eliminado correctamente"),HttpStatus.OK);
     }
 

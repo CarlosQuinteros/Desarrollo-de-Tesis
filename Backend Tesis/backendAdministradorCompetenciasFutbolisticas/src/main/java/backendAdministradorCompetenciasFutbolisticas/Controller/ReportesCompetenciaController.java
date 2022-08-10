@@ -4,6 +4,7 @@ package backendAdministradorCompetenciasFutbolisticas.Controller;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.DetalleGeneralPartidoDto;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.EstadisticasGeneralesCompetenciaDto;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Competencia;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoPartido;
 import backendAdministradorCompetenciasFutbolisticas.Service.CompetenciaService;
 import backendAdministradorCompetenciasFutbolisticas.Service.PartidoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +14,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/estadisticas-competencia")
+@RequestMapping("/reportes-competencia")
 @CrossOrigin("*")
-public class EstadisticasCompetenciaController {
+public class ReportesCompetenciaController {
 
     @Autowired
     private PartidoService partidoService;
@@ -36,7 +38,7 @@ public class EstadisticasCompetenciaController {
         Double media;
         Competencia competencia = competenciaService.getCompetencia(id);
         EstadisticasGeneralesCompetenciaDto estadisticasGenerales = new EstadisticasGeneralesCompetenciaDto();
-        List<DetalleGeneralPartidoDto> partidos = partidoService.listadoDePartidosPorCompetencia(competencia.getId());
+        List<DetalleGeneralPartidoDto> partidos = partidoService.listadoDePartidosPorCompetencia(competencia.getId()).stream().filter(p -> p.getEstado().equals(NombreEstadoPartido.FINALIZADO.name())).collect(Collectors.toList());
         for (DetalleGeneralPartidoDto partido : partidos) {
             golesLocales += partido.getCantidadGolesClubLocal();
             golesVisitantes += partido.getCantidadGolesClubVisitante();

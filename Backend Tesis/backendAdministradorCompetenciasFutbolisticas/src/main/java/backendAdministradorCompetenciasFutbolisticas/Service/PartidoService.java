@@ -3,6 +3,7 @@ package backendAdministradorCompetenciasFutbolisticas.Service;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.DetalleGeneralPartidoDto;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Partido;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoPartido;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.PartidoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -94,16 +96,18 @@ public class PartidoService {
     }
 
     public List<DetalleGeneralPartidoDto> listadoDePartidosPorCompetencia(Long idCompetencia){
-        List<DetalleGeneralPartidoDto> partidosPorJornada =
+        List<DetalleGeneralPartidoDto> partidosPorCompetencia =
                 partidoRepository.findByJornada_Competencia_Id(idCompetencia)
                         .stream()
                         .map(partido -> mapPartidoToDetalleGeneralPartidoDto(partido))
                         .collect(Collectors.toList());
-        return partidosPorJornada;
+        return partidosPorCompetencia;
     }
 
     public List<Partido> historialEntreClubes(Long idClub1, Long idClub2) {
-        List<Partido> partidosEntreClubes = partidoRepository.findByClubLocal_IdAndClubVisitante_IdOrClubLocal_IdAndClubVisitante_Id(idClub1, idClub2, idClub2, idClub1);
+        List<Partido> partidosEntreClubes = partidoRepository.findByClubLocal_IdAndClubVisitante_IdOrClubLocal_IdAndClubVisitante_Id(idClub1, idClub2, idClub2, idClub1)
+                .stream().filter(partido -> partido.getEstado().equals(NombreEstadoPartido.FINALIZADO))
+                .collect(Collectors.toList());
         return partidosEntreClubes;
     }
 
@@ -142,7 +146,10 @@ public class PartidoService {
                 partido.getClubLocal().getNombreClub(),
                 partido.getClubVisitante().getNombreClub(),
                 cantidadGolesLocales,
-                cantidadGolesVisitantes
+                cantidadGolesVisitantes,
+                partido.getJornada().getCompetencia().getNombre(),
+                partido.getJornada().getDescripcion(),
+                partido.getJornada().getCompetencia().getCategoria().getNombre()
         );
         return  informacionGeneral;
     }
