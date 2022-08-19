@@ -39,5 +39,6 @@ public interface AnotacionRepository extends JpaRepository<Anotacion, Long> {
             "order by count(j2.id) desc", nativeQuery = true)
     List<IGoleador> findGoleadoresByCompetencia_Id(@Param("idCompetencia") Long idCompetencia);
 
+    List<Anotacion> findByPartido_IdAndJugador_Id(Long idPartido, Long idJugador);
 
 }

@@ -81,6 +81,10 @@ public class SustitucionService {
         return sustitucionRepository.existsByPartido_IdAndJugadorSale_Id(idPartido,idJugadorSale);
     }
 
+    public boolean existeSustitucionPorPartidoYJugadorEntra(Long idPartido, Long idJugadorEntra){
+        return sustitucionRepository.existsByPartido_IdAndJugadorEntra_Id(idPartido, idJugadorEntra);
+    }
+
     public boolean jugadorSaleFormaParteDeTitularesOIngresoEnUnaSustitucion(Long idPartido, Long idClubSustituye, Long idJugador){
         return jugadorPartidoService.jugadorFormaParteDeTitulares(idPartido,idClubSustituye,idJugador)
                 || existeSustitucionPorPartidoYClubYJugadorEntra(idPartido, idClubSustituye, idJugador);

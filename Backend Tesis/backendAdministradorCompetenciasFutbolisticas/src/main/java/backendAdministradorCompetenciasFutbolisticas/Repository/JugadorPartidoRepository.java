@@ -1,5 +1,6 @@
 package backendAdministradorCompetenciasFutbolisticas.Repository;
 
+import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
 import backendAdministradorCompetenciasFutbolisticas.Entity.JugadorPartido;
 import backendAdministradorCompetenciasFutbolisticas.Enums.PosicionJugador;
 import backendAdministradorCompetenciasFutbolisticas.Enums.TipoRolJugador;
@@ -38,6 +39,8 @@ public interface JugadorPartidoRepository extends JpaRepository<JugadorPartido,L
 
     //obtiene todas las participaciones de un jugador
     List<JugadorPartido> findByJugador_Id(Long idJugador);
+
+    JugadorPartido findByJugador_IdAndPartido_Id(Long idJugador, Long idPartido);
 
 
 }

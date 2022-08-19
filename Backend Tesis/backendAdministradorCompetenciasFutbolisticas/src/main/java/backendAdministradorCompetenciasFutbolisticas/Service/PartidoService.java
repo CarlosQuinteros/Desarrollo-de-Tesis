@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -168,6 +167,10 @@ public class PartidoService {
 
     public boolean existeReferenciasConClub(Long idClub){
         return partidoRepository.existsByClubLocal_IdOrClubVisitante_Id(idClub, idClub);
+    }
+
+    public List<Partido> fixtureDeUnClub(Long idClub){
+        return partidoRepository.findByClubLocal_IdOrClubVisitante_IdOrderByFechaDesc(idClub, idClub);
     }
 
 

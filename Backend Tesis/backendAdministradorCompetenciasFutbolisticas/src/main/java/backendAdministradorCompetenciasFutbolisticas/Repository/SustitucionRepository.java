@@ -15,6 +15,9 @@ public interface SustitucionRepository extends JpaRepository<Sustitucion,Long> {
     //determina si el jugador salio
     boolean existsByPartido_IdAndJugadorSale_Id(Long idPartido, Long idJugador);
 
+    //determina si el jugador entró
+    boolean existsByPartido_IdAndJugadorEntra_Id(Long idPartido, Long idJugador);
+
     //determina si existe un cambio por el jugador que entra y club
     boolean existsByPartido_IdAndClubSustituye_IdAndJugadorEntra_Id(Long idPartido, Long idClub, Long idJugadorEntra);
 

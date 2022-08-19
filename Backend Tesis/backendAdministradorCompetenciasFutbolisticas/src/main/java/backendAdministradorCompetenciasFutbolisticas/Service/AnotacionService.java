@@ -1,7 +1,9 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
+import backendAdministradorCompetenciasFutbolisticas.Dtos.PartidoAntoacionJugadorDto;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Interface.IGoleador;
 import backendAdministradorCompetenciasFutbolisticas.Entity.*;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoPartido;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreTipoGol;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.ResourceNotFoundException;
@@ -123,6 +125,22 @@ public class AnotacionService {
 
     public List<IGoleador> goleadoresDeUnaCompetencia(Long idCompetencia){
         return anotacionRepository.findGoleadoresByCompetencia_Id(idCompetencia);
+    }
+
+    public List<Anotacion> anotacionesDeUnJugadorEnUnPartido(Long idJugador, Long idPartido){
+        return anotacionRepository.findByPartido_IdAndJugador_Id(idPartido, idJugador)
+                .stream()
+                .filter(anotacion -> anotacion.getPartido().getEstado().equals(NombreEstadoPartido.FINALIZADO) )
+                .filter(anotacion -> !anotacion.getTipoGol().equals(NombreTipoGol.GOL_EN_CONTRA))
+                .collect(Collectors.toList());
+    }
+
+    public List<String> tipoDeAnotacionesDeJugadorEnUnPartido(Long idPartido, Long idJugador){
+        List<String> tipoGoles = anotacionesDeUnJugadorEnUnPartido(idJugador,idPartido)
+                .stream()
+                .map(anotacion -> anotacion.getTipoGol().name())
+                .collect(Collectors.toList());
+        return  tipoGoles;
     }
 
 

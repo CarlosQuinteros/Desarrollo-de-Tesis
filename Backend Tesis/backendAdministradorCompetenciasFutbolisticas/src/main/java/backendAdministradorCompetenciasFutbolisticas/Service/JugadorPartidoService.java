@@ -155,6 +155,16 @@ public class JugadorPartidoService {
         return jugadorPartidoRepository.existsByPartido_Id(idPartido);
     }
 
+    public String getRolDeJugadorEnUnPartido(Long idPartido, Long idJugador){
+        return jugadorPartidoRepository.findByJugador_IdAndPartido_Id(idJugador,idPartido)
+                .getRol().name();
+    }
+
+    public String clubDondeParticipoJugadorEnUnPartido(Long idPartido, Long idJugador){
+        return jugadorPartidoRepository.findByJugador_IdAndPartido_Id(idJugador, idPartido)
+                .getClub().getAlias();
+    }
+
 
 
 

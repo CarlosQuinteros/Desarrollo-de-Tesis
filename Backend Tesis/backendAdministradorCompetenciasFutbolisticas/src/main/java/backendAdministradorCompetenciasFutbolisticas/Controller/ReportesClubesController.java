@@ -42,4 +42,13 @@ public class ReportesClubesController {
         return new ResponseEntity<>(historial, HttpStatus.OK);
     }
 
+    @GetMapping("/{id}/fixture")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<DetalleGeneralPartidoDto>> fixtureDeUnClub(@PathVariable Long id){
+        List<DetalleGeneralPartidoDto> fixture = partidoService.fixtureDeUnClub(id).stream()
+                .map(partido -> partidoService.mapPartidoToDetalleGeneralPartidoDto(partido))
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(fixture, HttpStatus.OK);
+    }
+
 }

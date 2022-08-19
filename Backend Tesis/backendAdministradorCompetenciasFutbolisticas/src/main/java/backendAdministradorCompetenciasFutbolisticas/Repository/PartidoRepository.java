@@ -28,5 +28,7 @@ public interface PartidoRepository extends JpaRepository<Partido,Long> {
 
     boolean existsByClubLocal_IdOrClubVisitante_Id(Long idClubLocal, Long idClubVisitante);
 
+    List<Partido> findByClubLocal_IdOrClubVisitante_IdOrderByFechaDesc(Long idClubLocal, Long idClubVisitante);
+
 
 }
