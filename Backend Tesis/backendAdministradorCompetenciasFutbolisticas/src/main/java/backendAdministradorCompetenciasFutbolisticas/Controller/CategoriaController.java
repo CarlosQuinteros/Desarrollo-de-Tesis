@@ -31,11 +31,11 @@ public class CategoriaController {
             throw new InvalidDataException(bindingResult);
         }
         if(categoriaService.existeCategoriaPorNombre(nuevaCategoria.getNombre())){
-            throw new BadRequestException("Ya existe una categoria con el nombre: " + nuevaCategoria.getNombre());
+            throw new BadRequestException("Ya existe una categoría con el nombre: " + nuevaCategoria.getNombre());
         }
         Categoria categoria = new Categoria(nuevaCategoria.getNombre(), nuevaCategoria.getDescripcion(), nuevaCategoria.getTipo(), nuevaCategoria.getEdadMinima(), nuevaCategoria.getEdadMaxima());
         categoriaService.guardarCategoria(categoria);
-        return new ResponseEntity<>(new Mensaje("Nueva Categoria guardada correctamente"), HttpStatus.CREATED);
+        return new ResponseEntity<>(new Mensaje("Categoría guardada correctamente"), HttpStatus.CREATED);
     }
 
     @GetMapping("/detalle/{id}")
@@ -53,7 +53,7 @@ public class CategoriaController {
         }
         Categoria categoriaObtenida = categoriaService.getDetalleCategoria(id);
         if(!categoriaObtenida.getNombre().equals(editarCategoria.getNombre()) && categoriaService.existeCategoriaPorNombre(editarCategoria.getNombre())){
-            throw new BadRequestException("Ya existe una categoria con el nombre: " + editarCategoria.getNombre());
+            throw new BadRequestException("Ya existe una categoría con el nombre: " + editarCategoria.getNombre());
         }
         categoriaObtenida.setNombre(editarCategoria.getNombre());
         categoriaObtenida.setDescripcion(editarCategoria.getDescripcion());
@@ -75,7 +75,7 @@ public class CategoriaController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> eliminarCategoria(@PathVariable ("id") Long id){
         categoriaService.eliminarCategoria(id);
-        return new ResponseEntity<>(new Mensaje("Categoria eliminada correctamente"),HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Categoría eliminada correctamente"),HttpStatus.OK);
     }
 
     @GetMapping("/cantidad-total")

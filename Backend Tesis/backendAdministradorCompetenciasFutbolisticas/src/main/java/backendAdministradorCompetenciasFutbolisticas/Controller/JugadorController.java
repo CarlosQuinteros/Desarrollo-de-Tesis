@@ -109,7 +109,7 @@ public class JugadorController {
             Jugador jugadorActualizado = jugadorService.guardarJugador(jugador);
             if(jugadorActualizado != null){
                 logService.guardarLogModificacionJugador(jugador, usuario);
-                return new ResponseEntity<>(new Mensaje("Jugador actualizado correctamente", jugador), HttpStatus.CREATED);
+                return new ResponseEntity<>(new Mensaje("Jugador guardado correctamente", jugador), HttpStatus.CREATED);
             }
             throw new InternalServerErrorException("Fallo la operación. Jugador no guardado correctamente");
         }catch (Exception e){
@@ -302,8 +302,17 @@ public class JugadorController {
         //El servicio genera exception si no encuentra el jugador
         Jugador jugador = jugadorService.getJugador(paseJugador.getJugador().getId());
 
+        Pase ultimoPase = jugadorService.getUltimaTransferencia(jugador.getId());
+
         Club clubActualizado = clubService.getClub(editarPaseJugadorDto.getIdClub());
 
+        if(ultimoPase != null && ultimoPase.getFechaHasta() == null && !ultimoPase.getId().equals(paseJugador.getId()) && editarPaseJugadorDto.getFechaHasta() == null){
+            throw new BadRequestException("No se puede establecer una fecha vacia en un pase que no sea el actual del jugador.");
+        }
+
+        if(jugador.getClubActual() == null && editarPaseJugadorDto.getFechaHasta() == null){
+            throw new BadRequestException("El jugador actualmente esta sin club. Debes generar un nueva pase para establecer su club actual");
+        }
         if(paseJugador.getFechaHasta() == null && paseJugador.getClub().getId() != clubActualizado.getId()){
             //System.out.println("La fecha hasta es null y clubes diferentes, debo actualizar club actual al club: " + clubActualizado.getNombreClub());
             jugador.setClubActual(clubActualizado);
@@ -321,7 +330,7 @@ public class JugadorController {
         paseJugadorService.guardar(paseJugador);
         jugadorService.guardarJugador(jugador);
         logService.guardarLogEdicionPase(paseJugador, usuario);
-        return new ResponseEntity<>(new Mensaje("Pase actualizado correctamente"),HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Pase guardado correctamente"),HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_JUGADORES')")

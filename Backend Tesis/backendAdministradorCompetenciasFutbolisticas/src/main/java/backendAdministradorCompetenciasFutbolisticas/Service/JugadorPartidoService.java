@@ -1,6 +1,7 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
 import backendAdministradorCompetenciasFutbolisticas.Entity.*;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoPartido;
 import backendAdministradorCompetenciasFutbolisticas.Enums.PosicionJugador;
 import backendAdministradorCompetenciasFutbolisticas.Enums.TipoRolJugador;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,13 @@ public class JugadorPartidoService {
     @Autowired
     private SustitucionService sustitucionService;
 
+    Comparator<JugadorPartido> comparadorPorPosicion = Comparator.comparing(JugadorPartido::getRol)
+            .thenComparing(jugadorPartido -> jugadorPartido.getPosicion().equals(PosicionJugador.ARQ))
+            .thenComparing(jugadorPartido -> jugadorPartido.getPosicion().equals(PosicionJugador.DEF))
+            .thenComparing(jugadorPartido -> jugadorPartido.getPosicion().equals(PosicionJugador.MED))
+            .thenComparing(jugadorPartido -> jugadorPartido.getPosicion().equals(PosicionJugador.DEL))
+            .reversed();
+
     public List<PosicionJugador> getListadoPosicionJugador(){
         return Arrays.stream(PosicionJugador.values()).collect(Collectors.toList());
     }
@@ -43,12 +52,12 @@ public class JugadorPartidoService {
         return getListadoPosicionJugador().stream()
                 .filter(posicionJugador -> posicionJugador.name().equals(nombre.toUpperCase()))
                 .findFirst()
-                .orElseThrow(() -> new BadRequestException("No existe la posicion: " + nombre));
+                .orElseThrow(() -> new BadRequestException("No existe la posición: " + nombre));
     }
 
     public JugadorPartido guardarParticipacionJugadorTitular(JugadorPartido jugadorPartido){
         if(existeParticipacionPorIdPartidoYJugador(jugadorPartido.getPartido().getId(), jugadorPartido.getJugador().getId())){
-            throw new BadRequestException("El jugador solo puede tener una participacion en un partido");
+            throw new BadRequestException("El jugador solo puede tener una participación en un partido");
         }
         if(jugadorPartido.getPosicion().equals(PosicionJugador.ARQ) && existeArqueroEnTitularesPorPartidoYClub(jugadorPartido.getPartido().getId(), jugadorPartido.getClub().getId())){
             throw new BadRequestException("El listado de titulares del club " + jugadorPartido.getClub().getNombreClub() + " solo puede tener un arquero");
@@ -63,7 +72,7 @@ public class JugadorPartidoService {
 
     public JugadorPartido guardarParticipacionJugadorSuplente(JugadorPartido jugadorPartido){
         if(existeParticipacionPorIdPartidoYJugador(jugadorPartido.getPartido().getId(), jugadorPartido.getJugador().getId())){
-            throw new BadRequestException("El jugador solo puede tener una participacion en un partido");
+            throw new BadRequestException("El jugador solo puede tener una participación en un partido");
         }
         jugadorPartido.setRol(TipoRolJugador.SUPLENTE);
         return jugadorPartidoRepository.save(jugadorPartido);
@@ -75,20 +84,22 @@ public class JugadorPartidoService {
 
     public JugadorPartido getJugadorPartidoById(Long id){
         return jugadorPartidoRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("No existe la participacion con Id: " + id));
+                .orElseThrow(()-> new ResourceNotFoundException("No existe la participación con Id: " + id));
     }
 
-    //TODO: No se puede eliminar si el jugador tiene tarjetas
     public void eliminarParticipacionJugador(Long idJugadorPartido){
         JugadorPartido participacionJugador = getJugadorPartidoById(idJugadorPartido);
+        if(participacionJugador.getPartido().getEstado().equals(NombreEstadoPartido.FINALIZADO)){
+            throw new BadRequestException("No se puede eliminar una participación de un partido FINALIZADO");
+        }
         if(anotacionService.existeAnotacionEnPartidoDeJugador(participacionJugador.getPartido().getId(), participacionJugador.getJugador().getId())){
-            throw new BadRequestException("El jugador anoto un gol y no se puede eliminar su participacion");
+            throw new BadRequestException("El jugador anoto un gol y no se puede eliminar su participación");
         }
         if(sustitucionService.existeSustitucionPorPartidoYClubYJugadorSale(participacionJugador.getPartido().getId(), participacionJugador.getClub().getId(),participacionJugador.getJugador().getId())){
-            throw new BadRequestException("El jugador salio en una sustitucion y no se puede eliminar su participacion");
+            throw new BadRequestException("El jugador salio en una sustitucion y no se puede eliminar su participación");
         }
         if(sustitucionService.existeSustitucionPorPartidoYClubYJugadorEntra(participacionJugador.getPartido().getId(), participacionJugador.getClub().getId(),participacionJugador.getJugador().getId())){
-            throw new BadRequestException("El jugador entro en una sustitucion y no se puede eliminar su participacion");
+            throw new BadRequestException("El jugador entro en una sustitucion y no se puede eliminar su participación");
         }
         jugadorPartidoRepository.deleteById(idJugadorPartido);
     }
@@ -111,26 +122,40 @@ public class JugadorPartidoService {
     }
 
     public List<JugadorPartido> getListadoJugadoresTitularesClubLocal(Partido partido){
+
+
         List<JugadorPartido> titulares = jugadorPartidoRepository
-                .findByPartido_IdAndClub_IdAndRol(partido.getId(), partido.getClubLocal().getId(),TipoRolJugador.TITULAR);
+                .findByPartido_IdAndClub_IdAndRol(partido.getId(), partido.getClubLocal().getId(),TipoRolJugador.TITULAR)
+                .stream()
+                .sorted(comparadorPorPosicion)
+                .collect(Collectors.toList());
         return titulares;
     }
 
     public List<JugadorPartido> getListadoJugadoresSuplentesClubLocal(Partido partido){
         List<JugadorPartido> suplentes = jugadorPartidoRepository
-                .findByPartido_IdAndClub_IdAndRol(partido.getId(), partido.getClubLocal().getId(),TipoRolJugador.SUPLENTE);
+                .findByPartido_IdAndClub_IdAndRol(partido.getId(), partido.getClubLocal().getId(),TipoRolJugador.SUPLENTE)
+                .stream()
+                .sorted(comparadorPorPosicion)
+                .collect(Collectors.toList());
         return suplentes;
     }
 
     public List<JugadorPartido> getListadoJugadoresTitularesClubVisitante(Partido partido){
         List<JugadorPartido> titulares = jugadorPartidoRepository
-                .findByPartido_IdAndClub_IdAndRol(partido.getId(), partido.getClubVisitante().getId(),TipoRolJugador.TITULAR);
+                .findByPartido_IdAndClub_IdAndRol(partido.getId(), partido.getClubVisitante().getId(),TipoRolJugador.TITULAR)
+                .stream()
+                .sorted(comparadorPorPosicion)
+                .collect(Collectors.toList());
         return titulares;
     }
 
     public List<JugadorPartido> getListadoJugadoresSuplentesClubVisitante(Partido partido){
         List<JugadorPartido> suplentes = jugadorPartidoRepository
-                .findByPartido_IdAndClub_IdAndRol(partido.getId(), partido.getClubVisitante().getId(),TipoRolJugador.SUPLENTE);
+                .findByPartido_IdAndClub_IdAndRol(partido.getId(), partido.getClubVisitante().getId(),TipoRolJugador.SUPLENTE)
+                .stream()
+                .sorted(comparadorPorPosicion)
+                .collect(Collectors.toList());
         return suplentes;
     }
 

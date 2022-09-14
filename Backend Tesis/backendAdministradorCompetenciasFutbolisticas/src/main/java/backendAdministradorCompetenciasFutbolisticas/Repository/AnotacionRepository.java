@@ -34,7 +34,7 @@ public interface AnotacionRepository extends JpaRepository<Anotacion, Long> {
             "join partido as p on (p.id = a.partido_id) " +
             "join jornada as j on (j.id = p.jornada_id) " +
             "join competencia as c on (c.id = j.competencia_id) " +
-            "where c.id = :idCompetencia and a.tipo_gol != 'GOL_EN_CONTRA' " +
+            "where c.id = :idCompetencia and a.tipo_gol != 'GOL_EN_CONTRA'  and p.estado = 'FINALIZADO' " +
             "group by c2.nombre_club,j2.id ,j2.apellidos,j2.nombre " +
             "order by count(j2.id) desc", nativeQuery = true)
     List<IGoleador> findGoleadoresByCompetencia_Id(@Param("idCompetencia") Long idCompetencia);

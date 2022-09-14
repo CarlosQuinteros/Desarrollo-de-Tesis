@@ -47,7 +47,7 @@ public class JuezRolController {
 
         JuezRol nuevoJuezRol = new JuezRol(juez,rolJuez, partido);
         juezRolService.crearJuezRol(nuevoJuezRol);
-        return new ResponseEntity<>(new Mensaje("Participacion de juez guardada correctamente"), HttpStatus.CREATED);
+        return new ResponseEntity<>(new Mensaje("Participación de juez guardada correctamente"), HttpStatus.CREATED);
     }
 
     @PutMapping("/editar/{id}")
@@ -70,7 +70,7 @@ public class JuezRolController {
         juezRol.setJuez(juez);
         juezRol.setRol(rolJuez);
         juezRol = juezRolService.guardarJuezRol(juezRol);
-        return new ResponseEntity<>(new Mensaje("Participacion de juez guardada correctamente"), HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Participación de juez guardada correctamente"), HttpStatus.OK);
 
     }
 
@@ -79,7 +79,7 @@ public class JuezRolController {
     public ResponseEntity<?> eliminarParticipacionDeJuezEnPartido(@PathVariable("id") Long id){
         JuezRol juezRol = juezRolService.getDetalleJuezRolPorId(id);
         juezRolService.eliminarJuezRol(id);
-        return new ResponseEntity<>(new Mensaje("Participacion de juez eliminada correctamente"),HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Participación de juez eliminada correctamente"),HttpStatus.OK);
     }
 
 

@@ -116,6 +116,11 @@ public class LogService {
         logRepository.save(log);
     }
 
+    public void guardarLogModificacionUsuario(Usuario usuario, Usuario usuarioEditado){
+        Log log = new Log(usuario, LogAccion.USUARIO_MODIFICACION, "Se edito el Usuario ID: " + usuarioEditado.getId(), usuarioEditado.getId());
+        logRepository.save(log);
+    }
+
     public void guardarLogErrorLogin(Usuario usuario){
         Log log = new Log(usuario, LogAccion.USUARIO_ERROR_LOGIN, "El Usuario no logro acceder al sistema", usuario.getId());
         logRepository.save(log);

@@ -130,12 +130,11 @@ public class JugadorService {
     */
     public void validarFechaCambioDeClub(LocalDate fechaCambioClub, Jugador jugador){
         Pase ultimoPase = getUltimaTransferencia(jugador.getId());
-
         if(ultimoPase!=null && ultimoPase.getFechaHasta() != null && fechaCambioClub.isBefore(ultimoPase.getFechaHasta())){
-            throw new BadRequestException("La fecha ingresada no debe ser menor a la fecha hasta de su ultimo cambio de club: "+ ultimoPase.getFechaHasta().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            throw new BadRequestException("La fecha ingresada no debe ser menor a la fecha hasta de su ultimo cambio de club: " + ultimoPase.getFechaHasta().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         }
         if(ultimoPase!=null && fechaCambioClub.isBefore(ultimoPase.getFechaDesde())){
-            throw new BadRequestException("La fecha ingresada no debe ser menor a la fecha desde de su ultimo cambio de club: "+ ultimoPase.getFechaDesde().format(DateTimeFormatter.ofPattern("dd/mm/yyy")));
+            throw new BadRequestException("La fecha ingresada no debe ser menor a la fecha desde de su ultimo cambio de club: " + ultimoPase.getFechaDesde().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         }
     }
 

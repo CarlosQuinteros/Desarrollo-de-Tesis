@@ -45,7 +45,7 @@ public class JornadaService {
         for (int i = 0; i < jornadas.size(); i++) {
             Integer numero = i + 1;
             jornadas.get(i).setNumero(numero);
-            jornadas.get(i).setDescripcion("Fecha: " + numero);
+            jornadas.get(i).setDescripcion("Fecha " + numero);
             jornadaRepository.save(jornadas.get(i));
         }
     }

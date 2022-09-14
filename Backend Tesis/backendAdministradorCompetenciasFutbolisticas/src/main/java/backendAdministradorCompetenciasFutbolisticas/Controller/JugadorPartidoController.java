@@ -88,14 +88,14 @@ public class JugadorPartidoController {
         participacionJugador.setNroCamiseta(participacionJugadorDto.getNroCamiseta());
         participacionJugador.setPosicion(posicion);
         jugadorPartidoService.guardarParticipacionJugador(participacionJugador);
-        return new ResponseEntity<>(new Mensaje("Participacion guardada correctamente"), HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Participación guardada correctamente"), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminarParticipacionJugador(@PathVariable Long id){
         jugadorPartidoService.eliminarParticipacionJugador(id);
-        return new ResponseEntity<>(new Mensaje("Participacion eliminada correctamente"),HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Participación eliminada correctamente"),HttpStatus.OK);
     }
 
     @GetMapping("/posiciones")

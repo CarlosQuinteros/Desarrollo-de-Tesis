@@ -129,7 +129,7 @@ public class ClubController {
         Club clubActualizado = clubService.actualizarClub(clubActualizar);
         if(clubActualizado != null){
             logService.guardarLogActualizacionClub(clubActualizado, usuario);
-            return new ResponseEntity<>(new Mensaje("Club actualizado correctamente", clubActualizado), HttpStatus.OK);
+            return new ResponseEntity<>(new Mensaje("Club guardado correctamente", clubActualizado), HttpStatus.OK);
         }
             throw new InternalServerErrorException("Club no actualizado correctamente");
     }

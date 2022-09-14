@@ -215,7 +215,7 @@ public class PartidoController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> establecerPartidoComoPendiente(@PathVariable Long id){
         partidoService.establecerPartidoComoPendiente(id);
-        return new ResponseEntity<>(new Mensaje("Partido establecido como 'Pendiente' correctamente"),HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Partido establecido como PENDIENTE correctamente"),HttpStatus.OK);
     }
 
 

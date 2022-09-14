@@ -50,7 +50,7 @@ public class SustitucionController {
         Club clubSustituye = clubService.getClub(nuevaSustitucion.getIdClubSustituye());
         Sustitucion sustitucion = new Sustitucion(partido,clubSustituye,nuevaSustitucion.getMinuto(),jugadorSale,jugadorEntra);
         sustitucionService.guardarSustitucion(sustitucion);
-        return new ResponseEntity<>(new Mensaje("Sustitucion guardada correctamente"), HttpStatus.CREATED);
+        return new ResponseEntity<>(new Mensaje("Sustitución guardada correctamente"), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/eliminar/{id}")
@@ -58,11 +58,13 @@ public class SustitucionController {
     public ResponseEntity<?> eliminarSustitucion(@PathVariable Long id){
         Sustitucion sustitucion = sustitucionService.getDetalleSustitucion(id);
         if (anotacionService.existeAnotacionEnPartidoDeJugador(sustitucion.getPartido().getId(), sustitucion.getJugadorEntra().getId())) {
-
-            throw new BadRequestException("No se puede eliminar la sustitucion porque el jugador que entro marco un gol");
+            throw new BadRequestException("No se puede eliminar la sustitución porque el jugador que entró marco un gol");
+        }
+        if(sustitucionService.existeSustitucionPorPartidoYClubYJugadorSale(sustitucion.getPartido().getId(), sustitucion.getClubSustituye().getId(), sustitucion.getJugadorEntra().getId())){
+            throw new BadRequestException("No se puede eliminar la sustitución porque el jugador que entró fue sustituido");
         }
         sustitucionService.eliminarSustitucion(sustitucion.getId());
-        return new ResponseEntity<>(new Mensaje("Sustitucion eliminada correctamente"),HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Sustitución eliminada correctamente"),HttpStatus.OK);
     }
 
 }

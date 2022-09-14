@@ -1,9 +1,11 @@
 package backendAdministradorCompetenciasFutbolisticas.Service;
 
+import backendAdministradorCompetenciasFutbolisticas.Dtos.DetalleCompetenciaDto;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.DetalleGeneralPartidoDto;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Interface.IGoleador;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Posicion;
 import backendAdministradorCompetenciasFutbolisticas.Entity.*;
+import backendAdministradorCompetenciasFutbolisticas.Enums.EstadoCompetencia;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoPartido;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreTipoGol;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
@@ -96,8 +98,8 @@ public class CompetenciaService {
                 .thenComparing(Posicion::getDIF)
                 .thenComparing(Posicion::getGF)
                 .thenComparing(Posicion::getV)
-                .thenComparing(Posicion::getClub)
-                .reversed();
+                .reversed()
+                .thenComparing(Posicion::getClub);
 
         clubes.forEach(club -> {
             Posicion posicion = new Posicion(club);
@@ -154,8 +156,39 @@ public class CompetenciaService {
         Competencia competencia = getCompetencia(id);
         List<Anotacion> anotaciones = anotacionService.anotacionesDeUnaCompetencia(competencia.getId());
         Map<String, Long> tipoDeGoles = anotaciones.stream()
+                .filter(anotacion -> anotacion.getPartido().getEstado().equals(NombreEstadoPartido.FINALIZADO))
                 .collect(Collectors.groupingBy(anotacion -> anotacion.getTipoGol().name(), Collectors.counting()));
         return tipoDeGoles;
+    }
+
+    public DetalleCompetenciaDto mapCompetenciaToDetalleCompetenciaDto(Competencia competencia){
+
+        EstadoCompetencia estadoCompetencia = EstadoCompetencia.PENDIENTE;
+        List<DetalleGeneralPartidoDto> listadoPartidos = partidoService.listadoDePartidosPorCompetencia(competencia.getId());
+        if(!listadoPartidos.isEmpty() && listadoPartidos.stream()
+            .anyMatch(detalleGeneralPartidoDto -> detalleGeneralPartidoDto.getEstado().equals(NombreEstadoPartido.FINALIZADO.name()))
+        ){
+            estadoCompetencia = EstadoCompetencia.EN_CURSO;
+        }
+        if(!listadoPartidos.isEmpty() && listadoPartidos.stream()
+                .allMatch(detalleGeneralPartidoDto -> detalleGeneralPartidoDto.getEstado().equals(NombreEstadoPartido.FINALIZADO.name()))
+        ){
+            estadoCompetencia = EstadoCompetencia.FINALIZADO;
+        }
+
+        DetalleCompetenciaDto detalleCompetenciaDto = new DetalleCompetenciaDto(
+                competencia.getId(),
+                competencia.getAsociacionDeportiva(),
+                competencia.getCategoria(),
+                competencia.getGenero(),
+                competencia.getNombre(),
+                competencia.getTemporada(),
+                competencia.getDescripcion(),
+                competencia.getTarjetasAmarillasPermitidas(),
+                competencia.getClubesParticipantes(),
+                estadoCompetencia.name()
+        );
+        return detalleCompetenciaDto;
     }
 
 

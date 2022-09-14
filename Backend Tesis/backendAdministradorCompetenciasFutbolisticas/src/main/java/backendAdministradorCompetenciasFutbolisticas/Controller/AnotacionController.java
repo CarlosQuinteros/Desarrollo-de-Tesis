@@ -55,7 +55,7 @@ public class AnotacionController {
         Anotacion anotacion = new Anotacion(partido,jugadorAnota,clubAnota,nuevaAnotacion.getMinuto(),tipoGol);
         anotacionService.guardarAnotacion(anotacion);
 
-        return new ResponseEntity<>(new Mensaje("Anotacion guardada correctamente"), HttpStatus.CREATED);
+        return new ResponseEntity<>(new Mensaje("Anotación guardada correctamente"), HttpStatus.CREATED);
     }
 
     @PutMapping("/editar/{id}")
@@ -76,7 +76,7 @@ public class AnotacionController {
         anotacion.setTipoGol(tipoGol);
         anotacionService.guardarAnotacion(anotacion);
 
-        return new ResponseEntity<>(new Mensaje("Anotacion guardada correctamente"), HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Anotación guardada correctamente"), HttpStatus.OK);
     }
 
     @GetMapping("/tipo-goles")
@@ -88,7 +88,7 @@ public class AnotacionController {
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminarAnotacion(@PathVariable Long id){
         anotacionService.eliminarAnotacion(id);
-        return new ResponseEntity<>(new Mensaje("Anotacion eliminada correctamente"),HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Anotación eliminada correctamente"),HttpStatus.OK);
     }
 
 

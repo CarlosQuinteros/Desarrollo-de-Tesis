@@ -5,15 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -121,7 +116,8 @@ public class Jugador {
 
     public String getFechaNacimientoParsed() {
         DateTimeFormatter  dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        return DateTimeFormatter.RFC_1123_DATE_TIME.format(fechaNacimiento.atStartOfDay(ZoneId.of("UTC-3")));
+        //return DateTimeFormatter.RFC_1123_DATE_TIME.format(fechaNacimiento.atStartOfDay(ZoneId.of("UTC-3")));
+        return fechaNacimiento.atTime(1,1).toString();
 
     }
 

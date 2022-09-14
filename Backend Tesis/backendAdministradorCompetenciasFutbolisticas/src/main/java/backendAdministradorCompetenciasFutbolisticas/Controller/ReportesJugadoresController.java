@@ -7,6 +7,7 @@ import backendAdministradorCompetenciasFutbolisticas.Entity.Anotacion;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
 import backendAdministradorCompetenciasFutbolisticas.Entity.JugadorPartido;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Partido;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoPartido;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreTipoGol;
 import backendAdministradorCompetenciasFutbolisticas.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,7 @@ public class ReportesJugadoresController {
         Jugador jugador = jugadorService.getJugadorPorDni(documento);
         List<JugadorPartido> todasLasParticipaciones = jugadorPartidoService.getParticipacionesDeJugador(jugador)
                 .stream()
+                .filter(jugadorPartido -> jugadorPartido.getPartido().getEstado().equals(NombreEstadoPartido.FINALIZADO))
                 .sorted(Comparator.comparing(jugadorPartido -> jugadorPartido.getPartido().getFecha()))
                 .collect(Collectors.toList());
         DetalleGeneralPartidoDto ultimoPartido = (todasLasParticipaciones.isEmpty()) ? null
@@ -66,6 +68,7 @@ public class ReportesJugadoresController {
         Jugador jugador = jugadorService.getJugadorPorDni(documento);
         List<Partido> partidosDelJugador = jugadorPartidoService.getParticipacionesDeJugador(jugador)
             .stream()
+                .filter(jugadorPartido -> jugadorPartido.getPartido().getEstado().equals(NombreEstadoPartido.FINALIZADO))
             .map(JugadorPartido::getPartido)
             .collect(Collectors.toList());
 
@@ -81,6 +84,7 @@ public class ReportesJugadoresController {
         Jugador jugador = jugadorService.getJugadorPorDni(documento);
         List<Anotacion> todasLasAnotaciones = anotacionService.getListadoTodasLasAnotacionesDeUnJugador(jugador.getId());
         Map<String, Long> golesMasAnotados = todasLasAnotaciones.stream()
+                .filter(anotacion -> anotacion.getPartido().getEstado().equals(NombreEstadoPartido.FINALIZADO))
                 .filter(anotacion -> !anotacion.getTipoGol().equals(NombreTipoGol.GOL_EN_CONTRA))
                 .collect(Collectors.groupingBy(anotacion -> anotacion.getTipoGol().name(), Collectors.counting()));
 
@@ -93,6 +97,7 @@ public class ReportesJugadoresController {
         Jugador jugador = jugadorService.getJugadorPorDni(documento);
         List<Anotacion> todasLasAnotaciones = anotacionService.getListadoTodasLasAnotacionesDeUnJugador(jugador.getId());
         Map<Integer, Long> golesAnuales = todasLasAnotaciones.stream()
+                .filter(anotacion -> anotacion.getPartido().getEstado().equals(NombreEstadoPartido.FINALIZADO))
                 .filter(anotacion -> !anotacion.getTipoGol().equals(NombreTipoGol.GOL_EN_CONTRA))
                 .collect(Collectors.groupingBy(anotacion -> anotacion.getPartido().getFecha().toLocalDate().getYear(), Collectors.counting()));
 

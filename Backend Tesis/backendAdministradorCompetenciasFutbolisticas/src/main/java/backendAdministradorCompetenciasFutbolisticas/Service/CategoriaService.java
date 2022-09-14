@@ -26,7 +26,7 @@ public class CategoriaService {
         if(categoria.esCategoriaHastaEdad()) return crearCategoriaHastaEdad(categoria);
         if(categoria.esCategoriaDesdeEdad()) return crearCategoriaDesdeEdad(categoria);
         if(categoria.esCategoriaEntreEdades()) return crearCategoriaEntreEdades(categoria);
-        throw new BadRequestException("Tipo de categoria incorrecto: "+ categoria.getTipo());
+        throw new BadRequestException("Tipo de categoría incorrecto: "+ categoria.getTipo());
     }
 
     public Categoria crearCategoriaSinRestricciones(Categoria categoria){
@@ -39,7 +39,7 @@ public class CategoriaService {
     public Categoria crearCategoriaHastaEdad(Categoria categoria){
         //edades 5 y edad
         if(categoria.getEdadMaxima().equals(categoria.getEdadMinima())){
-            throw new BadRequestException("Para crear categoria tipo: HASTA EDAD, las edades no deben ser iguales");
+            throw new BadRequestException("Para crear categoría tipo: HASTA EDAD, las edades no deben ser iguales");
         }
         categoria.setEdadMinima(5);
         return categoriaRepository.save(categoria);
@@ -48,7 +48,7 @@ public class CategoriaService {
     public Categoria crearCategoriaDesdeEdad(Categoria categoria){
         //edad y 65;
         if(categoria.getEdadMaxima().equals(categoria.getEdadMinima())){
-            throw new BadRequestException("Para crear categoria tipo: DESDE EDAD, las edades no deben ser iguales");
+            throw new BadRequestException("Para crear categoría tipo: DESDE EDAD, las edades no deben ser iguales");
         }
         categoria.setEdadMaxima(65);
         return categoriaRepository.save(categoria);
@@ -56,13 +56,13 @@ public class CategoriaService {
 
     public Categoria crearCategoriaEntreEdades(Categoria categoria){
         if(categoria.getEdadMinima() > categoria.getEdadMaxima()){
-            throw new BadRequestException("Para crear categoria tipo: ENTRE EDADES, las edad maxima debe ser mayor o igual a la edad minima");
+            throw new BadRequestException("Para crear categoría tipo: ENTRE EDADES, las edad maxima debe ser mayor o igual a la edad minima");
         }
         return categoriaRepository.save(categoria);
     }
     public Categoria getDetalleCategoria(Long id){
         return categoriaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("No existe la categoria con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No existe la categoría con ID: " + id));
     }
 
     public List<Categoria> getListadoCategorias(){
@@ -73,7 +73,7 @@ public class CategoriaService {
     public void eliminarCategoria(Long id){
         Categoria categoria = getDetalleCategoria(id);
         if(competenciaService.existeReferenciasConCategoria(categoria.getId())){
-            throw new BadRequestException("La categoria tiene referencias con competencias y no se puede eliminar");
+            throw new BadRequestException("La categoría tiene referencias con competencias y no se puede eliminar");
         }
         categoriaRepository.deleteById(categoria.getId());
     }

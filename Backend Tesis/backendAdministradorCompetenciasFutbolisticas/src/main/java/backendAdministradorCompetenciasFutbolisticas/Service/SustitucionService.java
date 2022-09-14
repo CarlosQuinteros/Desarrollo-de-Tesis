@@ -62,7 +62,7 @@ public class SustitucionService {
 
     public Sustitucion getDetalleSustitucion(Long id){
         return sustitucionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("La sustitucion con Id: " + id + " no existe"));
+                .orElseThrow(() -> new ResourceNotFoundException("La sustitución con Id: " + id + " no existe"));
     }
 
     public void eliminarSustitucion(Long id){

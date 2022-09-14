@@ -27,6 +27,6 @@ public class GeneroService {
                 .stream()
                 .filter(genero -> genero.name().equals(nombre.toUpperCase()))
                 .findFirst()
-                .orElseThrow(()-> new ResourceNotFoundException("No existe el genero: " + nombre));
+                .orElseThrow(()-> new ResourceNotFoundException("No existe el género: " + nombre));
     }
 }

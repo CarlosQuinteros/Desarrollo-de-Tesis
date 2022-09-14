@@ -1,11 +1,10 @@
 package backendAdministradorCompetenciasFutbolisticas.Controller;
 
-import backendAdministradorCompetenciasFutbolisticas.Dtos.CompetenciaDto;
+import backendAdministradorCompetenciasFutbolisticas.Dtos.*;
 import backendAdministradorCompetenciasFutbolisticas.Dtos.Interface.IGoleador;
-import backendAdministradorCompetenciasFutbolisticas.Dtos.Mensaje;
-import backendAdministradorCompetenciasFutbolisticas.Dtos.Posicion;
 import backendAdministradorCompetenciasFutbolisticas.Entity.*;
 import backendAdministradorCompetenciasFutbolisticas.Enums.TipoGenero;
+import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
 import backendAdministradorCompetenciasFutbolisticas.Security.Service.UsuarioService;
@@ -57,11 +56,17 @@ public class CompetenciaController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Autowired
+    private PartidoService partidoService;
+
     @PostMapping("/crear")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> crearCompetencia(@Valid @RequestBody CompetenciaDto competenciaDto, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             throw new InvalidDataException(bindingResult);
+        }
+        if(competenciaDto.getClubesParticipantes().size() < 2){
+            throw new BadRequestException("Deben participar al menos 2 clubes");
         }
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Usuario usuario = usuarioService.getUsuarioLogueado(auth);
@@ -85,7 +90,7 @@ public class CompetenciaController {
         nuevaCompetencia.setClubesParticipantes(clubesParticipantes);
         competenciaService.guardarCompetencia(nuevaCompetencia);
         logService.guardarLogCreacionCompetencia(nuevaCompetencia, usuario);
-        return new ResponseEntity<>(new Mensaje("Nueva competencia guardada correctamente"), HttpStatus.CREATED);
+        return new ResponseEntity<>(new Mensaje("Competencia guardada correctamente", nuevaCompetencia), HttpStatus.CREATED);
     }
 
     @PutMapping("/editar/{id}")
@@ -120,17 +125,27 @@ public class CompetenciaController {
         return new ResponseEntity<>(new Mensaje("Competencia guardada correctamente"), HttpStatus.OK);
     }
 
-    @GetMapping("/detalle/{id}")
+    @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
-    public ResponseEntity<Competencia> listadoDeCompetencias(@PathVariable Long id){
+    public ResponseEntity<Competencia> detalleCompetencia(@PathVariable Long id){
         Competencia competencia = competenciaService.getCompetencia(id);
         return new ResponseEntity<>(competencia,HttpStatus.OK);
     }
 
+    @GetMapping("/detalle/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<DetalleCompetenciaDto> detalleCompetenciaDto(@PathVariable Long id){
+        Competencia competencia = competenciaService.getCompetencia(id);
+        DetalleCompetenciaDto detalleCompetenciaDto = competenciaService.mapCompetenciaToDetalleCompetenciaDto(competencia);
+        return new ResponseEntity<>(detalleCompetenciaDto,HttpStatus.OK);
+    }
+
     @GetMapping("/listado")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
-    public ResponseEntity<List<Competencia>> listadoDeCompetencias(){
-        List<Competencia> competencias = competenciaService.getListadoCompetencias();
+    public ResponseEntity<List<DetalleCompetenciaDto>> listadoDeCompetencias(){
+        List<DetalleCompetenciaDto> competencias = competenciaService.getListadoCompetencias().stream()
+                .map(competencia -> competenciaService.mapCompetenciaToDetalleCompetenciaDto(competencia))
+                .collect(Collectors.toList());
         return new ResponseEntity<>(competencias,HttpStatus.OK);
     }
 
@@ -141,6 +156,18 @@ public class CompetenciaController {
         List<Jornada> jornadas = jornadaService.getListadoJornadasPorCompetencia(competencia.getId());
         return new ResponseEntity<>(jornadas, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}/calendario")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
+    public ResponseEntity<List<JornadaPartidosDto>> calendarioDeCompetencia(@PathVariable Long id){
+        Competencia competencia = competenciaService.getCompetencia(id);
+        List<Jornada> jornadas = jornadaService.getListadoJornadasPorCompetencia(competencia.getId());
+        List<JornadaPartidosDto> calendario = jornadas.stream()
+                .map(jornada -> new JornadaPartidosDto(jornada, partidoService.listadoDePartidosPorJornada(jornada.getId())))
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(calendario, HttpStatus.OK);
+    }
+
 
     @GetMapping("/{id}/goleadores")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")

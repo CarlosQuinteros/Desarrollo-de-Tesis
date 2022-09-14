@@ -66,21 +66,20 @@ public class ApiExceptionHandler {
         return errorMessage;
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    /*@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ErrorMessage fatalErrorUnexpectedException(HttpServletRequest request, Exception exception){
-        /*
+
         nunca enviamos el mensaje o trace al cliente
         lo ideal seria enviar al administrador o desarrolladores
         un correo indicando lo que sucedio para su analisis
-        */
+
         ErrorMessage errorMessage = new ErrorMessage(exception, request.getRequestURI());
         errorMessage.setMessage("Ocurrio un error inesperado. Operacion no realizada");
         System.out.println(exception.getMessage());
         System.out.println(exception.getClass());
         System.out.println(exception.getCause());
         return errorMessage;
-    }
-
+    } */
 }

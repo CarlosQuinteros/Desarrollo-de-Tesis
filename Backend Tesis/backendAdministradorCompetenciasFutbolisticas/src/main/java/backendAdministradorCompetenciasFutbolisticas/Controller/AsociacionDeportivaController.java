@@ -49,10 +49,10 @@ public class AsociacionDeportivaController {
             throw new InvalidDataException(bindingResult);
         }
         if(asociacionDeportivaService.existePorNombre(asociacionDeportivaDto.getNombre())){
-            throw new BadRequestException("Ya existe una Asociacion con el nombre: " + asociacionDeportivaDto.getNombre());
+            throw new BadRequestException("Ya existe una Asociación con el nombre: " + asociacionDeportivaDto.getNombre());
         }
         if(asociacionDeportivaService.existePorEmail(asociacionDeportivaDto.getEmail())){
-            throw new BadRequestException("Ya existe una Asociacion con el email: " + asociacionDeportivaDto.getEmail());
+            throw new BadRequestException("Ya existe una Asociación con el email: " + asociacionDeportivaDto.getEmail());
         }
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Usuario usuario = usuarioService.getUsuarioLogueado(auth);
@@ -61,11 +61,11 @@ public class AsociacionDeportivaController {
             boolean resultado = asociacionDeportivaService.guardarNuevaAsociacion(asociacionDeportiva);
             if(resultado){
                 logService.guardarLogCreacionAsociacion(asociacionDeportiva, usuario);
-                return new ResponseEntity<>(new Mensaje("Asociacion Deportiva guardada correctamente"),HttpStatus.OK);
+                return new ResponseEntity<>(new Mensaje("Asociación Deportiva guardada correctamente"),HttpStatus.OK);
             }
-            throw new InternalServerErrorException("La asociacion no fue guardada correctamente");
+            throw new InternalServerErrorException("La asociación no fue guardada correctamente");
         }catch (Exception e){
-            throw new InternalServerErrorException("Fallo la operacion. Asociacion Deportiva no guardada");
+            throw new InternalServerErrorException("Fallo la operacion. Asociación Deportiva no guardada");
         }
     }
 
@@ -82,10 +82,10 @@ public class AsociacionDeportivaController {
         AsociacionDeportiva asociacionDeportivaActualizar = asociacionDeportivaService.getById(id);
 
         if(!asociacionDeportivaActualizar.getNombre().equals(asociacionDeportivaDto.getNombre()) && asociacionDeportivaService.existePorNombre(asociacionDeportivaDto.getNombre())){
-            throw new BadRequestException("Ya existe una Asociacion Deportiva con el nombre: " + asociacionDeportivaDto.getNombre());
+            throw new BadRequestException("Ya existe una Asociación Deportiva con el nombre: " + asociacionDeportivaDto.getNombre());
         }
         if(!asociacionDeportivaActualizar.getEmail().equals(asociacionDeportivaDto.getEmail()) && asociacionDeportivaService.existePorEmail(asociacionDeportivaDto.getEmail())){
-            throw new BadRequestException("Ya existe una Asociacion con el email: " + asociacionDeportivaDto.getEmail());
+            throw new BadRequestException("Ya existe una Asociación con el email: " + asociacionDeportivaDto.getEmail());
         }
         try{
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -95,9 +95,9 @@ public class AsociacionDeportivaController {
             asociacionDeportivaActualizar.setEmail(asociacionDeportivaDto.getEmail());
             AsociacionDeportiva asociacionDeportivaEditada = asociacionDeportivaService.actualizarAsociacion(asociacionDeportivaActualizar);
             logService.guardarLogEdicionAsociacion(asociacionDeportivaEditada, usuario);
-            return new ResponseEntity<>(new Mensaje("Asociacion Deportiva actualizada correctamente"), HttpStatus.OK);
+            return new ResponseEntity<>(new Mensaje("Asociación Deportiva guardada correctamente"), HttpStatus.OK);
         }catch (Exception e){
-            throw new InternalServerErrorException("Fallo la operacion. La Asociacion Deportiva no se actualizo");
+            throw new InternalServerErrorException("Fallo la operacion. La Asociación Deportiva no se actualizo");
         }
     }
 
@@ -120,7 +120,7 @@ public class AsociacionDeportivaController {
         Usuario usuario = usuarioService.getUsuarioLogueado(auth);
         asociacionDeportivaService.eliminarAsociacion(asociacionDeportiva);
         logService.guardarLogEliminacionAsociacion(id, usuario);
-        return new ResponseEntity<>(new Mensaje("Asociacion Deportiva eliminada correctamente"), HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Asociación Deportiva eliminada correctamente"), HttpStatus.OK);
     }
 
     @GetMapping("/listado")

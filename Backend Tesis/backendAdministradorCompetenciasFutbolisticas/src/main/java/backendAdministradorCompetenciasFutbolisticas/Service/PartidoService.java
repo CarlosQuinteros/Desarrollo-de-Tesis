@@ -40,10 +40,10 @@ public class PartidoService {
             throw new BadRequestException("El club "+ partido.getClubVisitante().getNombreClub() + " no forma parte de los clubes participantes de la competencia");
         }
         if(existeParticipacionDeClubEnJornada(partido.getJornada().getId(),partido.getClubLocal().getId())){
-            throw new BadRequestException("El club " + partido.getClubLocal().getNombreClub() + " ya participa en un partido en la fecha ingresada");
+            throw new BadRequestException("El club " + partido.getClubLocal().getNombreClub() + " ya participa en un partido en la jornada ingresada");
         }
         if(existeParticipacionDeClubEnJornada(partido.getJornada().getId(),partido.getClubVisitante().getId())){
-            throw new BadRequestException("El club " + partido.getClubVisitante().getNombreClub() + " ya participa en un partido en la fecha ingresada");
+            throw new BadRequestException("El club " + partido.getClubVisitante().getNombreClub() + " ya participa en un partido en la jornada ingresada");
         }
         if(existePartidoConMismoClubLocalYClubVisitanteEnCompetencia(partido.getJornada().getCompetencia().getId(), partido.getClubLocal().getId(), partido.getClubVisitante().getId())){
             throw new BadRequestException("Ya existe un partido con el mismo club local y club visitante");

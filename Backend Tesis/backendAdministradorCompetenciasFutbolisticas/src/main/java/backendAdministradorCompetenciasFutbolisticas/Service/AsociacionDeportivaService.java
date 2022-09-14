@@ -31,14 +31,14 @@ public class AsociacionDeportivaService {
 
     public void eliminarAsociacion(AsociacionDeportiva asociacionDeportiva){
         if(competenciaService.existeReferenciasConAsociacionDeportiva(asociacionDeportiva.getId())){
-            throw new BadRequestException("La Asociacion tiene referencias con competencias y no se puede eliminar");
+            throw new BadRequestException("La Asociación tiene referencias con competencias y no se puede eliminar");
         }
         asociacionDeportivaRepository.delete(asociacionDeportiva);
     }
 
     public AsociacionDeportiva getById(Long id){
         return asociacionDeportivaRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("No existe una Asociacion con ID: " + id));
+                .orElseThrow(()-> new ResourceNotFoundException("No existe una Asociación con ID: " + id));
     }
 
     public List<AsociacionDeportiva> getListadoOrdenadoPorNombre(){

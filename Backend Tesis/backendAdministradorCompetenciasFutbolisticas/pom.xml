@@ -11,6 +11,7 @@
 	<groupId>backendAdministradorCompetenciasFutbolisticas</groupId>
 	<artifactId>backendAdministradorCompetenciasFutbolisticas</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
 	<name>backendAdministradorCompetenciasFutbolisticas</name>
 	<description>Proyecto backend de tesis</description>
 	<properties>
@@ -77,6 +78,13 @@
 			<groupId>org.webjars</groupId>
 			<artifactId>bootstrap</artifactId>
 			<version>4.0.0-2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.user.deploy</groupId>
+			<artifactId>deploy-jar</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>E:/Descargas/deploy.jar</systemPath>
 		</dependency>
 	</dependencies>
 

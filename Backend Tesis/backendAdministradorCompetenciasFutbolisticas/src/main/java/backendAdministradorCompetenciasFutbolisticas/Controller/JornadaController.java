@@ -43,7 +43,7 @@ public class JornadaController {
         Competencia competencia = competenciaService.getCompetencia(jornadaDto.getIdCompetencia());
         Jornada nuevaJornada = new Jornada(jornadaDto.getNumero(), jornadaDto.getDescripcion(), competencia);
         jornadaService.guardarJornada(nuevaJornada);
-        return new ResponseEntity<>(new Mensaje("Jornada Guardada correctamente"),HttpStatus.CREATED);
+        return new ResponseEntity<>(new Mensaje("Jornada guardada correctamente"),HttpStatus.CREATED);
     }
 
     @PostMapping("/editar/{id}")
@@ -59,7 +59,7 @@ public class JornadaController {
         jornada.setNumero(jornadaDto.getNumero());
 
         jornadaService.guardarJornada(jornada);
-        return new ResponseEntity<>(new Mensaje("Jornada Guardada correctamente"),HttpStatus.OK);
+        return new ResponseEntity<>(new Mensaje("Jornada guardada correctamente"),HttpStatus.OK);
     }
 
     @GetMapping("/{id}/partidos")

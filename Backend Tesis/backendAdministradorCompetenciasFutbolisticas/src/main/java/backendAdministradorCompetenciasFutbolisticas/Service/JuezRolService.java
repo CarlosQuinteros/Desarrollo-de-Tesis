@@ -49,7 +49,7 @@ public class JuezRolService {
 
     public JuezRol getDetalleJuezRolPorId(Long id){
         JuezRol juezRol = juezRolRepository.findById(id)
-                .orElseThrow(()-> new BadRequestException("No existe la participacion del juez con ID: "+ id));
+                .orElseThrow(()-> new BadRequestException("No existe la participación del juez con ID: "+ id));
         return juezRol;
     }
 

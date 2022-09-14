@@ -166,7 +166,7 @@ public class UsuarioController {
     }
 
     /*
-        Metodo que permite actividad de usuario. solo en desarrollo
+        Metodo que permite eliminar actividad de usuario. solo en desarrollo
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}/actividad")
@@ -301,8 +301,11 @@ public class UsuarioController {
         if (usuarioDto.getRoles().contains("Encargado de torneos"))
             roles.add(rolService.getRolByNombre(RolNombre.ROLE_ENCARGADO_DE_TORNEOS).get());
         usuarioActualizar.setRoles(roles);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuarioLogueado = usuarioService.getUsuarioLogueado(auth);
         try{
             usuarioService.save(usuarioActualizar);
+            logService.guardarLogModificacionUsuario(usuarioLogueado, usuarioActualizar);
             return new ResponseEntity(usuarioActualizar, HttpStatus.OK);
 
         } catch (Exception e){
