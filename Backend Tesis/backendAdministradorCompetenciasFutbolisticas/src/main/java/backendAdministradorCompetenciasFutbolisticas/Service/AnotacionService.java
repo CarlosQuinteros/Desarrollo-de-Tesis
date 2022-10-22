@@ -85,6 +85,9 @@ public class AnotacionService {
 
     public void eliminarAnotacion(Long id){
         Anotacion anotacion = getAnotacion(id);
+        if(anotacion.getPartido().getEstado().equals(NombreEstadoPartido.FINALIZADO)){
+            throw new BadRequestException("No se puede eliminar una anotación de un partido finalizado");
+        }
         anotacionRepository.deleteById(anotacion.getId());
     }
 

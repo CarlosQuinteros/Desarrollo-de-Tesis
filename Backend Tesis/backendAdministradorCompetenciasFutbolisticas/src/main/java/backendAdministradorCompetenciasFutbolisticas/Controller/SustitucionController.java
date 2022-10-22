@@ -6,6 +6,7 @@ import backendAdministradorCompetenciasFutbolisticas.Entity.Club;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Jugador;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Partido;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Sustitucion;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoPartido;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
 import backendAdministradorCompetenciasFutbolisticas.Service.*;
@@ -57,10 +58,13 @@ public class SustitucionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> eliminarSustitucion(@PathVariable Long id){
         Sustitucion sustitucion = sustitucionService.getDetalleSustitucion(id);
+        if(sustitucion.getPartido().getEstado().equals(NombreEstadoPartido.FINALIZADO)){
+            throw new BadRequestException("No se puede eliminar una sustitución de un partido finalizado");
+        }
         if (anotacionService.existeAnotacionEnPartidoDeJugador(sustitucion.getPartido().getId(), sustitucion.getJugadorEntra().getId())) {
             throw new BadRequestException("No se puede eliminar la sustitución porque el jugador que entró marco un gol");
         }
-        if(sustitucionService.existeSustitucionPorPartidoYClubYJugadorSale(sustitucion.getPartido().getId(), sustitucion.getClubSustituye().getId(), sustitucion.getJugadorEntra().getId())){
+        if(sustitucionService.existeSustitucionPorPartidoYClubYJugadorSale(sustitucion.getPartido().getId(), sustitucion.getClubSustituye().getId(), sustitucion.getJugadorEntra().getId())) {
             throw new BadRequestException("No se puede eliminar la sustitución porque el jugador que entró fue sustituido");
         }
         sustitucionService.eliminarSustitucion(sustitucion.getId());

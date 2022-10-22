@@ -90,7 +90,7 @@ public class JugadorPartidoService {
     public void eliminarParticipacionJugador(Long idJugadorPartido){
         JugadorPartido participacionJugador = getJugadorPartidoById(idJugadorPartido);
         if(participacionJugador.getPartido().getEstado().equals(NombreEstadoPartido.FINALIZADO)){
-            throw new BadRequestException("No se puede eliminar una participación de un partido FINALIZADO");
+            throw new BadRequestException("No se puede eliminar una participación de un partido finalizado");
         }
         if(anotacionService.existeAnotacionEnPartidoDeJugador(participacionJugador.getPartido().getId(), participacionJugador.getJugador().getId())){
             throw new BadRequestException("El jugador anoto un gol y no se puede eliminar su participación");

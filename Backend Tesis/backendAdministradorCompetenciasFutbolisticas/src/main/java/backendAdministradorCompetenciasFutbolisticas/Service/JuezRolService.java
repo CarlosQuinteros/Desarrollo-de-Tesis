@@ -4,6 +4,7 @@ import backendAdministradorCompetenciasFutbolisticas.Dtos.JuezRolDto;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Juez;
 import backendAdministradorCompetenciasFutbolisticas.Entity.JuezRol;
 import backendAdministradorCompetenciasFutbolisticas.Entity.Partido;
+import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoPartido;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreRolJuez;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Repository.JuezRepository;
@@ -75,6 +76,9 @@ public class JuezRolService {
 
     public void eliminarJuezRol(Long id){
         JuezRol juezRol = getDetalleJuezRolPorId(id);
+        if(juezRol.getPartido().getEstado().equals(NombreEstadoPartido.FINALIZADO)){
+            throw new BadRequestException("No se puede eliminar una participación de un partido finalizado");
+        }
         juezRolRepository.deleteById(juezRol.getId());
     }
 
