@@ -35,7 +35,8 @@ public class JugadorPartidoService {
             .thenComparing(jugadorPartido -> jugadorPartido.getPosicion().equals(PosicionJugador.DEF))
             .thenComparing(jugadorPartido -> jugadorPartido.getPosicion().equals(PosicionJugador.MED))
             .thenComparing(jugadorPartido -> jugadorPartido.getPosicion().equals(PosicionJugador.DEL))
-            .reversed();
+            .reversed()
+            .thenComparing(jugadorPartido -> jugadorPartido.getJugador().getApellidos());
 
     public List<PosicionJugador> getListadoPosicionJugador(){
         return Arrays.stream(PosicionJugador.values()).collect(Collectors.toList());
@@ -63,7 +64,7 @@ public class JugadorPartidoService {
             throw new BadRequestException("El listado de titulares del club " + jugadorPartido.getClub().getNombreClub() + " solo puede tener un arquero");
         }
         if(cantidadParticipacionesPorPartidoYClubYRol(jugadorPartido.getPartido().getId(), jugadorPartido.getClub().getId(), TipoRolJugador.TITULAR) == 11){
-            throw new BadRequestException("El club " + jugadorPartido.getClub().getNombreClub() + " puede tener hasta 11 titualres");
+            throw new BadRequestException("El club " + jugadorPartido.getClub().getNombreClub() + " puede tener hasta 11 titulares");
         }
         jugadorPartido.setRol(TipoRolJugador.TITULAR);
         return jugadorPartidoRepository.save(jugadorPartido);
@@ -96,10 +97,10 @@ public class JugadorPartidoService {
             throw new BadRequestException("El jugador anoto un gol y no se puede eliminar su participación");
         }
         if(sustitucionService.existeSustitucionPorPartidoYClubYJugadorSale(participacionJugador.getPartido().getId(), participacionJugador.getClub().getId(),participacionJugador.getJugador().getId())){
-            throw new BadRequestException("El jugador salio en una sustitucion y no se puede eliminar su participación");
+            throw new BadRequestException("El jugador salió en una sustitución y no se puede eliminar su participación");
         }
         if(sustitucionService.existeSustitucionPorPartidoYClubYJugadorEntra(participacionJugador.getPartido().getId(), participacionJugador.getClub().getId(),participacionJugador.getJugador().getId())){
-            throw new BadRequestException("El jugador entro en una sustitucion y no se puede eliminar su participación");
+            throw new BadRequestException("El jugador entró en una sustitución y no se puede eliminar su participación");
         }
         jugadorPartidoRepository.deleteById(idJugadorPartido);
     }

@@ -207,14 +207,20 @@ public class PartidoController {
     @PutMapping("/{id}/finalizado")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> establecerPartidoComoFinalizado(@PathVariable ("id") Long id){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioService.getUsuarioLogueado(auth);
         partidoService.finalizarPartido(id);
+        logService.guardarLogPartidoFinalizado(id, usuario);
         return new ResponseEntity<>(new Mensaje("Partido finalizado correctamente"),HttpStatus.OK);
     }
 
     @PutMapping("/{id}/pendiente")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
     public ResponseEntity<?> establecerPartidoComoPendiente(@PathVariable Long id){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioService.getUsuarioLogueado(auth);
         partidoService.establecerPartidoComoPendiente(id);
+        logService.guardarLogPartidoPendiente(id,usuario);
         return new ResponseEntity<>(new Mensaje("Partido establecido como PENDIENTE correctamente"),HttpStatus.OK);
     }
 

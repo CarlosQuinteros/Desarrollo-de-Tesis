@@ -216,6 +216,16 @@ public class LogService {
         logRepository.save(log);
     }
 
+    public void guardarLogPartidoPendiente(Long idPartido, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.PARTIDO_PENDIENTE, "Se pasó a pendiente el partido ID: " + idPartido, idPartido);
+        logRepository.save(log);
+    }
+
+    public void guardarLogPartidoFinalizado(Long idPartido, Usuario usuario){
+        Log log = new Log(usuario, LogAccion.PARTIDO_FINALIZADO, "Se finalizó el partido ID: " + idPartido, idPartido);
+        logRepository.save(log);
+    }
+
     //Metodos para logs de competencias
     public void guardarLogCreacionCompetencia(Competencia competencia, Usuario usuario){
         Log log = new Log(usuario, LogAccion.COMPETENCIA_CREACION, "Se creo la competencia ID: " + competencia.getId(), competencia.getId());

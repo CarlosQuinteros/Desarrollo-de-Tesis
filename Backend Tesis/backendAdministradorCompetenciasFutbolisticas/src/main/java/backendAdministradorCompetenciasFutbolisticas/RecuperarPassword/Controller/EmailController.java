@@ -37,7 +37,7 @@ public class EmailController {
     @GetMapping("/existe-token/{tokenPassword}")
     public ResponseEntity<?> existeTokenPassword(@PathVariable ("tokenPassword") String tokenPassword){
         if(!usuarioService.existByTokenPassword(tokenPassword)){
-            throw new ResourceNotFoundException("Token de recuperacion incorrecto");
+            throw new ResourceNotFoundException("Token de recuperación incorrecto");
         }
         return new ResponseEntity(new Mensaje("Token de recuperación válido"), HttpStatus.OK);
     }
