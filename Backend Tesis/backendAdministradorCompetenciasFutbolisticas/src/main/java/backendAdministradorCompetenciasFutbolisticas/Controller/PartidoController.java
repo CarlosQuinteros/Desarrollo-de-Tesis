@@ -7,7 +7,10 @@ import backendAdministradorCompetenciasFutbolisticas.Entity.*;
 import backendAdministradorCompetenciasFutbolisticas.Enums.NombreEstadoPartido;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.BadRequestException;
 import backendAdministradorCompetenciasFutbolisticas.Excepciones.InvalidDataException;
+import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Rol;
 import backendAdministradorCompetenciasFutbolisticas.Security.Entity.Usuario;
+import backendAdministradorCompetenciasFutbolisticas.Security.Enums.RolNombre;
+import backendAdministradorCompetenciasFutbolisticas.Security.Service.RolService;
 import backendAdministradorCompetenciasFutbolisticas.Security.Service.UsuarioService;
 import backendAdministradorCompetenciasFutbolisticas.Service.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -55,6 +58,9 @@ public class PartidoController {
 
     @Autowired
     private JornadaService jornadaService;
+
+    @Autowired
+    private RolService rolService;
 
     @PostMapping("/crear")
     @PreAuthorize("hasAnyRole('ADMIN', 'ENCARGADO_DE_TORNEOS')")
@@ -219,6 +225,10 @@ public class PartidoController {
     public ResponseEntity<?> establecerPartidoComoPendiente(@PathVariable Long id){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Usuario usuario = usuarioService.getUsuarioLogueado(auth);
+        Rol admin = rolService.getRolByNombre(RolNombre.ROLE_ADMIN).get();
+        if(!usuario.getRoles().contains(admin)){
+            throw new BadRequestException("Solo un administrador puede establecer un partido finalizado como pendiente");
+        }
         partidoService.establecerPartidoComoPendiente(id);
         logService.guardarLogPartidoPendiente(id,usuario);
         return new ResponseEntity<>(new Mensaje("Partido establecido como PENDIENTE correctamente"),HttpStatus.OK);
