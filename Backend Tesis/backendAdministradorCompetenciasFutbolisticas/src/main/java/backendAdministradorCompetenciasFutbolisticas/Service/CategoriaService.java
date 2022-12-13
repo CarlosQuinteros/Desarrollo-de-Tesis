@@ -39,7 +39,7 @@ public class CategoriaService {
     public Categoria crearCategoriaHastaEdad(Categoria categoria){
         //edades 5 y edad
         if(categoria.getEdadMaxima().equals(categoria.getEdadMinima())){
-            throw new BadRequestException("Para crear categoría tipo: HASTA EDAD, las edades no deben ser iguales");
+            throw new BadRequestException("Para guardar una categoría tipo: HASTA EDAD, las edades no deben ser iguales");
         }
         categoria.setEdadMinima(5);
         return categoriaRepository.save(categoria);
@@ -48,7 +48,7 @@ public class CategoriaService {
     public Categoria crearCategoriaDesdeEdad(Categoria categoria){
         //edad y 65;
         if(categoria.getEdadMaxima().equals(categoria.getEdadMinima())){
-            throw new BadRequestException("Para crear categoría tipo: DESDE EDAD, las edades no deben ser iguales");
+            throw new BadRequestException("Para guardar una categoría tipo: DESDE EDAD, las edades no deben ser iguales");
         }
         categoria.setEdadMaxima(65);
         return categoriaRepository.save(categoria);
@@ -56,7 +56,7 @@ public class CategoriaService {
 
     public Categoria crearCategoriaEntreEdades(Categoria categoria){
         if(categoria.getEdadMinima() > categoria.getEdadMaxima()){
-            throw new BadRequestException("Para crear categoría tipo: ENTRE EDADES, las edad maxima debe ser mayor o igual a la edad minima");
+            throw new BadRequestException("Para guardar una categoría tipo: ENTRE EDADES, las edad maxima debe ser mayor o igual a la edad minima");
         }
         return categoriaRepository.save(categoria);
     }
