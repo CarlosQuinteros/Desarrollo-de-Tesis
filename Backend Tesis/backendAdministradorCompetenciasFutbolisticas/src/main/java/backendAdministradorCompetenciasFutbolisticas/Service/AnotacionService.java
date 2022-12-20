@@ -49,11 +49,14 @@ public class AnotacionService {
         if(!partidoService.clubFormaParteDePartido(partido,clubAnota)){
             throw new BadRequestException("El club "+ clubAnota.getNombreClub() + " no forma parte del partido");
         }
-        if(sustitucionService.existeSustitucionPorPartidoYJugadorSale(partido.getId(),jugadorAnota.getId())){
+        if(sustitucionService.existeSustitucionPorPartidoYJugadorSale(partido.getId(),jugadorAnota.getId()) && nuevaAnotacion.getMinuto() >= sustitucionService.getSustitucionPorPartidoYJugadorSale(partido.getId(), jugadorAnota.getId()).getMinuto()){
             throw new BadRequestException("El jugador que anota ya fue sustituido y no puede anotar");
         }
         if(nuevaAnotacion.getTipoGol().equals(NombreTipoGol.GOL_EN_CONTRA) && !jugadorFormaParteDelEquipoContrarioAlQueAnota(partido,clubAnota,jugadorAnota)){
             throw new BadRequestException("Para guardar un gol en contra, el jugador " + jugadorAnota.getApellidos() + ", " + jugadorAnota.getNombre() + " debe ser titular o haber entrado en una sustitución del equipo contrario");
+        }
+        if(sustitucionService.existeSustitucionPorPartidoYJugadorEntra(partido.getId(), jugadorAnota.getId()) && nuevaAnotacion.getMinuto() <= sustitucionService.getSustitucionPorPartidoYJugadorEntra(partido.getId(), jugadorAnota.getId()).getMinuto()){
+            throw new BadRequestException("El jugador que anota debe ingresar en una sustitución para anotar");
         }
         if(!nuevaAnotacion.getTipoGol().equals(NombreTipoGol.GOL_EN_CONTRA) && !jugadorAnotaEsTitularOIngresoEnSustitucion(partido.getId(), clubAnota.getId(),jugadorAnota.getId())){
             throw new BadRequestException("El jugador debe formar parte de los titulares de " + clubAnota.getNombreClub() + " o haber ingresado en una sustitución");

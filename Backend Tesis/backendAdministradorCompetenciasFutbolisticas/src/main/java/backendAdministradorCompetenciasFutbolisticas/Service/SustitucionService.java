@@ -101,4 +101,14 @@ public class SustitucionService {
     public List<Sustitucion> getListadoSustitucionesClubVisitante(Partido partido){
         return getListadoSustitucionesPorPartidoYClub(partido.getId(), partido.getClubVisitante().getId());
     }
+
+    public Sustitucion getSustitucionPorPartidoYJugadorSale(Long idPartido, Long idJugadorSale){
+        return sustitucionRepository.findByPartido_IdAndJugadorSale_Id(idPartido, idJugadorSale)
+                .orElseThrow(() -> new BadRequestException("No existe la sustitución"));
+    }
+
+    public Sustitucion getSustitucionPorPartidoYJugadorEntra(Long idPartido, Long idJugadorEntra){
+        return sustitucionRepository.findByPartido_IdAndJugadorEntra_Id(idPartido, idJugadorEntra)
+                .orElseThrow(() -> new BadRequestException("No existe la sustitución"));
+    }
 }

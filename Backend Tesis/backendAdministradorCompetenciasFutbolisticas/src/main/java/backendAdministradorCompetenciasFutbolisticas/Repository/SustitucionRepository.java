@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SustitucionRepository extends JpaRepository<Sustitucion,Long> {
@@ -14,6 +15,10 @@ public interface SustitucionRepository extends JpaRepository<Sustitucion,Long> {
 
     //determina si el jugador salio
     boolean existsByPartido_IdAndJugadorSale_Id(Long idPartido, Long idJugador);
+
+    Optional<Sustitucion> findByPartido_IdAndJugadorSale_Id(Long idPartido, Long idJugador);
+
+    Optional<Sustitucion> findByPartido_IdAndJugadorEntra_Id(Long idPartido, Long idJugador);
 
     //determina si el jugador entró
     boolean existsByPartido_IdAndJugadorEntra_Id(Long idPartido, Long idJugador);

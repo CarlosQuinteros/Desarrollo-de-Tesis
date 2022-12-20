@@ -85,6 +85,9 @@ public class JugadorPartidoController {
         }
         PosicionJugador posicion = jugadorPartidoService.getPosicionJugadorPorNombre(participacionJugadorDto.getPosicion());
         JugadorPartido participacionJugador = jugadorPartidoService.getJugadorPartidoById(id);
+        if(posicion.equals(PosicionJugador.ARQ) && participacionJugador.getRol().equals(TipoRolJugador.TITULAR) && jugadorPartidoService.existeArqueroEnTitularesPorPartidoYClub(participacionJugador.getPartido().getId(), participacionJugador.getClub().getId())){
+            throw new BadRequestException("El listado de titulares del club " + participacionJugador.getClub().getNombreClub() + " solo puede tener un arquero");
+        }
         participacionJugador.setNroCamiseta(participacionJugadorDto.getNroCamiseta());
         participacionJugador.setPosicion(posicion);
         jugadorPartidoService.guardarParticipacionJugador(participacionJugador);
